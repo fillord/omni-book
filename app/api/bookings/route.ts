@@ -4,6 +4,8 @@ import { BookingStatus } from '@prisma/client'
 import { basePrisma } from '@/lib/db'
 import { resolveTenant, isTenantError } from '@/lib/tenant'
 import { createBooking, BookingConflictError, BookingLimitError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
+import { sendBookingConfirmation } from '@/lib/email/resend'
+import { normalizePhone } from '@/lib/utils/phone'
 
 // ---- query schema ----------------------------------------------------------
 
@@ -134,10 +136,25 @@ export async function POST(req: NextRequest) {
       serviceId,
       startsAt,
       guestName,
-      guestPhone,
+      guestPhone: normalizePhone(guestPhone),
       guestEmail,
     })
     console.log(`✅ Booking created: ${booking.id} for ${booking.guestName} at ${booking.startsAt}`)
+
+    // Fire-and-forget confirmation email
+    if (booking.guestEmail && booking.guestName) {
+      const service = await basePrisma.service.findUnique({ where: { id: serviceId }, select: { name: true } })
+      const resource = await basePrisma.resource.findUnique({ where: { id: resourceId }, select: { name: true } })
+      sendBookingConfirmation({
+        guestName:    booking.guestName,
+        guestEmail:   booking.guestEmail,
+        tenantName:   tenant.name,
+        serviceName:  service?.name ?? '',
+        resourceName: resource?.name ?? '',
+        startsAt:     booking.startsAt,
+      }).catch(console.error)
+    }
+
     return NextResponse.json({ booking }, { status: 201 })
   } catch (err) {
     if (err instanceof BookingLimitError) {

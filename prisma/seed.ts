@@ -31,7 +31,16 @@ async function main() {
 
   // ===== MEDICINE =====
   const clinic = await prisma.tenant.create({
-    data: { slug: "city-polyclinic", name: "Городская поликлиника №1", niche: "medicine", plan: "pro", timezone: "Asia/Almaty" },
+    data: {
+      slug: "city-polyclinic", name: "Городская поликлиника №1", niche: "medicine", plan: "pro", timezone: "Asia/Almaty",
+      description: "Многопрофильная поликлиника с опытными специалистами. Современное оборудование, внимательный персонал.",
+      phone: "+7 727 123 45 67",
+      email: "info@polyclinic.kz",
+      address: "ул. Абая 52",
+      city: "Алматы",
+      workingHours: "Пн-Пт: 09:00-18:00",
+      socialLinks: { instagram: "@citypolyclinic", whatsapp: "+77271234567" },
+    },
   });
   await prisma.user.create({
     data: { tenantId: clinic.id, email: "clinic-owner@test.com", name: "Алия Нурланова", passwordHash: hash, role: "OWNER" },
@@ -62,7 +71,15 @@ async function main() {
 
   // ===== MEDICINE #2 =====
   const clinic2 = await prisma.tenant.create({
-    data: { slug: "zdorovie-med", name: 'Медцентр "Здоровье"', niche: "medicine", plan: "free", timezone: "Asia/Almaty" },
+    data: {
+      slug: "zdorovie-med", name: 'Медцентр "Здоровье"', niche: "medicine", plan: "free", timezone: "Asia/Almaty",
+      description: "Медицинский центр для всей семьи. Неврология, терапия, диагностика.",
+      phone: "+7 727 987 65 43",
+      address: "пр. Аль-Фараби 17",
+      city: "Алматы",
+      workingHours: "Пн-Пт: 09:00-16:00",
+      socialLinks: { telegram: "@zdorovie_med" },
+    },
   });
   await prisma.user.create({ data: { tenantId: clinic2.id, email: "zdorovie@test.com", name: "Бауыржан Сатыбалдиев", passwordHash: hash, role: "OWNER" } });
   const drAsel = await prisma.resource.create({ data: { tenantId: clinic2.id, name: "Асель Маратова", type: "staff", attributes: { specialization: "Невролог", experience_years: 6, license: "KZ-MED-100" } } });
@@ -73,7 +90,15 @@ async function main() {
 
   // ===== BEAUTY =====
   const salon = await prisma.tenant.create({
-    data: { slug: "beauty-studio", name: "Beauty Studio Almaty", niche: "beauty", plan: "pro", timezone: "Asia/Almaty" },
+    data: {
+      slug: "beauty-studio", name: "Beauty Studio Almaty", niche: "beauty", plan: "pro", timezone: "Asia/Almaty",
+      description: "Студия красоты в центре города. Стрижки, окрашивание, уход за лицом и телом.",
+      phone: "+7 701 555 00 11",
+      address: "пр. Достык 89",
+      city: "Алматы",
+      workingHours: "Пн-Сб: 09:00-19:00",
+      socialLinks: { instagram: "@beautystudio.almaty", telegram: "@beautystudio" },
+    },
   });
   await prisma.user.create({
     data: { tenantId: salon.id, email: "salon-owner@test.com", name: "Мария Иванова", passwordHash: hash, role: "OWNER" },
@@ -102,7 +127,16 @@ async function main() {
 
   // ===== HORECA =====
   const bistro = await prisma.tenant.create({
-    data: { slug: "bistro-central", name: "Bistro Central", niche: "horeca", plan: "pro", timezone: "Asia/Almaty" },
+    data: {
+      slug: "bistro-central", name: "Bistro Central", niche: "horeca", plan: "pro", timezone: "Asia/Almaty",
+      description: "Уютное бистро в центре Алматы. Европейская кухня, живая музыка по выходным, банкетный зал.",
+      phone: "+7 727 300 10 20",
+      email: "reserve@bistro-central.kz",
+      address: "ул. Панфилова 41",
+      city: "Алматы",
+      workingHours: "Ежедневно: 10:00-23:00",
+      socialLinks: { instagram: "@bistrocentral_almaty", whatsapp: "+77273001020" },
+    },
   });
   await prisma.user.create({
     data: { tenantId: bistro.id, email: "bistro-owner@test.com", name: "Алексей Попов", passwordHash: hash, role: "OWNER" },
@@ -131,7 +165,15 @@ async function main() {
 
   // ===== SPORTS =====
   const sport = await prisma.tenant.create({
-    data: { slug: "sport-arena", name: "Sport Arena", niche: "sports", plan: "free", timezone: "Asia/Almaty" },
+    data: {
+      slug: "sport-arena", name: "Sport Arena", niche: "sports", plan: "free", timezone: "Asia/Almaty",
+      description: "Теннисные корты для любителей и профессионалов. Грунтовые и хард-покрытия, прокат инвентаря.",
+      phone: "+7 705 222 33 44",
+      address: "ул. Тимирязева 28",
+      city: "Алматы",
+      workingHours: "Ежедневно: 07:00-22:00",
+      socialLinks: { instagram: "@sportarena_almaty", telegram: "@sportarena" },
+    },
   });
   await prisma.user.create({
     data: { tenantId: sport.id, email: "sport-owner@test.com", name: "Тимур Касымов", passwordHash: hash, role: "OWNER" },

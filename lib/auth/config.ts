@@ -127,6 +127,15 @@ export const authConfig: NextAuthOptions = {
     },
 
     // ------------------------------------------------------------------
+    // Redirect — always resolve relative URLs against baseUrl
+    // ------------------------------------------------------------------
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      if (url.startsWith(baseUrl)) return url
+      return `${baseUrl}/dashboard`
+    },
+
+    // ------------------------------------------------------------------
     // Session — expose custom fields to client-side session
     // ------------------------------------------------------------------
     async session({ session, token }) {

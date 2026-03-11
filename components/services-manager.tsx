@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { PlusCircle, Pencil, PowerOff, Power, Trash2 } from 'lucide-react'
+import { PlusCircle, Pencil, PowerOff, Power, Trash2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
@@ -74,8 +75,11 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       await createService(data as CreateServiceInput)
       setCreateOpen(false)
       refresh()
+      toast.success('Услуга создана')
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка создания')
+      const msg = err instanceof Error ? err.message : 'Ошибка создания'
+      setActionError(msg)
+      toast.error(msg)
     }
   }
 
@@ -86,13 +90,14 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       await updateService(editService.id, data as UpdateServiceInput)
       setEditService(null)
       refresh()
+      toast.success('Изменения сохранены')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Ошибка сохранения'
-      setActionError(
-        msg.includes('not found') || msg.includes('не найдена')
-          ? 'Данные были изменены, обновите страницу'
-          : msg
-      )
+      const display = msg.includes('not found') || msg.includes('не найдена')
+        ? 'Данные были изменены, обновите страницу'
+        : msg
+      setActionError(display)
+      toast.error(display)
     }
   }
 
@@ -101,8 +106,11 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
     try {
       await toggleServiceActive(id)
       refresh()
+      toast.success('Статус обновлён')
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка')
+      const msg = err instanceof Error ? err.message : 'Ошибка'
+      setActionError(msg)
+      toast.error(msg)
     }
   }
 
@@ -111,8 +119,11 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
     try {
       await deleteService(id)
       refresh()
+      toast.success('Услуга удалена')
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка удаления')
+      const msg = err instanceof Error ? err.message : 'Ошибка удаления'
+      setActionError(msg)
+      toast.error(msg)
     }
   }
 
@@ -169,93 +180,130 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
           )}
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Название</TableHead>
-              <TableHead>Длительность</TableHead>
-              <TableHead>Цена</TableHead>
-              <TableHead>Ресурсы</TableHead>
-              <TableHead>Статус</TableHead>
-              {canEdit && <TableHead className="text-right">Действия</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+          {/* Mobile cards */}
+          <div className="sm:hidden space-y-2">
             {filtered.map((s) => (
-              <TableRow key={s.id} className={!s.isActive ? 'opacity-60' : undefined}>
-                <TableCell>
-                  <div className="font-medium">{s.name}</div>
-                  {s.description && (
-                    <div className="text-xs text-muted-foreground mt-0.5 max-w-xs truncate">
-                      {s.description}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="whitespace-nowrap">
-                  {s.durationMin} мин
-                </TableCell>
-                <TableCell className="whitespace-nowrap font-medium">
-                  {formatPrice(s.price, s.currency)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {s.resources.length === 0 ? (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    ) : (
-                      s.resources.map((rs) => (
-                        <Badge key={rs.resource.id} variant="secondary" className="text-xs">
-                          {rs.resource.name}
-                        </Badge>
-                      ))
+              <div
+                key={s.id}
+                className={['rounded-lg border bg-card p-3 space-y-2', !s.isActive ? 'opacity-60' : ''].join(' ')}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-sm">{s.name}</p>
+                    {s.description && (
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">{s.description}</p>
                     )}
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={s.isActive ? 'default' : 'secondary'}>
+                  <Badge variant={s.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
                     {s.isActive ? 'Активна' : 'Неактивна'}
                   </Badge>
-                </TableCell>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {s.durationMin} мин · {formatPrice(s.price, s.currency)}
+                </p>
+                {s.resources.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {s.resources.map((rs) => (
+                      <Badge key={rs.resource.id} variant="secondary" className="text-xs">
+                        {rs.resource.name}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 {canEdit && (
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title="Редактировать"
-                        onClick={() => { setActionError(null); setEditService(s) }}
-                        disabled={isPending}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title={s.isActive ? 'Деактивировать' : 'Активировать'}
-                        onClick={() => handleToggle(s.id)}
-                        disabled={isPending}
-                      >
-                        {s.isActive ? (
-                          <PowerOff className="h-3.5 w-3.5 text-amber-600" />
-                        ) : (
-                          <Power className="h-3.5 w-3.5 text-green-600" />
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title="Удалить"
-                        onClick={() => handleDelete(s.id)}
-                        disabled={isPending}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
+                  <div className="flex gap-1 pt-1">
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleToggle(s.id)} disabled={isPending}>
+                      {s.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(s.id)} disabled={isPending}>
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <Table className="hidden sm:table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Название</TableHead>
+                <TableHead>Длительность</TableHead>
+                <TableHead>Цена</TableHead>
+                <TableHead>Ресурсы</TableHead>
+                <TableHead>Статус</TableHead>
+                {canEdit && <TableHead className="text-right">Действия</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((s) => (
+                <TableRow key={s.id} className={!s.isActive ? 'opacity-60' : undefined}>
+                  <TableCell>
+                    <div className="font-medium">{s.name}</div>
+                    {s.description && (
+                      <div className="text-xs text-muted-foreground mt-0.5 max-w-xs truncate">
+                        {s.description}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{s.durationMin} мин</TableCell>
+                  <TableCell className="whitespace-nowrap font-medium">
+                    {formatPrice(s.price, s.currency)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {s.resources.length === 0 ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : (
+                        s.resources.map((rs) => (
+                          <Badge key={rs.resource.id} variant="secondary" className="text-xs">
+                            {rs.resource.name}
+                          </Badge>
+                        ))
+                      )}
                     </div>
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <TableCell>
+                    <Badge variant={s.isActive ? 'default' : 'secondary'}>
+                      {s.isActive ? 'Активна' : 'Неактивна'}
+                    </Badge>
+                  </TableCell>
+                  {canEdit && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button size="sm" variant="ghost" title="Редактировать" onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="sm" variant="ghost" title={s.isActive ? 'Деактивировать' : 'Активировать'} onClick={() => handleToggle(s.id)} disabled={isPending}>
+                          {s.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
+                        </Button>
+                        <Button size="sm" variant="ghost" title="Удалить" onClick={() => handleDelete(s.id)} disabled={isPending}>
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
+
+      {/* FAB for mobile */}
+      {canEdit && (
+        <button
+          onClick={() => { setActionError(null); setCreateOpen(true) }}
+          className="sm:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          title="Добавить услугу"
+        >
+          <Plus className="h-6 w-6" />
+        </button>
       )}
 
       {/* Create dialog */}

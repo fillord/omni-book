@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-
+imgthrash/
 # Next.js
 .next/
 out/
@@ -31,3 +31,4 @@ __pycache__/
 
 # Prisma
 prisma/generated/
+

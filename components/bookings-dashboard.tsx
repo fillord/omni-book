@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Table2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
+import { formatPhone } from '@/lib/utils/phone'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -135,12 +137,9 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
   const [calendarData, setCalendarData] = useState<CalendarData | null>(null)
   const [calendarLoading, setCalendarLoading] = useState(false)
 
-  // Error / toast
-  const [toastMsg, setToastMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
-
   function showToast(type: 'error' | 'success', text: string) {
-    setToastMsg({ type, text })
-    setTimeout(() => setToastMsg(null), 4000)
+    if (type === 'error') toast.error(text)
+    else toast.success(text)
   }
 
   // ---- fetch table data -----------------------------------------------------
@@ -278,20 +277,6 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
   return (
     <div className="space-y-4">
 
-      {/* Toast */}
-      {toastMsg && (
-        <div
-          className={[
-            'rounded-md border px-4 py-2 text-sm',
-            toastMsg.type === 'error'
-              ? 'border-destructive/40 bg-destructive/5 text-destructive'
-              : 'border-green-400/40 bg-green-50 text-green-800 dark:bg-green-950/20 dark:text-green-300',
-          ].join(' ')}
-        >
-          {toastMsg.text}
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="flex items-center gap-1 rounded-lg border bg-muted/30 p-1 w-fit">
         <button
@@ -412,7 +397,47 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
 
           {!tableLoading && tableData && tableData.data.length > 0 && (
             <>
-              <Table>
+              {/* Mobile cards */}
+              <div className="sm:hidden space-y-2">
+                {tableData.data.map((booking) => {
+                  const { date, time } = formatDateTimeRu(booking.startsAt, timezone)
+                  const clientName = booking.user?.name ?? booking.guestName
+                  const allowed = TRANSITIONS[booking.status] ?? []
+                  return (
+                    <div key={booking.id} className="rounded-lg border bg-card p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-medium text-sm">{clientName ?? '—'}</p>
+                          {booking.guestPhone && (
+                            <p className="text-xs text-muted-foreground font-mono">{formatPhone(booking.guestPhone)}</p>
+                          )}
+                        </div>
+                        <BookingStatusBadge status={booking.status} />
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <p>{booking.service?.name ?? '—'} · {booking.resource.name}</p>
+                        <p>{date} в {time}</p>
+                      </div>
+                      {canEdit && allowed.length > 0 && (
+                        <div className="flex gap-1 flex-wrap pt-1">
+                          {allowed.map((s) => (
+                            <button
+                              key={s}
+                              onClick={() => handleStatusChange(booking.id, s)}
+                              className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted transition-colors"
+                            >
+                              {ACTION_LABELS[s]}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Desktop table */}
+              <Table className="hidden sm:table">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Дата / время</TableHead>
@@ -439,7 +464,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                           <div className="font-medium">{clientName ?? '—'}</div>
                           {booking.guestPhone && (
                             <div className="text-xs text-muted-foreground font-mono">
-                              {booking.guestPhone}
+                              {formatPhone(booking.guestPhone)}
                             </div>
                           )}
                         </TableCell>

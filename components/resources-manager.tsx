@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { PlusCircle, Pencil, PowerOff, Power, Trash2 } from 'lucide-react'
+import { PlusCircle, Pencil, PowerOff, Power, Trash2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   Table,
   TableBody,
@@ -97,8 +98,11 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       await createResource(data as CreateResourceInput, schedule)
       setCreateOpen(false)
       refresh()
+      toast.success(`${nicheConfig.resourceLabel} создан`)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка создания')
+      const msg = err instanceof Error ? err.message : 'Ошибка создания'
+      setActionError(msg)
+      toast.error(msg)
     }
   }
 
@@ -109,13 +113,14 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       await updateResource(editResource.id, data as UpdateResourceInput, schedule)
       setEditResource(null)
       refresh()
+      toast.success('Изменения сохранены')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Ошибка сохранения'
-      setActionError(
-        msg.includes('Record') || msg.includes('not found')
-          ? 'Данные были изменены, обновите страницу'
-          : msg
-      )
+      const display = msg.includes('Record') || msg.includes('not found')
+        ? 'Данные были изменены, обновите страницу'
+        : msg
+      setActionError(display)
+      toast.error(display)
     }
   }
 
@@ -124,8 +129,11 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
     try {
       await toggleResourceActive(id)
       refresh()
+      toast.success('Статус обновлён')
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Ошибка')
+      const msg = err instanceof Error ? err.message : 'Ошибка'
+      setActionError(msg)
+      toast.error(msg)
     }
   }
 
@@ -135,13 +143,16 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
     try {
       await deleteResource(id)
       refresh()
+      toast.success(`${nicheConfig.resourceLabel} удалён`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
       if (msg.startsWith('FUTURE_BOOKINGS:')) {
         const count = parseInt(msg.split(':')[1])
         setFutureWarning({ id, count })
       } else {
-        setActionError(msg || 'Ошибка удаления')
+        const display = msg || 'Ошибка удаления'
+        setActionError(display)
+        toast.error(display)
       }
     }
   }
@@ -238,94 +249,137 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
           )}
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Название</TableHead>
-              <TableHead>Тип</TableHead>
-              {/* Niche-specific attribute columns */}
-              {attrColumns.map((f) => (
-                <TableHead key={f.key}>{f.label}</TableHead>
-              ))}
-              <TableHead>Услуги</TableHead>
-              <TableHead>Статус</TableHead>
-              {canEdit && <TableHead className="text-right">Действия</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <>
+          {/* Mobile cards */}
+          <div className="sm:hidden space-y-2">
             {filtered.map((r) => (
-              <TableRow key={r.id} className={!r.isActive ? 'opacity-60' : undefined}>
-                <TableCell className="font-medium">{r.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">
-                    {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label ?? r.type}
-                  </Badge>
-                </TableCell>
-                {/* Niche attribute values */}
-                {attrColumns.map((f) => (
-                  <TableCell key={f.key} className="text-sm text-muted-foreground">
-                    {getAttrDisplay(r, f)}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {r.services.length === 0 ? (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    ) : (
-                      r.services.map((rs) => (
-                        <Badge key={rs.service.id} variant="secondary" className="text-xs">
-                          {rs.service.name}
-                        </Badge>
-                      ))
-                    )}
+              <div
+                key={r.id}
+                className={['rounded-lg border bg-card p-3 space-y-2', !r.isActive ? 'opacity-60' : ''].join(' ')}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium text-sm">{r.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label ?? r.type}
+                    </p>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={r.isActive ? 'default' : 'secondary'}>
+                  <Badge variant={r.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
                     {r.isActive ? 'Активен' : 'Неактивен'}
                   </Badge>
-                </TableCell>
+                </div>
+                {attrColumns.map((f) => {
+                  const val = getAttrDisplay(r, f)
+                  if (val === '—') return null
+                  return (
+                    <p key={f.key} className="text-xs text-muted-foreground">
+                      {f.label}: <span className="text-foreground">{val}</span>
+                    </p>
+                  )
+                })}
+                {r.services.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {r.services.map((rs) => (
+                      <Badge key={rs.service.id} variant="secondary" className="text-xs">
+                        {rs.service.name}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 {canEdit && (
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title="Редактировать"
-                        onClick={() => { setActionError(null); setEditResource(r) }}
-                        disabled={isPending}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title={r.isActive ? 'Деактивировать' : 'Активировать'}
-                        onClick={() => handleToggle(r.id)}
-                        disabled={isPending}
-                      >
-                        {r.isActive ? (
-                          <PowerOff className="h-3.5 w-3.5 text-amber-600" />
-                        ) : (
-                          <Power className="h-3.5 w-3.5 text-green-600" />
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        title="Удалить"
-                        onClick={() => handleDelete(r.id)}
-                        disabled={isPending}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
+                  <div className="flex gap-1 pt-1">
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleToggle(r.id)} disabled={isPending}>
+                      {r.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(r.id)} disabled={isPending}>
+                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <Table className="hidden sm:table">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Название</TableHead>
+                <TableHead>Тип</TableHead>
+                {attrColumns.map((f) => (
+                  <TableHead key={f.key}>{f.label}</TableHead>
+                ))}
+                <TableHead>Услуги</TableHead>
+                <TableHead>Статус</TableHead>
+                {canEdit && <TableHead className="text-right">Действия</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((r) => (
+                <TableRow key={r.id} className={!r.isActive ? 'opacity-60' : undefined}>
+                  <TableCell className="font-medium">{r.name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label ?? r.type}
+                    </Badge>
+                  </TableCell>
+                  {attrColumns.map((f) => (
+                    <TableCell key={f.key} className="text-sm text-muted-foreground">
+                      {getAttrDisplay(r, f)}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {r.services.length === 0 ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : (
+                        r.services.map((rs) => (
+                          <Badge key={rs.service.id} variant="secondary" className="text-xs">
+                            {rs.service.name}
+                          </Badge>
+                        ))
+                      )}
                     </div>
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <TableCell>
+                    <Badge variant={r.isActive ? 'default' : 'secondary'}>
+                      {r.isActive ? 'Активен' : 'Неактивен'}
+                    </Badge>
+                  </TableCell>
+                  {canEdit && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button size="sm" variant="ghost" title="Редактировать" onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="sm" variant="ghost" title={r.isActive ? 'Деактивировать' : 'Активировать'} onClick={() => handleToggle(r.id)} disabled={isPending}>
+                          {r.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
+                        </Button>
+                        <Button size="sm" variant="ghost" title="Удалить" onClick={() => handleDelete(r.id)} disabled={isPending}>
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </>
+      )}
+
+      {/* FAB for mobile */}
+      {canEdit && (
+        <button
+          onClick={() => { setActionError(null); setCreateOpen(true) }}
+          className="sm:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          title={`Добавить ${nicheConfig.resourceLabel.toLowerCase()}`}
+        >
+          <Plus className="h-6 w-6" />
+        </button>
       )}
 
       {/* Create dialog */}

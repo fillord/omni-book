@@ -4,6 +4,7 @@ import { BookingStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth/next'
 import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
+import { sendBookingCancellation } from '@/lib/email/resend'
 
 // ---- Allowed status transitions --------------------------------------------
 
@@ -92,8 +93,21 @@ export async function PATCH(
     include: {
       resource: { select: { id: true, name: true, type: true } },
       service:  { select: { id: true, name: true, durationMin: true } },
+      tenant:   { select: { name: true } },
     },
   })
+
+  // Fire-and-forget cancellation email
+  if (newStatus === 'CANCELLED' && booking.guestEmail && booking.guestName) {
+    sendBookingCancellation({
+      guestName:    booking.guestName,
+      guestEmail:   booking.guestEmail,
+      tenantName:   result.tenant.name,
+      serviceName:  result.service?.name ?? '',
+      resourceName: result.resource.name,
+      startsAt:     booking.startsAt,
+    }).catch(console.error)
+  }
 
   return NextResponse.json({ booking: result })
 }

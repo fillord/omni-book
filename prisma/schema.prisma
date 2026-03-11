@@ -11,15 +11,28 @@ datasource db {
 // Tenant — компания/бизнес (один тенант = один клиент платформы)
 // ---------------------------------------------------------------------------
 model Tenant {
-  id        String   @id @default(cuid())
-  slug      String   @unique               // субдомен: acme.omnibook.com
-  name      String
-  niche     String?                        // beauty | horeca | sports | medicine
-  plan      String   @default("free")      // free | pro | enterprise
-  isActive  Boolean  @default(true)
-  timezone  String   @default("Asia/Almaty") // IANA timezone
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  slug         String   @unique               // субдомен: acme.omnibook.com
+  name         String
+  niche        String?                        // beauty | horeca | sports | medicine
+  plan         String   @default("free")      // free | pro | enterprise
+  isActive     Boolean  @default(true)
+  timezone     String   @default("Asia/Almaty") // IANA timezone
+
+  // Информация о бизнесе (публичная страница)
+  description  String?                        // Описание до 500 символов
+  phone        String?                        // Телефон для клиентов
+  email        String?                        // Email для клиентов
+  address      String?                        // Адрес
+  city         String?                        // Город
+  website      String?                        // Сайт
+  logoUrl      String?                        // URL логотипа
+  coverUrl     String?                        // URL обложки hero-секции
+  workingHours String?                        // "Пн-Пт: 09:00-18:00"
+  socialLinks  Json     @default("{}")        // { instagram?, whatsapp?, telegram? }
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   users     User[]
   resources Resource[]

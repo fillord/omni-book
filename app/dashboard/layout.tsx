@@ -3,11 +3,11 @@ import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
 import { getNicheConfig } from '@/lib/niche/config'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
+import { Toaster } from '@/components/ui/sonner'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authConfig)
 
-  // Not authenticated — middleware already handles redirect; render bare layout
   if (!session?.user.tenantId) {
     return (
       <div className="flex min-h-screen">
@@ -25,8 +25,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="flex min-h-screen">
-      <DashboardSidebar nicheConfig={nicheConfig} tenantName={tenant?.name ?? ''} tenantSlug={tenant?.slug ?? ''} />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <DashboardSidebar
+        nicheConfig={nicheConfig}
+        tenantName={tenant?.name ?? ''}
+        tenantSlug={tenant?.slug ?? ''}
+        userName={session.user.name ?? ''}
+        userEmail={session.user.email ?? ''}
+      />
+      <main className="flex-1 overflow-auto pt-14 md:pt-0">{children}</main>
+      <Toaster richColors />
     </div>
   )
 }

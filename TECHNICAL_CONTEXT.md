@@ -1,464 +1,509 @@
-  # omni-book — Технический отчёт о состоянии проекта                                                                                                                                              
-                                                                                                                                                                                                   
-  **Дата:** 10 марта 2026                                                                                                                                                                          
-  **Репозиторий:** `/home/qzyola/projects/omni-book` (git, ветка `main`)
-  **Назначение:** универсальная мультитенантная SaaS-платформа онлайн-бронирования, поддерживающая ниши Beauty, HoReCa, Sports & Leisure, Medicine & Consulting.
-
-  ---
-
-  ## 1. Tech Stack
-
-  | Слой | Технология | Версия |
-  |---|---|---|
-  | Framework | Next.js (App Router) | 15.5.12 |
-  | UI Runtime | React | 19.0.0 |
-  | Language | TypeScript | ^5 |
-  | ORM | Prisma | 6.7.0 |
-  | DB Client | @prisma/client | 6.7.0 |
-  | Database | PostgreSQL | 16-alpine (Docker) |
-  | CSS | Tailwind CSS | 4.2.1 |
-  | PostCSS | @tailwindcss/postcss | 4.2.1 |
-  | UI Components | shadcn/ui | 4.0.2 (New York style, Zinc theme) |
-  | Animation | tw-animate-css | 1.4.0 |
-  | Forms | react-hook-form | 7.71.2 |
-  | Validation | zod | 4.3.6 |
-  | Form resolvers | @hookform/resolvers | 5.2.2 |
-  | Auth | next-auth | 4.24.11 |
-  | Icons | lucide-react | 0.577.0 |
-  | Seed runner | tsx | 4.21.0 |
-  | Testing | jest + ts-jest | ^29 |
-  | Package manager | npm | (system) |
-
-  ---
-
-  ## 2. Project Structure
-
-  ```
-  omni-book/
-  ├── app/
-  │   ├── layout.tsx                    # Root layout (Geist font, globals.css)
-  │   ├── globals.css                   # Tailwind v4 + shadcn CSS-переменные (light/dark)
-  │   ├── (marketing)/
-  │   │   ├── layout.tsx
-  │   │   └── page.tsx                  # Лендинг платформы (заглушка) → /
-  │   ├── (tenant)/
-  │   │   ├── layout.tsx
-  │   │   └── clinic/
-  │   │       └── page.tsx              # Публичная страница-визитка тенанта → /clinic
-  │   ├── (auth)/
-  │   │   ├── layout.tsx
-  │   │   ├── login/page.tsx            # Страница входа (заглушка)
-  │   │   └── register/page.tsx         # Страница регистрации (заглушка)
-  │   ├── dashboard/
-  │   │   ├── layout.tsx                # Обёртка дашборда (TODO: sidebar)
-  │   │   ├── page.tsx                  # Главная дашборда → /dashboard ✅ READY
-  │   │   ├── bookings/page.tsx         # Список бронирований (заглушка)
-  │   │   ├── resources/page.tsx        # Ресурсы (заглушка)
-  │   │   ├── services/page.tsx         # Услуги (заглушка)
-  │   │   ├── staff/page.tsx            # Сотрудники (заглушка)
-  │   │   └── settings/page.tsx         # Настройки (заглушка)
-  │   ├── book/
-  │   │   ├── layout.tsx
-  │   │   └── page.tsx                  # Wizard бронирования (заглушка, дублирует /clinic)
-  │   └── api/
-  │       ├── auth/[...nextauth]/route.ts
-  │       ├── bookings/
-  │       │   ├── route.ts              # GET + POST /api/bookings ✅ READY
-  │       │   └── busy/
-  │       │       └── route.ts          # GET /api/bookings/busy ✅ READY
-  │       ├── resources/route.ts        # Заглушка
-  │       ├── tenants/route.ts          # Заглушка
-  │       └── webhooks/route.ts         # Заглушка
-  ├── components/
-  │   ├── booking-form.tsx              # Клиентский wizard-компонент ✅ READY
-  │   └── ui/                           # shadcn/ui компоненты
-  │       ├── badge.tsx
-  │       ├── button.tsx
-  │       ├── card.tsx
-  │       ├── dialog.tsx
-  │       ├── form.tsx
-  │       ├── input.tsx
-  │       ├── label.tsx
-  │       ├── radio-group.tsx
-  │       ├── select.tsx
-  │       ├── separator.tsx
-  │       └── table.tsx
-  ├── lib/
-  │   ├── db/index.ts                   # Prisma singleton (globalThis pattern)
-  │   ├── utils.ts                      # cn() (clsx + tailwind-merge)
-  │   ├── auth/config.ts                # NextAuth options (JWT, провайдеры не добавлены)
-  │   ├── booking/engine.ts             # slotsOverlap() util (TODO: getAvailableSlots, createBooking)
-  │   ├── resources/types.ts            # Типы ресурсов
-  │   └── tenant/
-  │       ├── context.ts                # Контекст тенанта
-  │       └── guard.ts                  # Guard тенанта
-  ├── prisma/
-  │   ├── schema.prisma                 # Полная схема БД
-  │   └── seed.ts                       # Seed-скрипт (npx prisma db seed)
-  ├── scripts/                          # Python-автоматизация (пусто)
-  ├── middleware.ts                     # Subdomain → x-tenant-slug header
-  ├── docker-compose.yml
-  ├── postcss.config.mjs
-  ├── next.config.ts
-  ├── tsconfig.json
-  └── package.json
-  ```
-
-  ---
-
-  ## 3. Database Schema
-
-  ```prisma
-  // prisma/schema.prisma
-
-  generator client {
-    provider = "prisma-client-js"
-  }
-
-  datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-  }
-
-  model Tenant {
-    id        String   @id @default(cuid())
-    slug      String   @unique               // субдомен: acme.omnibook.com
-    name      String
-    niche     String?                        // beauty | horeca | sports | medicine
-    plan      String   @default("free")      // free | pro | enterprise
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    users     User[]
-    resources Resource[]
-    services  Service[]
-    bookings  Booking[]
-  }
-
-  model User {
-    id            String    @id @default(cuid())
-    tenantId      String?                         // null → суперадмин платформы
-    email         String    @unique
-    name          String?
-    phone         String?
-    passwordHash  String?
-    role          Role      @default(CUSTOMER)
-    emailVerified DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
-
-    tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-    bookings      Booking[]
-
-    @@index([tenantId])
-    @@index([email])
-  }
-
-  enum Role {
-    SUPERADMIN
-    OWNER
-    STAFF
-    CUSTOMER
-  }
-
-  model Resource {
-    id          String    @id @default(cuid())
-    tenantId    String
-    name        String
-    type        String                          // staff | room | court | table | other
-    description String?
-    capacity    Int?
-    attributes  Json      @default("{}")        // нише-специфичные данные (см. ниже)
-    isActive    Boolean   @default(true)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-
-    tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-    bookings    Booking[]
-    services    ResourceService[]
-
-    @@index([tenantId])
-    @@index([tenantId, type])
-  }
-
-  // Примеры attributes по нишам:
-  // Beauty:   { "services": ["haircut","coloring"], "experience_years": 5 }
-  // HoReCa:   { "capacity": 4, "location": "terrace" }
-  // Sports:   { "surface": "clay", "indoor": true }
-  // Medicine: { "specialization": "cardiologist", "license": "KZ-MED-00456",
-  //             "experience_years": 8, "languages": ["ru","kz"],
-  //             "equipment": ["ECG-1200"], "working_hours": { "mon": "09:00-18:00" } }
-
-  model Service {
-    id          String    @id @default(cuid())
-    tenantId    String
-    name        String
-    description String?
-    durationMin Int
-    price       Int?                            // в минимальных единицах валюты (тиыны/центы)
-    currency    String    @default("KZT")
-    isActive    Boolean   @default(true)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-
-    tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-    bookings    Booking[]
-    resources   ResourceService[]
-
-    @@index([tenantId])
-  }
-
-  model ResourceService {
-    resourceId String
-    serviceId  String
-
-    resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-    service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-    @@id([resourceId, serviceId])
-  }
-
-  model Booking {
-    id         String        @id @default(cuid())
-    tenantId   String
-    resourceId String
-    serviceId  String?
-    userId     String?                           // null → гостевое бронирование
-    guestName  String?
-    guestPhone String?
-    guestEmail String?
-    startsAt   DateTime
-    endsAt     DateTime
-    status     BookingStatus @default(CONFIRMED)
-    notes      String?
-    createdAt  DateTime      @default(now())
-    updatedAt  DateTime      @updatedAt
-
-    tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-    resource   Resource      @relation(fields: [resourceId], references: [id])
-    service    Service?      @relation(fields: [serviceId], references: [id])
-    user       User?         @relation(fields: [userId], references: [id])
-
-    @@index([tenantId])
-    @@index([tenantId, resourceId, startsAt])   // индекс для проверки коллизий
-    @@index([tenantId, status])
-    @@index([userId])
-  }
-
-  enum BookingStatus {
-    PENDING
-    CONFIRMED
-    CANCELLED
-    COMPLETED
-    NO_SHOW
-  }
-  ```
-
-  ---
-
-  ## 4. Multi-tenancy Logic
-
-  Разделение данных реализовано на нескольких уровнях:
-
-  **Уровень данных (DB):**
-  Каждая запись в таблицах `User`, `Resource`, `Service`, `Booking` содержит поле `tenantId`. Все запросы через Prisma обязаны включать фильтр `where: { tenantId }`. Cascade-удаление настроено
-  через `onDelete: Cascade` на уровне схемы.
-
-  **Уровень API:**
-  Все API-роуты принимают `tenantSlug` в теле запроса или query-параметрах, резолвят `tenantId` через `prisma.tenant.findUnique({ where: { slug } })`, после чего все последующие запросы к БД
-  scope-ируются этим `tenantId`. Пример из `POST /api/bookings`:
-  ```typescript
-  const tenant = await prisma.tenant.findUnique({ where: { slug: tenantSlug } })
-  const service = await prisma.service.findFirst({ where: { id: serviceId, tenantId: tenant.id } })
-  ```
-
-  **Уровень маршрутизации (Middleware):**
-  `middleware.ts` перехватывает все запросы, извлекает субдомен из `Host`-заголовка и прокидывает его как `x-tenant-slug` в response headers. Это позволит в будущем автоматически определять
-  тенанта по субдомену (`acme.omnibook.com` → `slug = "acme"`) без явной передачи slug в каждом запросе.
-
-  **Текущее ограничение:**
-  Slug тенанта пока хардкодится в серверных компонентах (`'city-polyclinic'`). Следующий шаг — читать slug из заголовка `x-tenant-slug` (проброшенного middleware) или из сессии
-  аутентифицированного пользователя.
-
-  ---
-
-  ## 5. API Routes
-
-  ### Реализованные эндпоинты
-
-  | Метод | Путь | Описание | Статусы |
-  |---|---|---|---|
-  | `GET` | `/api/bookings?tenantSlug=` | Список последних 50 бронирований тенанта (с ресурсом и услугой) | 200, 400 |
-  | `POST` | `/api/bookings` | Создать бронирование | 201, 400, 404, 409, 422 |
-  | `GET` | `/api/bookings/busy?resourceId=&date=` | Занятые слоты ресурса на дату (`startsAt`, `endsAt`) | 200, 400 |
-
-  ### POST /api/bookings — тело запроса
-
-  ```json
-  {
-    "tenantSlug": "city-polyclinic",
-    "serviceId": "svc-consultation",
-    "resourceId": "res-doctor-petrov",
-    "date": "2026-03-20",
-    "time": "10:00",
-    "guestName": "Иван Иванов",
-    "guestPhone": "+77011112233",
-    "guestEmail": "ivan@example.com"
-  }
-  ```
-
-  **Логика POST /api/bookings:**
-  1. Валидация обязательных полей (422 если отсутствуют)
-  2. Резолв тенанта по slug (404 если не найден)
-  3. Проверка принадлежности serviceId и resourceId этому тенанту (404)
-  4. Построение `startsAt` из `date + time`, вычисление `endsAt = startsAt + service.durationMin`
-  5. **Проверка коллизий** — поиск любого `CONFIRMED|PENDING` бронирования того же ресурса с пересекающимся интервалом (409 если занято)
-  6. Создание `Booking` со статусом `CONFIRMED`
-
-  ### Заглушки (не реализованы)
-
-  | Метод | Путь | Статус |
-  |---|---|---|
-  | `GET/POST` | `/api/resources` | Заглушка |
-  | `GET/POST` | `/api/tenants` | Заглушка |
-  | `POST` | `/api/webhooks` | Заглушка |
-  | `GET/POST` | `/api/auth/[...nextauth]` | Настроен, провайдеры не добавлены |
-
-  ---
-
-  ## 6. UI/UX State
-
-  ### Готовые страницы
-
-  #### `/dashboard` — Дашборд тенанта (Server Component)
-  - Шапка: название, ниша, тариф, бейдж статуса
-  - 4 стат-карточки: Ресурсов / Услуг / Бронирований / Пользователей
-  - Таблица ресурсов: название, тип (Badge), специализация из `attributes.specialization`, лицензия, опыт
-  - Таблица услуг: название, описание, длительность, цена в KZT через `Intl.NumberFormat`
-  - Данные хардкодом берутся для slug `city-polyclinic`
-
-  #### `/clinic` — Публичная страница-визитка (Server Component + Client Form)
-  - Sticky header с названием и нишей
-  - Hero-секция: название, адрес, часы, телефон, список услуг-бейджами
-  - Карточки специалистов с аватаром-инициалом, описанием, специализацией и опытом
-  - Секция «Онлайн-запись» с компонентом `BookingForm`
-
-  ### Ключевые компоненты
-
-  #### `components/booking-form.tsx` — 4-шаговый wizard (Client Component)
-
-  **Шаги:**
-  1. **Услуга** — RadioGroup карточки с ценой, описанием, длительностью; сброс ресурса при смене услуги
-  2. **Специалист** — RadioGroup карточки, фильтрованные по `serviceIds` выбранной услуги; показ специализации и опыта из `attributes`; сброс слота при смене специалиста
-  3. **Дата и время** — нативный date picker (min = завтра); сетка 14 тайм-слотов; при выборе ресурса + даты автоматически запрашиваются занятые слоты:
-     - `useEffect` → `GET /api/bookings/busy?resourceId=&date=`
-     - `AbortController` для отмены устаревших запросов
-     - Skeleton (`animate-pulse`) пока грузятся данные
-     - Занятые кнопки: `disabled`, `opacity-50`, `cursor-not-allowed`, серый фон
-  4. **Подтверждение** — сводка, поля гостя (имя*, телефон*, email); loading spinner; inline-сообщение об ошибке (включая «время занято»)
-
-  **После успешного сабмита** — экран подтверждения с номером брони, деталями и кнопкой «Записаться ещё раз».
-
-  **Состояния формы:** `loading`, `error: string | null`, `successId: string | null`, `busySlots`, `busyLoading`
-
-  ### Установленные shadcn/ui компоненты
-
-  `button`, `input`, `card`, `label`, `select`, `table`, `dialog`, `badge`, `radio-group`, `separator`, `form`
-
-  ---
-
-  ## 7. Infrastructure
-
-  ### Docker (`docker-compose.yml`)
-
-  ```yaml
-  services:
-    postgres:
-      image: postgres:16-alpine
-      restart: unless-stopped
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: omni_book
-      ports:
-        - '5432:5432'
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      healthcheck:
-        test: ['CMD-SHELL', 'pg_isready -U postgres']
-        interval: 5s
-        timeout: 5s
-        retries: 5
-  ```
-
-  Запуск: `docker compose up -d`
-  Контейнер: `omni-book-postgres-1`
-  Данные хранятся в named volume `postgres_data` (персистентно).
-
-  ### .env (без секретных значений)
-
-  ```env
-  DATABASE_URL="postgresql://postgres:postgres@localhost:5432/omni_book"
-  NEXTAUTH_SECRET=<your-secret>
-  NEXTAUTH_URL=http://localhost:3000
-  ROOT_DOMAIN=omnibook.com
-  ```
-
-  ### Prisma
-
-  ```bash
-  npx prisma db push        # синхронизировать схему с БД (без миграций)
-  npx prisma db seed        # заполнить тестовыми данными
-  npx prisma studio         # визуальный браузер БД на :5555
-  ```
-
-  Seed (`prisma/seed.ts`) создаёт:
-  - 1 тенант: `City Polyclinic` (slug: `city-polyclinic`, niche: `medicine`, plan: `pro`)
-  - 3 пользователя: Алия Нурланова (OWNER), Дмитрий Петров (STAFF), Гүлнара Сейтқали (STAFF)
-  - 3 ресурса: Петров Дмитрий (staff/therapist), Сейтқали Гүлнара (staff/cardiologist), Кабинет №101 (room)
-  - 4 услуги: Первичная консультация (30 мин, 5000₸), ЭКГ (20 мин, 3000₸), УЗИ (40 мин, 8000₸), Анализ крови (10 мин, 2000₸)
-  - 7 связей ResourceService (M2M)
-  - 2 тестовых бронирования
-
-  ### Dev Server
-
-  Запуск: `npm run dev`
-  Текущий порт: **3030** (порт 3000 занят системным процессом WSL)
-  Рекомендация: добавить `"dev": "next dev --port 3030"` в `package.json`.
-
-  ---
-
-  ## 8. Current Progress & Next Steps
-
-  ### Что полностью готово ✅
-
-  - Схема БД, миграции через `db push`, seed с реальными данными
-  - Prisma-клиент singleton (hot-reload safe)
-  - Middleware для извлечения субдомена в `x-tenant-slug`
-  - Dashboard: статистика, таблицы ресурсов и услуг
-  - Публичная страница тенанта `/clinic`
-  - 4-шаговый wizard бронирования с полным UI
-  - `POST /api/bookings` — создание бронирования с проверкой коллизий
-  - `GET /api/bookings/busy` — занятые слоты для UX disabled-кнопок
-  - Disabled тайм-слоты со skeleton-загрузкой в форме
-
-  ### Что в процессе / заглушки 🔧
-
-  - `lib/booking/engine.ts` — только `slotsOverlap()`, нет `getAvailableSlots()` и `createBooking()`
-  - `app/book/page.tsx` — дублирующий роут, не использует новый `BookingForm`
-  - Dashboard: `bookings/`, `resources/`, `services/`, `staff/`, `settings/` — заглушки
-  - Slug тенанта хардкодится в серверных компонентах вместо чтения из middleware-заголовка
-
-  ### Приоритетные следующие шаги 📋
-
-  1. **Авторизация** — подключить NextAuth провайдеры (Credentials + Google OAuth), реализовать `CredentialsProvider` в `lib/auth/config.ts`, добавить защиту роутов `/dashboard/*` через
-  middleware
-  2. **Dashboard: раздел бронирований** — таблица всех записей с фильтрацией по дате/статусу/ресурсу, возможность смены статуса (CONFIRMED → CANCELLED/COMPLETED)
-  3. **Календарь в дашборде** — week/day view со слотами бронирований по ресурсам, рекомендуется `react-big-calendar` или `@fullcalendar/react`
-  4. **Динамический тенант** — убрать хардкод `'city-polyclinic'`, читать slug из `x-tenant-slug` заголовка (middleware) или из JWT-сессии
-  5. **Dashboard CRUD** — страницы управления ресурсами (`/dashboard/resources`) и услугами (`/dashboard/services`) с формами создания/редактирования
-  6. **Уведомления** — email/SMS подтверждение бронирования (интеграция Resend или Nodemailer в webhook/background job)
-  7. **Timezone-safe datetime** — текущая реализация строит `new Date(\`${date}T${time}:00\`)` в локальном времени сервера; нужно передавать timezone клиента или хранить UTC явно
-  8. **Мультитенантный routing** — настроить `next.config.ts` для маршрутизации субдоменов на `(tenant)` layout
-  9. **Rate limiting** — добавить на `POST /api/bookings` защиту от спама (например, через Upstash Ratelimit)
+# omni-book — Technical Context Report
+
+> Generated: 2026-03-11. Based on actual source files.
+
+---
+
+## 1. Tech Stack
+
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Framework | Next.js (App Router) | 15.5.12 |
+| Runtime | React | 19.0.0 |
+| Language | TypeScript | ^5 |
+| ORM | Prisma | 6.7.0 |
+| Database | PostgreSQL | 16-alpine (Docker) |
+| CSS | Tailwind CSS | 4.2.1 |
+| UI Components | shadcn/ui | 4.0.2 (New York, Zinc) |
+| Forms | react-hook-form + Zod | 7.71.2 / 4.3.6 |
+| Auth | NextAuth | 4.24.11 |
+| Icons | lucide-react | 0.577.0 |
+| Testing | jest + ts-jest | ^29 |
+| Email | Resend | 6.9.3 |
+| Passwords | bcryptjs | — |
+| Toasts | sonner | — |
+| Date/TZ | date-fns + date-fns-tz | — |
+| Package manager | npm | — |
+| Dev server port | **3030** (not 3000) | — |
+
+---
+
+## 2. Project Structure
+
+```
+app/
+├── (marketing)/
+│   ├── layout.tsx
+│   └── page.tsx                    # Landing page /
+├── (auth)/
+│   ├── layout.tsx
+│   ├── login/page.tsx
+│   └── register/page.tsx
+├── (tenant)/
+│   ├── layout.tsx
+│   ├── [slug]/page.tsx             # Public tenant page /beauty-studio etc.
+│   └── clinic/page.tsx             # Legacy redirect → city-polyclinic
+├── dashboard/
+│   ├── layout.tsx                  # Reads tenant from session, provides nicheConfig
+│   ├── page.tsx                    # Stats + upcoming bookings
+│   ├── bookings/page.tsx           # Bookings table + calendar tabs
+│   ├── resources/page.tsx          # Resources CRUD
+│   ├── services/page.tsx           # Services CRUD
+│   ├── settings/page.tsx           # Tenant settings
+│   └── staff/page.tsx              # Staff management (placeholder)
+├── book/
+│   ├── layout.tsx
+│   └── page.tsx                    # Public booking wizard demo
+├── api/
+│   ├── auth/[...nextauth]/route.ts
+│   ├── auth/register/route.ts
+│   ├── bookings/route.ts           # GET (list) + POST (create)
+│   ├── bookings/slots/route.ts     # GET available time slots
+│   ├── bookings/calendar/route.ts  # GET week view data
+│   ├── bookings/busy/route.ts      # GET busy slots
+│   ├── bookings/[id]/status/route.ts # PATCH status change
+│   ├── resources/route.ts
+│   ├── tenants/route.ts
+│   └── webhooks/route.ts
+├── layout.tsx                      # Root layout
+└── middleware.ts                   # Subdomain→header + auth protection
+
+components/
+├── ui/                             # shadcn/ui (button, card, input, select, ...)
+│   └── phone-input.tsx             # Custom controlled phone input with formatting
+├── landing/                        # Marketing page sections
+│   ├── Navbar.tsx
+│   ├── HeroSection.tsx
+│   ├── NicheCards.tsx
+│   ├── FeaturesGrid.tsx
+│   ├── DemoSection.tsx
+│   ├── PricingCards.tsx
+│   ├── Footer.tsx
+│   └── FadeIn.tsx
+├── booking-form.tsx                # 4-step booking wizard (resource→service→slot→guest)
+├── booking-calendar.tsx            # Week-view calendar (CSS Grid + absolute positioning)
+├── bookings-dashboard.tsx          # Bookings table + calendar tabs + status updates
+├── booking-status-badge.tsx        # Badge component for booking statuses
+├── resource-form.tsx               # Niche-aware dynamic resource form
+├── resources-manager.tsx           # Resources CRUD table + dialogs + mobile cards
+├── service-form.tsx                # Service form with resource assignment
+├── services-manager.tsx            # Services CRUD table + dialogs + mobile cards
+├── settings-form.tsx               # Tenant settings (6 sections, STAFF read-only)
+├── dashboard-sidebar.tsx           # Mobile Sheet + desktop sidebar, niche-colored
+├── tenant-public-page.tsx          # Shared Server Component for public tenant page
+└── providers.tsx                   # Client layout wrapper (SessionProvider + ThemeProvider)
+
+lib/
+├── db/index.ts                     # basePrisma (raw) + prisma (tenant-extended via $extends)
+├── tenant/
+│   ├── context.ts                  # setTenantContext / getTenantId (AsyncLocalStorage)
+│   ├── resolve.ts                  # resolveTenant(request) — x-tenant-slug header
+│   ├── prisma-tenant.ts            # $allOperations extension — auto-injects tenantId
+│   ├── guard.ts
+│   └── index.ts
+├── auth/
+│   ├── config.ts                   # NextAuth options (Credentials + Google)
+│   ├── guards.ts                   # requireAuth / requireRole / requireTenant
+│   ├── types.ts                    # Session/JWT type augmentation
+│   └── index.ts
+├── booking/engine.ts               # getAvailableSlots + createBooking (FOR UPDATE lock)
+├── email/resend.ts                 # sendBookingConfirmation / sendBookingCancellation
+├── niche/config.ts                 # Central niche definitions (single source of truth)
+├── actions/
+│   ├── resources.ts                # Server Actions: getResources, createResource, ...
+│   ├── services.ts                 # Server Actions: getServices, createService, ...
+│   └── tenant-settings.ts         # Server Actions: getTenantSettings, updateTenantSettings
+├── validations/
+│   ├── resource.ts                 # createResourceSchema, updateResourceSchema
+│   ├── service.ts                  # createServiceSchema, updateServiceSchema
+│   └── tenant-settings.ts         # tenantSettingsSchema
+├── utils/
+│   ├── phone.ts                    # formatPhone(), normalizePhone()
+│   └── index.ts
+├── resources/types.ts              # ResourceWithRelations type
+└── utils.ts                        # cn() helper
+
+prisma/
+├── schema.prisma
+├── seed.ts                         # 5 tenants × resources, services, bookings
+└── migrations/ (auto)
+```
+
+---
+
+## 3. Database Schema
+
+### Tenant
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| slug | String (unique) | Subdomain identifier |
+| name | String | Business display name |
+| niche | String | beauty \| horeca \| sports \| medicine |
+| plan | String | free \| pro \| enterprise |
+| isActive | Boolean | default true |
+| timezone | String | IANA tz, default Asia/Almaty |
+| description | String? | Public description |
+| phone | String? | Contact phone |
+| email | String? | Contact email |
+| address | String? | Street address |
+| city | String? | City |
+| website | String? | Website URL |
+| logoUrl | String? | Logo image URL |
+| coverUrl | String? | Hero cover image URL |
+| workingHours | String? | e.g. "Пн-Пт: 09-18" |
+| socialLinks | Json | `{ instagram, whatsapp, telegram }` |
+| createdAt | DateTime | auto |
+
+### User
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| tenantId | String? | NULL for SUPERADMIN |
+| email | String (unique) | |
+| name | String? | |
+| passwordHash | String? | bcrypt |
+| role | Enum | SUPERADMIN \| OWNER \| STAFF \| CUSTOMER |
+| createdAt | DateTime | auto |
+
+### Resource
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| tenantId | String | FK, mandatory |
+| name | String | |
+| type | String | staff \| room \| court \| table \| equipment \| other |
+| description | String? | |
+| capacity | Int? | |
+| attributes | Json | Niche-specific fields |
+| isActive | Boolean | default true |
+| createdAt | DateTime | auto |
+
+Index: `(tenantId, type)`
+
+### Schedule
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| resourceId | String | FK |
+| dayOfWeek | Int | 0=Sun … 6=Sat |
+| startTime | String | HH:MM |
+| endTime | String | HH:MM |
+| isActive | Boolean | default true |
+
+Unique: `(resourceId, dayOfWeek)`. **No schedule = unbookable resource.**
+
+### Service
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| tenantId | String | FK, mandatory |
+| name | String | |
+| description | String? | |
+| durationMin | Int | minutes |
+| price | Int? | In minor units (tiyins = 1/100 tenge) |
+| currency | String | default KZT |
+| isActive | Boolean | default true |
+| createdAt | DateTime | auto |
+
+### ResourceService (M2M)
+| Column | Type | Notes |
+|--------|------|-------|
+| resourceId | String | Composite PK |
+| serviceId | String | Composite PK |
+
+Note: NOT in tenant-scoped extension — verified manually in actions.
+
+### Booking
+| Column | Type | Notes |
+|--------|------|-------|
+| id | String (CUID) | PK |
+| tenantId | String | FK, mandatory |
+| resourceId | String | FK |
+| serviceId | String | FK |
+| userId | String? | NULL = guest booking |
+| guestName | String | |
+| guestPhone | String | Normalized: +7XXXXXXXXXX |
+| guestEmail | String? | |
+| startsAt | DateTime | UTC |
+| endsAt | DateTime | UTC |
+| status | Enum | PENDING \| CONFIRMED \| CANCELLED \| COMPLETED \| NO_SHOW |
+| createdAt | DateTime | auto |
+
+Indexes: `(tenantId, resourceId, startsAt)`, `(tenantId, status)`
+
+---
+
+## 4. Multi-Tenancy Rules
+
+1. **Every DB query MUST include explicit `where: { tenantId }`** — no exceptions
+2. **Use `basePrisma`** (not the extended client) for all queries — AsyncLocalStorage is unreliable in Next.js 15
+3. **tenantId sources**:
+   - Dashboard: `session.user.tenantId`
+   - API: `resolveTenant(req)` (reads `x-tenant-slug` header or `?tenantSlug=` param)
+   - Never from client input
+4. **Before create/update/delete**: verify record belongs to tenant via `findFirst({ where: { id, tenantId } })`
+5. **NEVER hardcode a tenant slug**
+
+### Middleware (`middleware.ts`)
+
+- Extracts subdomain from `Host` header → sets `x-tenant-slug` header
+- Protects `/dashboard/*` → requires session + (OWNER | STAFF | SUPERADMIN)
+- Protects `/api/resources`, `/api/tenants` → requires OWNER | SUPERADMIN
+- Redirects `/login`, `/register` to `/dashboard` if already signed in
+
+---
+
+## 5. Auth
+
+**Strategy**: NextAuth JWT (stateless, Edge-safe, no DB adapter)
+
+**Session fields**: `{ id, email, name, role, tenantId, tenantSlug }`
+
+**Credentials flow**: email + bcryptjs → validate → JWT
+
+**Roles**: SUPERADMIN (tenantId=null, bypasses all checks), OWNER, STAFF, CUSTOMER
+
+**`redirect` callback** in authConfig:
+```typescript
+async redirect({ url, baseUrl }) {
+  if (url.startsWith('/')) return `${baseUrl}${url}`
+  if (url.startsWith(baseUrl)) return url
+  return `${baseUrl}/dashboard`
+}
+```
+
+---
+
+## 6. Niche System
+
+**File**: `lib/niche/config.ts` — single source of truth. Never hardcode niche logic elsewhere.
+
+| Niche | Color | resourceLabel | Types |
+|-------|-------|--------------|-------|
+| medicine | blue | Врач | staff, room, equipment |
+| beauty | pink | Мастер | staff, room |
+| horeca | orange | Столик | table, room, staff |
+| sports | green | Площадка | court, room, staff, equipment |
+
+**AttributeField** structure:
+```typescript
+{
+  key: string
+  label: string
+  type: 'text' | 'number' | 'select' | 'multitext' | 'checkbox'
+  options?: string[]          // for select
+  required?: boolean
+  forTypes?: string[]         // limit to specific resource types
+  showInTable?: boolean       // show in resources table + public cards
+}
+```
+
+**Attribute fields by niche**:
+
+- **medicine**: specialization (text, staff), license (text, staff), experience_years (number, staff), languages (multitext, staff), equipment (multitext, room/equipment)
+- **beauty**: specialization (select, staff), experience_years (number, staff), skills (multitext, staff)
+- **horeca**: capacity (number, table/room, required), location (select, table/room), features (multitext)
+- **sports**: surface (select, court), indoor (checkbox, court/room), capacity (number), equipment_included (multitext)
+
+**`getNicheConfig(niche)`**: Fallback to medicine for unknown/null niches.
+
+---
+
+## 7. Booking Engine (`lib/booking/engine.ts`)
+
+### `getAvailableSlots({ tenantId, resourceId, date, serviceId })`
+
+1. Load tenant timezone + resource schedule for `dayOfWeek`
+2. Build UTC window for the day using `fromZonedTime()`
+3. Query active overlapping bookings (CONFIRMED | PENDING)
+4. Generate slots every `durationMin` minutes within schedule window
+5. Mark slot `available: false` if collision
+6. Format time label in tenant timezone
+
+**Returns**: `SlotResult[]` — `{ time, startsAt, endsAt, available }`
+
+**Errors**: DayOffError (422), ResourceNotFoundError (404), ServiceNotFoundError (404)
+
+### `createBooking({ tenantId, resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail? })`
+
+1. `$transaction(serializable)` → `FOR UPDATE` lock on resource row
+2. Verify resource + service belong to tenant
+3. Anti-spam: count active (PENDING|CONFIRMED) by guestPhone → if ≥2 → BookingLimitError (429)
+4. Collision check: overlapping active bookings → BookingConflictError (409)
+5. Create booking with status CONFIRMED
+
+---
+
+## 8. API Routes
+
+### `GET /api/bookings`
+Query: `{ tenantSlug?, status?, resourceId?, dateFrom?, dateTo?, page, limit }`
+Response: `{ data[], total, page, totalPages, limit }`
+
+### `POST /api/bookings`
+Body: `{ resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail? }`
+Responses: 201 (created), 409 (conflict), 422 (missing fields), 429 (limit exceeded)
+Post-creation: fire-and-forget email via `sendBookingConfirmation().catch(console.error)`
+
+### `GET /api/bookings/slots`
+Query: `{ resourceId, serviceId, date (YYYY-MM-DD), tenantSlug? }`
+Response: `{ slots: SlotResult[] }` or `{ slots: [], dayOff: true }`
+
+### `PATCH /api/bookings/[id]/status`
+Body: `{ status: BookingStatus }`
+Auth: session required (OWNER | STAFF | SUPERADMIN)
+Finite-state transitions: past bookings can only go to COMPLETED | NO_SHOW
+
+### `GET /api/bookings/calendar`
+Response: grouped by resource `{ resourceId, resourceName, resourceType, bookings[] }`
+
+### `GET /api/bookings/busy`
+Returns busy time windows (used by booking form to disable slots)
+
+---
+
+## 9. Email (`lib/email/resend.ts`)
+
+```typescript
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+```
+
+- **No-op** if `RESEND_API_KEY` is absent (development-safe)
+- `sendBookingConfirmation(data)` — HTML email, green header
+- `sendBookingCancellation(data)` — HTML email, red header
+- Both accept `BookingEmailData { guestName, guestEmail, tenantName, serviceName, resourceName, startsAt, timezone? }`
+
+---
+
+## 10. Phone Utilities (`lib/utils/phone.ts`)
+
+```typescript
+formatPhone("+77071234567")            // → "+7 (707) 123 45 67"
+normalizePhone("+7 707 123-45-67")     // → "+77071234567"
+```
+
+- `normalizePhone` applied in POST /api/bookings before engine call
+- `formatPhone` used in UI display (bookings table, dashboard)
+- `PhoneInput` component: controlled Input, formats on `onBlur`
+
+---
+
+## 11. Schedule Defaults by Niche (on Resource Creation)
+
+| Niche | Days | Start | End |
+|-------|------|-------|-----|
+| medicine | Mon–Fri (1–5) | 09:00 | 18:00 |
+| beauty | Mon–Sat (1–6) | 09:00 | 19:00 |
+| horeca | Every day (0–6) | 10:00 | 23:00 |
+| sports | Every day (0–6) | 07:00 | 22:00 |
+
+**Rule**: Creating a resource via Dashboard MUST also create default Schedule entries. Without them, all slots return "Не работает в этот день."
+
+---
+
+## 12. Settings Page (`/dashboard/settings`)
+
+**Server Action** (`lib/actions/tenant-settings.ts`):
+- `getTenantSettings()` — returns all public fields + socialLinks
+- `updateTenantSettings(data)` — OWNER/SUPERADMIN only, validates with `tenantSettingsSchema`, `revalidatePath` for `/dashboard/settings` and `/:slug`
+
+**Form** (`components/settings-form.tsx`):
+- 6 Card sections: slug (read-only), основная информация, контакты, часы работы, брендинг, соцсети
+- STAFF → all fields disabled, no Save button
+- Live image preview via `<img>` with `onError` hide
+- Manual `tenantSettingsSchema.safeParse()` in submit (no zodResolver — project pattern)
+
+---
+
+## 13. Public Tenant Page (`/[slug]`)
+
+**Component**: `components/tenant-public-page.tsx` (Server Component)
+
+**Sections**:
+1. **Sticky header** — logo thumbnail + tenant name + "Book" CTA
+2. **Hero** — `coverUrl` as CSS background, `logoUrl` avatar, name, description, niche CTA button
+3. **Contact bar** — phone (formatted), email, address, city, website (shown only if non-null)
+4. **Niche content** — resources (specialists/tables/courts) + services grid
+5. **Booking section** — embeds `<BookingForm>` wizard
+6. **Social footer** — Instagram, WhatsApp (MessageCircle), Telegram icons → links
+
+---
+
+## 14. Seed Data (`prisma/seed.ts`)
+
+5 tenants, all with full public fields:
+
+| Tenant | Niche | Plan | Resources | Services |
+|--------|-------|------|-----------|----------|
+| city-polyclinic | medicine | pro | Dr. Petrov (therapist), Dr. Gulnara (cardiologist) | Консультация (30 min, 5000), ЭКГ (20 min, 3000) |
+| zdorovie-med | medicine | free | Dr. Asel (neurologist) | Нейро-консультация (40 min, 7000) |
+| beauty-studio | beauty | pro | Anna Kim (hairdresser), Dana Serik (cosmetologist) | Стрижка (45 min, 5000), Уход за лицом (60 min, 8000) |
+| bistro-central | horeca | pro | Столик у окна (cap 4), VIP-зал (cap 12) | Обычный столик (120 min, free), VIP (180 min, 15000) |
+| sport-arena | sports | free | Корт №1 (clay, outdoor), Корт №2 (hard, indoor) | Аренда (60 min, 3000) |
+
+**Test accounts** (password: `password123`):
+- clinic-owner@test.com, zdorovie@test.com, salon-owner@test.com, bistro-owner@test.com, sport-owner@test.com
+
+---
+
+## 15. Dashboard UI
+
+### Sidebar (`components/dashboard-sidebar.tsx`)
+- **Desktop**: fixed `<aside>` 64px wide
+- **Mobile**: `<Sheet>` (burger button in top bar, `pt-14` clearance on main)
+- Niche-colored active nav links (static string records per color — Tailwind 4 constraint)
+- Avatar + owner name/email + tenant name + niche badge
+- Footer: "Публичная страница" link + "Выйти" button
+
+### Dashboard Home (`app/dashboard/page.tsx`)
+- Stat cards: Bookings today, Resources, Confirmed bookings, Guests (with lucide icons)
+- "Предстоящие записи" — 5 upcoming PENDING/CONFIRMED bookings from DB
+
+### Mobile Pattern (all CRUD pages)
+- Desktop: `<table className="hidden sm:table">`
+- Mobile: card list `<div className="sm:hidden">`
+- FAB: `<Button className="sm:hidden fixed bottom-6 right-6">`
+- Toasts: `toast.success/error()` from sonner (replaced inline state)
+
+---
+
+## 16. Environment Variables
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/omni_book"
+NEXTAUTH_SECRET=<openssl rand -base64 32>
+NEXTAUTH_URL=http://localhost:3030       # Must match dev server port!
+ROOT_DOMAIN=omnibook.com
+RESEND_API_KEY=                          # Optional; emails disabled if absent
+GOOGLE_CLIENT_ID=                        # Optional
+GOOGLE_CLIENT_SECRET=                    # Optional
+```
+
+---
+
+## 17. Known Issues & Rules
+
+1. **Schedule required on resource creation** — always create default entries via niche defaults
+2. **AsyncLocalStorage unreliable in Next.js 15** — use `basePrisma` + explicit `tenantId` in all queries
+3. **`zodResolver` dual-types TS error** — project pattern: use local `FormValues` type + manual `.safeParse()` in submit handler
+4. **Tailwind 4 dynamic classes** — must use static string records (COLORS object), never template literals
+5. **`SheetTrigger asChild`** — `@base-ui/react` doesn't support `asChild`; use `className` directly on `SheetTrigger`
+6. **Date handling** — always YYYY-MM-DD for API, sanitize on server, store UTC in DB
+7. **`NEXTAUTH_URL` port** — must be 3030 (not 3000); mismatch causes redirect to wrong server in WSL
+8. **Price units** — form input in major units (tenge), stored as minor units (tiyins = ×100)
+
+---
+
+## 18. Key Constraints
+
+| Metric | Value |
+|--------|-------|
+| Max active bookings per phone per tenant | 2 |
+| Max booking list page size | 100 |
+| Description max length | 500 chars |
+| Default timezone | Asia/Almaty |
+| Supported currencies | KZT, RUB, USD, EUR |
+| Booking duration range | 5–480 min |
+| Resource types | staff, room, court, table, equipment, other |
+| Niches | medicine, beauty, horeca, sports |
