@@ -67,7 +67,7 @@ function parseAttributes(raw: unknown): ResourceAttributes {
 // ---- data ------------------------------------------------------------------
 
 async function getDashboardData(tenantId: string) {
-  return basePrisma.tenant.findUniqueOrThrow({
+  return basePrisma.tenant.findUnique({
     where: { id: tenantId },
     include: {
       resources: {
@@ -92,6 +92,7 @@ export default async function DashboardPage() {
   if (!session?.user?.tenantId) redirect('/login')
 
   const tenant = await getDashboardData(session.user.tenantId)
+  if (!tenant) redirect('/login')
   const attrs = tenant.resources.map((r) => parseAttributes(r.attributes))
 
   return (
