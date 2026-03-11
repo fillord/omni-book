@@ -17,6 +17,7 @@ model Tenant {
   niche     String?                        // beauty | horeca | sports | medicine
   plan      String   @default("free")      // free | pro | enterprise
   isActive  Boolean  @default(true)
+  timezone  String   @default("Asia/Almaty") // IANA timezone
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -80,9 +81,27 @@ model Resource {
   tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   bookings    Booking[]
   services    ResourceService[]
+  schedules   Schedule[]
 
   @@index([tenantId])
   @@index([tenantId, type])
+}
+
+// ---------------------------------------------------------------------------
+// Schedule — рабочий график ресурса по дням недели
+// ---------------------------------------------------------------------------
+model Schedule {
+  id         String   @id @default(cuid())
+  resourceId String
+  dayOfWeek  Int      // 0=Sunday … 6=Saturday
+  startTime  String   // "09:00"
+  endTime    String   // "18:00"
+  isActive   Boolean  @default(true)
+
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceId, dayOfWeek])
+  @@index([resourceId])
 }
 
 // ---------------------------------------------------------------------------

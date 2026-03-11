@@ -1,8 +1,24 @@
 import { PrismaClient } from '@prisma/client'
+import { withTenantExtension } from '@/lib/tenant/prisma-tenant'
 
-// Prevent multiple Prisma Client instances in development (hot-reload)
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+// ---- Singletons (hot-reload safe) ------------------------------------------
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
+type GlobalWithPrisma = typeof globalThis & {
+  _basePrisma?: PrismaClient
+  _prisma?: ReturnType<typeof withTenantExtension>
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+const g = globalThis as GlobalWithPrisma
+
+// Raw client — used by resolveTenant() and any platform-level code that must
+// query without a tenant context (e.g. looking up Tenant by slug).
+export const basePrisma: PrismaClient = g._basePrisma ?? new PrismaClient()
+
+// Tenant-scoped client — automatically injects tenantId from AsyncLocalStorage.
+// Use this in all feature code (bookings, resources, services, users).
+export const prisma = g._prisma ?? withTenantExtension(basePrisma)
+
+if (process.env.NODE_ENV !== 'production') {
+  g._basePrisma = basePrisma
+  g._prisma = prisma
+}
