@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ShieldCheck, Users, LayoutDashboard, LogOut } from 'lucide-react'
+import { SignOutButton } from '@/components/sign-out-button'
 
 export default async function AdminLayout({
   children,
@@ -61,6 +62,13 @@ export default async function AdminLayout({
               <p className="text-xs text-zinc-500 truncate">{session.user.email}</p>
             </div>
           </div>
+          <SignOutButton
+            redirectTo="/login"
+            className="mt-2 w-full flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-sm"
+          >
+            <LogOut size={16} />
+            Выйти
+          </SignOutButton>
         </div>
       </aside>
 

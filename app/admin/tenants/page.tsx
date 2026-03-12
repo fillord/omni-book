@@ -34,6 +34,7 @@ export default async function AdminTenantsPage() {
                 <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider w-48">Тариф и Статус</th>
                 <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Лимит ресурсов</th>
                 <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Текущих ресурсов</th>
+                <th className="p-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -43,7 +44,7 @@ export default async function AdminTenantsPage() {
               
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-zinc-500 text-sm">
+                  <td colSpan={6} className="p-8 text-center text-zinc-500 text-sm">
                     Нет зарегистрированных компаний
                   </td>
                 </tr>

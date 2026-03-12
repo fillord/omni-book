@@ -170,4 +170,5 @@ enum PlanStatus {
   ACTIVE
   PENDING
   EXPIRED
+  BANNED
 }

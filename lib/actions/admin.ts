@@ -7,6 +7,7 @@ import { getServerSession } from 'next-auth'
 
 const prisma = new PrismaClient()
 
+
 // Безопасная проверка: только админ
 async function ensureSuperAdmin() {
   const session = await getServerSession(authConfig)
@@ -17,13 +18,32 @@ async function ensureSuperAdmin() {
   }
 }
 
+const PLAN_DEFAULT_MAX_RESOURCES: Record<Plan, number> = {
+  FREE: 1,
+  PRO: 20,
+  ENTERPRISE: 100,
+}
+
 export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus: PlanStatus) {
   try {
     await ensureSuperAdmin()
 
+    // Получаем текущий план, чтобы понять — изменился ли он
+    const current = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { plan: true },
+    })
+
+    const data: { plan: Plan; planStatus: PlanStatus; maxResources?: number } = { plan, planStatus }
+
+    // Автоматически выставляем лимит ресурсов только при смене тарифа
+    if (current && current.plan !== plan) {
+      data.maxResources = PLAN_DEFAULT_MAX_RESOURCES[plan]
+    }
+
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: { plan, planStatus }
+      data,
     })
 
     revalidatePath('/admin/tenants')
@@ -48,5 +68,37 @@ export async function updateTenantMaxResources(tenantId: string, maxResources: n
     return { success: true }
   } catch (error: any) {
     return { error: error.message || 'Ошибка обновления лимитов' }
+  }
+}
+
+export async function banTenant(tenantId: string) {
+  try {
+    await ensureSuperAdmin()
+
+    await prisma.tenant.update({
+      where: { id: tenantId },
+      data: { planStatus: PlanStatus.BANNED }
+    })
+
+    revalidatePath('/admin/tenants')
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || 'Ошибка при бане компании' }
+  }
+}
+
+export async function deleteTenant(tenantId: string) {
+  try {
+    await ensureSuperAdmin()
+
+    // Каскадное удаление: User, Resource, Service, Booking удаляются автоматически (onDelete: Cascade)
+    await prisma.tenant.delete({
+      where: { id: tenantId }
+    })
+
+    revalidatePath('/admin/tenants')
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || 'Ошибка при удалении компании' }
   }
 }
