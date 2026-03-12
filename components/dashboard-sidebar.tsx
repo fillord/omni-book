@@ -8,21 +8,27 @@ import { signOut } from 'next-auth/react'
 import {
   Menu, LogOut, ExternalLink,
   LayoutDashboard, CalendarDays, Wrench, Scissors, Settings, BarChart3,
+  Zap, Clock
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useI18n } from '@/lib/i18n/context'
 import { LocaleSwitcher } from '@/components/locale-switcher'
 import type { NicheConfig } from '@/lib/niche/config'
+import { useState, useEffect } from 'react'
+import { ShieldCheck } from 'lucide-react'
 
 // ---- types -----------------------------------------------------------------
 
 type Props = {
-  nicheConfig: NicheConfig
-  tenantName:  string
-  tenantSlug:  string
-  userName:    string
-  userEmail:   string
+  nicheConfig:      NicheConfig
+  tenantName:       string
+  tenantSlug:       string
+  tenantPlan:       string
+  tenantPlanStatus: string
+  userName:         string
+  userEmail:        string
+  userRole:         string
 }
 
 // ---- static color maps (Tailwind requires static strings) ------------------
@@ -53,20 +59,26 @@ function initials(name: string): string {
 
 // ---- inner content (shared between desktop aside and Sheet) ----------------
 
-function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEmail }: Props) {
+function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenantPlanStatus, userName, userEmail, userRole }: Props) {
   const pathname = usePathname()
   const { t }    = useI18n()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const color    = nicheConfig.color ?? 'blue'
   const active   = ACTIVE_LINK[color] ?? ACTIVE_LINK.blue
   const badge    = BADGE_CLS[color]   ?? BADGE_CLS.blue
 
   const items = [
-    { href: '/dashboard',           label: t('dashboard', 'overview'),  icon: LayoutDashboard, exact: true  },
-    { href: '/dashboard/resources', label: t('niche', nicheConfig.resourceLabelPlural), icon: Wrench,       exact: false },
-    { href: '/dashboard/services',  label: t('dashboard', 'services'),  icon: Scissors,        exact: false },
-    { href: '/dashboard/bookings',   label: t('dashboard', 'bookings'),  icon: CalendarDays,    exact: false },
-    { href: '/dashboard/analytics', label: t('dashboard', 'analytics'), icon: BarChart3,        exact: false },
-    { href: '/dashboard/settings',  label: t('dashboard', 'settings'),  icon: Settings,        exact: false },
+    { href: '/dashboard',           section: 'dashboard', tKey: 'overview',  icon: LayoutDashboard, exact: true  },
+    { href: '/dashboard/resources', section: 'niche',     tKey: nicheConfig.resourceLabelPlural, icon: Wrench,       exact: false },
+    { href: '/dashboard/services',  section: 'dashboard', tKey: 'services',  icon: Scissors,        exact: false },
+    { href: '/dashboard/bookings',  section: 'dashboard', tKey: 'bookings',  icon: CalendarDays,    exact: false },
+    { href: '/dashboard/analytics', section: 'dashboard', tKey: 'analytics', icon: BarChart3,        exact: false },
+    { href: '/dashboard/settings',  section: 'dashboard', tKey: 'settings',  icon: Settings,        exact: false },
   ]
 
   return (
@@ -87,19 +99,24 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
         </div>
       </div>
 
-      {/* Tenant + niche */}
+      {/* Tenant + niche & plan */}
       <div className="px-4 py-3 border-b">
         <p className="text-xs font-semibold text-foreground truncate" title={tenantName}>
           {tenantName}
         </p>
-        <span className={`mt-1.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${badge}`}>
-          {t('niche', nicheConfig.label)}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+          <span className={`inline-flex items-center justify-center rounded border px-1.5 py-0.5 text-[10px] font-medium leading-none ${badge} min-w-[50px] uppercase`}>
+            {mounted ? t('niche', nicheConfig.label) : <span className="h-2.5 w-8 bg-current/20 rounded-sm animate-pulse" />}
+          </span>
+          <span className="inline-flex items-center justify-center rounded border border-zinc-200 bg-zinc-100 text-zinc-700 px-1.5 py-0.5 text-[10px] font-bold leading-none uppercase">
+            {tenantPlan}
+          </span>
+        </div>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-3 space-y-0.5">
-        {items.map(({ href, label, icon: Icon, exact }) => {
+        {items.map(({ href, section, tKey, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href)
           return (
             <Link
@@ -113,14 +130,43 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
               ].join(' ')}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {label}
+              {mounted ? t(section, tKey) : <span className="h-3.5 w-20 bg-current/20 rounded-sm animate-pulse" />}
             </Link>
           )
         })}
       </nav>
 
-      {/* Footer links */}
-      <div className="px-3 py-4 border-t space-y-0.5">
+      {/* Upgrade Banner & Footer links */}
+      <div className="px-3 py-4 border-t space-y-1">
+        {tenantPlan === 'FREE' && tenantPlanStatus !== 'PENDING' && (
+          <Link
+            href="/dashboard/settings/billing"
+            className="group flex items-center justify-between gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-all shadow-sm mb-2"
+          >
+            <span className="flex items-center gap-2">
+              <Zap className="h-4 w-4 shrink-0 fill-indigo-500 text-indigo-500 group-hover:scale-110 transition-transform" />
+              Upgrade to PRO
+            </span>
+          </Link>
+        )}
+
+        {tenantPlanStatus === 'PENDING' && (
+          <div className="flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-100 mb-2">
+            <Clock className="h-3.5 w-3.5 shrink-0" />
+            Ожидает активации
+          </div>
+        )}
+
+        {userRole === 'SUPERADMIN' && (
+          <Link
+            href="/admin"
+            className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-white bg-zinc-900 hover:bg-zinc-800 transition-colors mb-2"
+          >
+            <ShieldCheck className="h-4 w-4 shrink-0 text-indigo-400" />
+            Панель администратора
+          </Link>
+        )}
+
         <a
           href={`/${tenantSlug}`}
           target="_blank"
@@ -128,7 +174,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
           className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
           <ExternalLink className="h-4 w-4 shrink-0" />
-          {t('dashboard', 'publicPage')}
+          {mounted ? t('dashboard', 'publicPage') : <span className="h-3.5 w-28 bg-current/20 rounded-sm animate-pulse" />}
         </a>
 
         {/* Language switcher */}
@@ -141,7 +187,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          {t('common', 'logout')}
+          {mounted ? t('common', 'logout') : <span className="h-3.5 w-16 bg-current/20 rounded-sm animate-pulse" />}
         </button>
       </div>
     </div>

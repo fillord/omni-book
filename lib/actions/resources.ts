@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { Prisma } from '@prisma/client'
-import { basePrisma } from '@/lib/db'
+import { basePrisma, getTenantDB } from '@/lib/db'
 import { requireAuth, requireRole } from '@/lib/auth/guards'
 import {
   createResourceSchema,
@@ -43,7 +43,8 @@ async function getSession(requireOwner = false) {
 
 /** Find a resource that belongs to this tenant — ownership check */
 async function findOwned(id: string, tenantId: string) {
-  const resource = await basePrisma.resource.findFirst({ where: { id, tenantId } })
+  const db = getTenantDB(tenantId)
+  const resource = await db.resource.findUnique({ where: { id } })
   if (!resource) throw new Error('Ресурс не найден')
   return resource
 }
@@ -80,8 +81,8 @@ async function upsertSchedule(resourceId: string, entries: ScheduleEntry[]) {
 
 export async function getResources(): Promise<ResourceWithRelations[]> {
   const session = await getSession()
-  return basePrisma.resource.findMany({
-    where: { tenantId: session.user.tenantId },
+  const db = getTenantDB(session.user.tenantId)
+  return db.resource.findMany({
     include: RESOURCE_INCLUDE,
     orderBy: { name: 'asc' },
   }) as Promise<ResourceWithRelations[]>
@@ -94,10 +95,27 @@ export async function createResource(
   const session  = await getSession(true)
   const parsed   = createResourceSchema.parse(data)
   const tenantId = session.user.tenantId
+  const db       = getTenantDB(tenantId)
 
-  const resource = await basePrisma.resource.create({
+  const tenantObj = await basePrisma.tenant.findUnique({
+    where: { id: tenantId },
+  })
+  
+  if (!tenantObj) throw new Error('Бизнес не найден')
+
+  const currentResourceCount = await db.resource.count({
+    where: { tenantId }
+  })
+
+  // Используем каст к any чтобы обойти временный кэш типов TS-сервера (мы только что сделали db push)
+  const maxRes = (tenantObj as any).maxResources || 1
+
+  if (currentResourceCount >= maxRes) {
+    throw new Error('Лимит ресурсов исчерпан. Пожалуйста, обновите тарифный план или обратитесь в поддержку.')
+  }
+
+  const resource = await db.resource.create({
     data: {
-      tenantId,
       name:        parsed.name,
       type:        parsed.type,
       description: parsed.description,
@@ -110,16 +128,12 @@ export async function createResource(
   // Use provided schedule or fall back to niche defaults
   let entries = scheduleData
   if (!entries || entries.length === 0) {
-    const tenant = await basePrisma.tenant.findUnique({
-      where: { id: tenantId },
-      select: { niche: true },
-    })
-    entries = getDefaultSchedule(tenant?.niche)
+    entries = getDefaultSchedule(tenantObj.niche)
   }
   await upsertSchedule(resource.id, entries)
 
-  const result = await basePrisma.resource.findFirst({
-    where: { id: resource.id, tenantId },
+  const result = await db.resource.findUnique({
+    where: { id: resource.id },
     include: RESOURCE_INCLUDE,
   })
 
@@ -154,14 +168,15 @@ export async function updateResource(
     }, { ...existingTranslations }) as Prisma.InputJsonValue
   }
 
-  await basePrisma.resource.update({ where: { id }, data: updateData })
+  const db = getTenantDB(tenantId)
+  await db.resource.update({ where: { id }, data: updateData })
 
   if (scheduleData && scheduleData.length > 0) {
     await upsertSchedule(id, scheduleData)
   }
 
-  const resource = await basePrisma.resource.findFirst({
-    where: { id, tenantId },
+  const resource = await db.resource.findUnique({
+    where: { id },
     include: RESOURCE_INCLUDE,
   })
 
@@ -175,9 +190,9 @@ export async function deleteResource(id: string): Promise<void> {
 
   await findOwned(id, tenantId)
 
-  const futureCount = await basePrisma.booking.count({
+  const db = getTenantDB(tenantId)
+  const futureCount = await db.booking.count({
     where: {
-      tenantId,
       resourceId: id,
       startsAt: { gt: new Date() },
       status: { in: ['CONFIRMED', 'PENDING'] },
@@ -186,7 +201,7 @@ export async function deleteResource(id: string): Promise<void> {
 
   if (futureCount > 0) throw new Error(`FUTURE_BOOKINGS:${futureCount}`)
 
-  await basePrisma.resource.update({ where: { id }, data: { isActive: false } })
+  await db.resource.update({ where: { id }, data: { isActive: false } })
 
   revalidatePath('/dashboard/resources')
 }
@@ -196,10 +211,11 @@ export async function toggleResourceActive(
 ): Promise<ResourceWithRelations> {
   const session  = await getSession(true)
   const tenantId = session.user.tenantId
+  const db       = getTenantDB(tenantId)
 
   const existing = await findOwned(id, tenantId)
 
-  const resource = await basePrisma.resource.update({
+  const resource = await db.resource.update({
     where: { id },
     data:  { isActive: !existing.isActive },
     include: RESOURCE_INCLUDE,

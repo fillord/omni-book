@@ -99,7 +99,7 @@ export default async function DashboardPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
-          label={nicheConfig.resourceLabelPlural}
+          label={t('niche', nicheConfig.resourceLabelPlural)}
           value={tenant.resources.length}
           icon={Briefcase}
           iconCls="text-blue-600"

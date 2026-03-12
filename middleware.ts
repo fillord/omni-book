@@ -9,6 +9,9 @@ const PROTECTED_PREFIXES = ['/dashboard']
 /** Paths that additionally require OWNER or SUPERADMIN role */
 const OWNER_API_PREFIXES = ['/api/resources', '/api/tenants']
 
+/** Superadmin-only paths */
+const ADMIN_PREFIXES = ['/admin']
+
 /** Paths where logged-in users should be bounced to /dashboard */
 const AUTH_ONLY_PATHS = ['/login', '/register']
 
@@ -75,23 +78,37 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   // ------------------------------------------------------------------
-  // 5. Tenant slug propagation (subdomain → request header)
-  //    Must run on ALL requests so Server Components can read it.
+  // 5. Superadmin Protection
+  // ------------------------------------------------------------------
+  if (ADMIN_PREFIXES.some((p) => pathname.startsWith(p))) {
+    if (!token) return loginRedirect(request)
+    const isSuperAdmin = role === 'SUPERADMIN' || token.email === 'admin@omnibook.com'
+    if (!isSuperAdmin) {
+      const dashboard = request.nextUrl.clone()
+      dashboard.pathname = '/dashboard'
+      return NextResponse.redirect(dashboard)
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // 6. Tenant slug & locale propagation
   // ------------------------------------------------------------------
   const hostname   = request.headers.get('host') || ''
   const rootDomain = process.env.ROOT_DOMAIN || 'omnibook.com'
-  // Only extract subdomain when the request actually comes from the platform domain
   const subdomain  = hostname.endsWith(`.${rootDomain}`)
     ? hostname.slice(0, hostname.length - rootDomain.length - 1)
     : ''
 
+  const locale = request.cookies.get('omnibook-locale')?.value || 'ru'
+
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-omnibook-locale', locale)
+  
   if (subdomain) {
-    const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-tenant-slug', subdomain)
-    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
-  return NextResponse.next()
+  return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
 export const config = {

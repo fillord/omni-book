@@ -27,9 +27,9 @@ export default async function ResourcesPage() {
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{nicheConfig.resourceLabelPlural}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('niche', nicheConfig.resourceLabelPlural)}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {t('dashboard', 'resourcesSubtitle').replace('{resources}', nicheConfig.resourceLabelPlural.toLowerCase())}
+          {t('dashboard', 'resourcesSubtitle').replace('{resources}', t('niche', nicheConfig.resourceLabelPlural).toLowerCase())}
         </p>
       </div>
       <ResourcesManager resources={resources} canEdit={canEdit} niche={niche} />

@@ -4,7 +4,7 @@
  */
 
 import { fromZonedTime, toZonedTime } from "date-fns-tz"
-import { basePrisma } from "@/lib/db"
+import { basePrisma, getTenantDB } from "@/lib/db"
 
 // ---- Errors ----------------------------------------------------------------
 
@@ -114,17 +114,19 @@ export async function getAvailableSlots(
 ): Promise<SlotResult[]> {
   const { tenantId, resourceId, date, serviceId } = params
 
+  const db = getTenantDB(tenantId)
+
   // Load tenant timezone + resource schedule + service duration in parallel
   const [tenant, schedule, service] = await Promise.all([
-    basePrisma.tenant.findUnique({ where: { id: tenantId }, select: { timezone: true } }),
-    basePrisma.schedule.findFirst({
+    db.tenant.findUnique({ where: { id: tenantId }, select: { timezone: true } }),
+    db.schedule.findFirst({
       where: {
         resourceId,
         dayOfWeek: new Date(date + "T12:00:00").getDay(), // noon to avoid DST edge
         isActive: true,
       },
     }),
-    basePrisma.service.findUnique({
+    db.service.findUnique({
       where: { id: serviceId },
       select: { durationMin: true, tenantId: true },
     }),
@@ -142,9 +144,8 @@ export async function getAvailableSlots(
   const dayEnd   = zonedDatetime(date, schedule.endTime, timezone)
 
   // Fetch all active bookings for this resource on that day
-  const existingBookings = await basePrisma.booking.findMany({
+  const existingBookings = await db.booking.findMany({
     where: {
-      tenantId,
       resourceId,
       status: { in: ["CONFIRMED", "PENDING"] },
       AND: [

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { Prisma } from '@prisma/client'
-import { basePrisma } from '@/lib/db'
+import { basePrisma, getTenantDB } from '@/lib/db'
 import { requireAuth, requireRole } from '@/lib/auth/guards'
 import {
   createServiceSchema,
@@ -35,7 +35,8 @@ async function getSession(requireOwner = false) {
 
 /** Find a service that belongs to this tenant — used for ownership checks */
 async function findOwned(id: string, tenantId: string) {
-  const service = await basePrisma.service.findFirst({ where: { id, tenantId } })
+  const db = getTenantDB(tenantId)
+  const service = await db.service.findUnique({ where: { id } })
   if (!service) throw new Error('Услуга не найдена')
   return service
 }
@@ -50,8 +51,8 @@ function toMinorUnits(price: number | undefined): number | null {
 
 export async function getServices(): Promise<ServiceWithRelations[]> {
   const session = await getSession()
-  return basePrisma.service.findMany({
-    where: { tenantId: session.user.tenantId },
+  const db = getTenantDB(session.user.tenantId)
+  return db.service.findMany({
     include: SERVICE_INCLUDE,
     orderBy: { name: 'asc' },
   }) as Promise<ServiceWithRelations[]>
@@ -63,10 +64,10 @@ export async function createService(
   const session  = await getSession(true)
   const parsed   = createServiceSchema.parse(data)
   const tenantId = session.user.tenantId
+  const db       = getTenantDB(tenantId)
 
-  const svc = await basePrisma.service.create({
+  const svc = await db.service.create({
     data: {
-      tenantId,
       name:        parsed.name,
       description: parsed.description,
       durationMin: parsed.durationMin,
@@ -84,8 +85,8 @@ export async function createService(
     skipDuplicates: true,
   })
 
-  const result = await basePrisma.service.findFirst({
-    where:   { id: svc.id, tenantId },
+  const result = await db.service.findUnique({
+    where:   { id: svc.id },
     include: SERVICE_INCLUDE,
   })
   if (!result) throw new Error('Услуга не найдена после создания')
@@ -121,7 +122,8 @@ export async function updateService(
     }, { ...existingTranslations }) as Prisma.InputJsonValue
   }
 
-  await basePrisma.service.update({ where: { id }, data: updateData })
+  const db = getTenantDB(tenantId)
+  await db.service.update({ where: { id }, data: updateData })
 
   if (parsed.resourceIds !== undefined) {
     await basePrisma.resourceService.deleteMany({ where: { serviceId: id } })
@@ -131,8 +133,8 @@ export async function updateService(
     })
   }
 
-  const result = await basePrisma.service.findFirst({
-    where:   { id, tenantId },
+  const result = await db.service.findUnique({
+    where:   { id },
     include: SERVICE_INCLUDE,
   })
   if (!result) throw new Error('Услуга не найдена после обновления')
@@ -148,7 +150,8 @@ export async function deleteService(id: string): Promise<void> {
 
   await findOwned(id, tenantId)
 
-  await basePrisma.service.update({
+  const db = getTenantDB(tenantId)
+  await db.service.update({
     where: { id },
     data:  { isActive: false },
   })
@@ -161,10 +164,11 @@ export async function toggleServiceActive(
 ): Promise<ServiceWithRelations> {
   const session  = await getSession(true)
   const tenantId = session.user.tenantId
+  const db       = getTenantDB(tenantId)
 
   const existing = await findOwned(id, tenantId)
 
-  const result = await basePrisma.service.update({
+  const result = await db.service.update({
     where:   { id },
     data:    { isActive: !existing.isActive },
     include: SERVICE_INCLUDE,

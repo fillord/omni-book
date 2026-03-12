@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from '@prisma/client'
-import { getTenantId } from './context'
 
 // Models that carry a tenantId column and must be scoped.
 const TENANT_SCOPED = new Set(['User', 'Resource', 'Service', 'Booking'])
@@ -25,17 +24,14 @@ const UNIQUE_OPS = new Set(['findUnique', 'findUniqueOrThrow'])
 type AnyArgs = Record<string, unknown>
 
 /**
- * Wraps a PrismaClient with a $allOperations extension that automatically
- * injects `tenantId` from AsyncLocalStorage into every qualifying query.
- *
- * Rules:
- *  - Tenant, ResourceService  — untouched (no tenantId column)
- *  - No context set           — query passes through with a console.warn
- *  - findMany, findFirst, count, update, delete — tenantId added to WHERE
- *  - create, createMany       — tenantId added to DATA
- *  - findUnique, findUniqueOrThrow — post-validate result.tenantId matches context
+ * Returns a PrismaClient scoped to a specific tenant.
+ * Uses $allOperations extension to automatically inject `tenantId` into every qualifying query.
  */
-export function withTenantExtension<T extends PrismaClient>(client: T) {
+export function getTenantPrisma<T extends PrismaClient>(client: T, tenantId: string) {
+  if (!tenantId) {
+    throw new Error('[tenant] getTenantPrisma requires a valid tenantId')
+  }
+
   return client.$extends({
     query: {
       $allModels: {
@@ -52,18 +48,6 @@ export function withTenantExtension<T extends PrismaClient>(client: T) {
         }) {
           // Skip models that don't have tenantId
           if (!TENANT_SCOPED.has(model)) {
-            return query(args)
-          }
-
-          const tenantId = getTenantId()
-
-          if (!tenantId) {
-            if (process.env.NODE_ENV !== 'test') {
-              console.warn(
-                `[tenant] No tenantId in AsyncLocalStorage for ${model}.${operation}. ` +
-                'Wrap this call in setTenantContext().'
-              )
-            }
             return query(args)
           }
 
@@ -121,4 +105,4 @@ export function withTenantExtension<T extends PrismaClient>(client: T) {
   })
 }
 
-export type TenantPrismaClient = ReturnType<typeof withTenantExtension>
+export type TenantPrismaClient = ReturnType<typeof getTenantPrisma>

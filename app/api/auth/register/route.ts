@@ -53,8 +53,9 @@ export async function POST(req: NextRequest) {
           slug:  slug.trim().toLowerCase(),
           name:  tenantName.trim(),
           niche: niche,
-          plan:  'free',
-        },
+          plan:  'FREE',
+          planStatus: 'ACTIVE',
+        } as any,
       })
 
       const user = await tx.user.create({

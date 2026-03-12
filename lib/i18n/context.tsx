@@ -17,13 +17,8 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('omnibook-locale') as Locale) || DEFAULT_LOCALE
-    }
-    return DEFAULT_LOCALE
-  })
+export function I18nProvider({ children, initialLocale = DEFAULT_LOCALE }: { children: ReactNode, initialLocale?: Locale }) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale)

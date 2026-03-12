@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { BookingStatus } from '@prisma/client'
-import { basePrisma } from '@/lib/db'
+import { basePrisma, getTenantDB } from '@/lib/db'
 import { resolveTenant, isTenantError } from '@/lib/tenant'
 import { createBooking, BookingConflictError, BookingLimitError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
 import { sendBookingConfirmation } from '@/lib/email/resend'
@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
       : undefined
 
     const where = {
-      tenantId: tenant.id,
       ...(resourceId && { resourceId }),
       ...(statuses?.length && { status: { in: statuses } }),
       ...((dateFrom || dateTo) && {
@@ -59,15 +58,16 @@ export async function GET(req: NextRequest) {
       }),
     }
 
+    const db = getTenantDB(tenant.id)
     const [bookings, total] = await Promise.all([
-      basePrisma.booking.findMany({
+      db.booking.findMany({
         where,
         include: BOOKING_INCLUDE,
         orderBy: { startsAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      basePrisma.booking.count({ where }),
+      db.booking.count({ where }),
     ])
 
     return NextResponse.json({
@@ -143,8 +143,9 @@ export async function POST(req: NextRequest) {
 
     // Fire-and-forget confirmation email
     if (booking.guestEmail && booking.guestName) {
-      const service = await basePrisma.service.findUnique({ where: { id: serviceId }, select: { name: true } })
-      const resource = await basePrisma.resource.findUnique({ where: { id: resourceId }, select: { name: true } })
+      const db = getTenantDB(tenant.id)
+      const service = await db.service.findUnique({ where: { id: serviceId }, select: { name: true } })
+      const resource = await db.resource.findUnique({ where: { id: resourceId }, select: { name: true } })
       sendBookingConfirmation({
         guestName:    booking.guestName,
         guestEmail:   booking.guestEmail,

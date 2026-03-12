@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -182,7 +183,15 @@ export default function RegisterPage() {
   )}
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-10 relative">
+      <Link 
+        href="/" 
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ArrowLeft size={16} />
+        Назад на главную
+      </Link>
+
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="space-y-1 pb-4">
           <CardTitle className="text-2xl font-bold tracking-tight">{t('auth', 'registerTitle')}</CardTitle>
