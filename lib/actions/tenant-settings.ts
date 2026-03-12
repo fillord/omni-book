@@ -5,6 +5,7 @@ import { authConfig } from "@/lib/auth/config"
 import { basePrisma } from "@/lib/db"
 import { tenantSettingsSchema, type TenantSettingsInput } from "@/lib/validations/tenant-settings"
 import { revalidatePath } from "next/cache"
+import { Prisma } from "@prisma/client"
 
 export async function getTenantSettings() {
   const session = await getServerSession(authConfig)
@@ -29,6 +30,7 @@ export async function getTenantSettings() {
       workingHours: true,
       timezone:    true,
       socialLinks: true,
+      translations: true,
     },
   })
 }
@@ -41,6 +43,20 @@ export async function updateTenantSettings(data: TenantSettingsInput) {
   }
 
   const validated = tenantSettingsSchema.parse(data)
+
+  // Fetch existing translations to merge them
+  const existingTenant = await basePrisma.tenant.findUnique({
+    where: { id: session.user.tenantId },
+    select: { translations: true },
+  })
+  const existingTranslations = (existingTenant?.translations as Record<string, any>) || {}
+  
+  const mergedTranslations = validated.translations
+    ? Object.entries(validated.translations).reduce((acc, [lang, dict]) => {
+        acc[lang] = { ...(acc[lang] || {}), ...dict }
+        return acc
+      }, { ...existingTranslations })
+    : existingTranslations
 
   await basePrisma.tenant.update({
     where: { id: session.user.tenantId },
@@ -57,6 +73,7 @@ export async function updateTenantSettings(data: TenantSettingsInput) {
       workingHours: validated.workingHours || null,
       timezone:     validated.timezone,
       socialLinks:  validated.socialLinks  ?? {},
+      translations: mergedTranslations as Prisma.InputJsonValue,
     },
   })
 

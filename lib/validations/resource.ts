@@ -17,6 +17,7 @@ export const createResourceSchema = z.object({
   description: z.string().optional(),
   capacity: z.number().int().min(1, 'Минимум 1').optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
+  translations: z.record(z.string(), z.record(z.string(), z.string())).optional(),
 })
 
 export const updateResourceSchema = createResourceSchema.partial()

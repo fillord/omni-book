@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useI18n } from "@/lib/i18n/context"
 
 // ---- types -----------------------------------------------------------------
 
@@ -50,11 +52,16 @@ type TenantData = {
   workingHours: string | null
   timezone:    string
   socialLinks: unknown
+  translations?: unknown
 }
 
 type FormValues = {
   name:         string
   description:  string
+  name_kz?:     string
+  desc_kz?:     string
+  name_en?:     string
+  desc_en?:     string
   phone:        string
   email:        string
   address:      string
@@ -136,6 +143,7 @@ function FieldError({ msg }: { msg?: string }) {
 // ---- component -------------------------------------------------------------
 
 export function SettingsForm({ tenant, readOnly }: Props) {
+  const { t }  = useI18n()
   const social = parseSocialLinks(tenant.socialLinks)
   const [loading, setLoading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormValues, string>>>({})
@@ -149,6 +157,10 @@ export function SettingsForm({ tenant, readOnly }: Props) {
     defaultValues: {
       name:         tenant.name,
       description:  tenant.description  ?? "",
+      name_kz:      ((tenant.translations as any)?.kz?.name) || "",
+      desc_kz:      ((tenant.translations as any)?.kz?.description) || "",
+      name_en:      ((tenant.translations as any)?.en?.name) || "",
+      desc_en:      ((tenant.translations as any)?.en?.description) || "",
       phone:        tenant.phone        ?? "",
       email:        tenant.email        ?? "",
       address:      tenant.address      ?? "",
@@ -188,6 +200,16 @@ export function SettingsForm({ tenant, readOnly }: Props) {
         whatsapp:  values.whatsapp,
         telegram:  values.telegram,
       },
+      translations: {
+        en: {
+          name: values.name_en,
+          description: values.desc_en,
+        },
+        kz: {
+          name: values.name_kz,
+          description: values.desc_kz,
+        }
+      }
     }
 
     const result = tenantSettingsSchema.safeParse(payload)
@@ -204,9 +226,9 @@ export function SettingsForm({ tenant, readOnly }: Props) {
     setLoading(true)
     try {
       await updateTenantSettings(result.data)
-      toast.success("Настройки сохранены")
+      toast.success(t('settings', 'saved'))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Ошибка сохранения")
+      toast.error(err instanceof Error ? err.message : t('settings', 'saveError'))
     } finally {
       setLoading(false)
     }
@@ -219,7 +241,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Адрес вашей страницы
+            {t('settings', 'pageAddress')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -227,7 +249,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
             omnibook.com/<span className="font-semibold text-foreground">{tenant.slug}</span>
           </p>
           <p className="text-xs text-muted-foreground mt-1.5">
-            Адрес нельзя изменить — это сломает все ваши ссылки.
+            {t('settings', 'pageAddressHint')}
           </p>
         </CardContent>
       </Card>
@@ -235,49 +257,107 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Основная информация */}
       <Card>
         <CardHeader>
-          <CardTitle>Основная информация</CardTitle>
-          <CardDescription>Название и описание вашего заведения</CardDescription>
+          <CardTitle>{t('settings', 'basicInfo')}</CardTitle>
+          <CardDescription>{t('settings', 'basicInfoDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
 
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Название бизнеса *</Label>
-            <Input
-              id="name"
-              {...register("name")}
-              disabled={readOnly}
-              placeholder="Ваше заведение"
-            />
-            <FieldError msg={fieldErrors.name} />
-          </div>
+          <Tabs defaultValue="ru" className="w-full mb-6">
+            <TabsList className="mb-4">
+              <TabsTrigger value="ru">RU (Основной)</TabsTrigger>
+              <TabsTrigger value="kz">Қазақша</TabsTrigger>
+              <TabsTrigger value="en">English</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="ru" className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">{t('settings', 'businessName')} (RU)</Label>
+                <Input
+                  id="name"
+                  {...register("name")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'businessNamePlaceholder')}
+                />
+                <FieldError msg={fieldErrors.name} />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="description">{t('settings', 'description')} (RU)</Label>
+                <Textarea
+                  id="description"
+                  {...register("description")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'descriptionPlaceholder')}
+                  maxLength={500}
+                  rows={4}
+                />
+                <div className="flex justify-between">
+                  <FieldError msg={fieldErrors.description} />
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {descValue.length}/500
+                  </span>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="kz" className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name_kz">{t('settings', 'businessName')} (KZ)</Label>
+                <Input
+                  id="name_kz"
+                  {...register("name_kz")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'businessNamePlaceholder')}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="desc_kz">{t('settings', 'description')} (KZ)</Label>
+                <Textarea
+                  id="desc_kz"
+                  {...register("desc_kz")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'descriptionPlaceholder')}
+                  maxLength={500}
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="en" className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="name_en">{t('settings', 'businessName')} (EN)</Label>
+                <Input
+                  id="name_en"
+                  {...register("name_en")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'businessNamePlaceholder')}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="desc_en">{t('settings', 'description')} (EN)</Label>
+                <Textarea
+                  id="desc_en"
+                  {...register("desc_en")}
+                  disabled={readOnly}
+                  placeholder={t('settings', 'descriptionPlaceholder')}
+                  maxLength={500}
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <div className="space-y-1.5">
-            <Label htmlFor="description">Описание</Label>
-            <Textarea
-              id="description"
-              {...register("description")}
-              disabled={readOnly}
-              placeholder="Расскажите клиентам о вашем заведении…"
-              maxLength={500}
-              rows={4}
-            />
-            <div className="flex justify-between">
-              <FieldError msg={fieldErrors.description} />
-              <span className="text-xs text-muted-foreground ml-auto">
-                {descValue.length}/500
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="timezone">Часовой пояс</Label>
+            <Label htmlFor="timezone">{t('settings', 'timezone')}</Label>
             <Select
               value={timezone}
               onValueChange={(v) => { if (v) setValue("timezone", v) }}
               disabled={readOnly}
             >
               <SelectTrigger id="timezone">
-                <SelectValue placeholder="Выберите часовой пояс" />
+                <SelectValue placeholder={t('settings', 'timezonePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 {TIMEZONES.map((tz) => (
@@ -294,13 +374,13 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Контакты */}
       <Card>
         <CardHeader>
-          <CardTitle>Контакты</CardTitle>
-          <CardDescription>Контактная информация для клиентов</CardDescription>
+          <CardTitle>{t('settings', 'contacts')}</CardTitle>
+          <CardDescription>{t('settings', 'contactsDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="phone">Телефон</Label>
+              <Label htmlFor="phone">{t('settings', 'phone')}</Label>
               <PhoneInput
                 value={watch("phone")}
                 onChange={(formatted) => setValue("phone", formatted)}
@@ -315,7 +395,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                 type="email"
                 {...register("email")}
                 disabled={readOnly}
-                placeholder="info@yourbusiness.com"
+                placeholder={t('settings', 'emailPlaceholder') || "info@yourbusiness.com"}
               />
               <FieldError msg={fieldErrors.email} />
             </div>
@@ -323,27 +403,27 @@ export function SettingsForm({ tenant, readOnly }: Props) {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="city">Город</Label>
+              <Label htmlFor="city">{t('settings', 'city')}</Label>
               <Input
                 id="city"
                 {...register("city")}
                 disabled={readOnly}
-                placeholder="Алматы"
+                placeholder={t('settings', 'cityPlaceholder') || "Almaty"}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="address">Адрес</Label>
+              <Label htmlFor="address">{t('settings', 'address')}</Label>
               <Input
                 id="address"
                 {...register("address")}
                 disabled={readOnly}
-                placeholder="ул. Абая, 10"
+                placeholder={t('settings', 'addressPlaceholder') || "Abay St, 10"}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="website">Сайт</Label>
+            <Label htmlFor="website">{t('settings', 'website')}</Label>
             <Input
               id="website"
               type="url"
@@ -359,17 +439,17 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Часы работы */}
       <Card>
         <CardHeader>
-          <CardTitle>Часы работы</CardTitle>
-          <CardDescription>Общее расписание заведения для клиентов</CardDescription>
+          <CardTitle>{t('settings', 'workingHours')}</CardTitle>
+          <CardDescription>{t('settings', 'workingHoursDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-1.5">
-            <Label htmlFor="workingHours">Расписание</Label>
+            <Label htmlFor="workingHours">{t('settings', 'schedule')}</Label>
             <Input
               id="workingHours"
               {...register("workingHours")}
               disabled={readOnly}
-              placeholder="Пн-Пт: 09:00-18:00, Сб: 10:00-15:00"
+              placeholder={t('settings', 'schedulePlaceholder')}
             />
           </div>
         </CardContent>
@@ -378,32 +458,14 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Брендинг */}
       <Card>
         <CardHeader>
-          <CardTitle>Брендинг</CardTitle>
+          <CardTitle>{t('settings', 'branding')}</CardTitle>
           <CardDescription>
-            Загрузите изображение на{" "}
-            <a
-              href="https://imgbb.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2"
-            >
-              imgbb.com
-            </a>{" "}
-            или{" "}
-            <a
-              href="https://imgur.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2"
-            >
-              imgur.com
-            </a>{" "}
-            и вставьте ссылку
+            {t('settings', 'brandingDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="logoUrl">URL логотипа</Label>
+            <Label htmlFor="logoUrl">{t('settings', 'logoUrl')}</Label>
             <Input
               id="logoUrl"
               type="url"
@@ -412,13 +474,13 @@ export function SettingsForm({ tenant, readOnly }: Props) {
               placeholder="https://i.imgur.com/…"
             />
             <FieldError msg={fieldErrors.logoUrl} />
-            <UrlPreview url={logoValue} alt="Превью логотипа" />
+            <UrlPreview url={logoValue} alt={t('settings', 'logoPreview')} />
           </div>
 
           <Separator />
 
           <div className="space-y-1.5">
-            <Label htmlFor="coverUrl">URL обложки (hero-секция)</Label>
+            <Label htmlFor="coverUrl">{t('settings', 'coverUrl')}</Label>
             <Input
               id="coverUrl"
               type="url"
@@ -427,7 +489,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
               placeholder="https://i.imgur.com/…"
             />
             <FieldError msg={fieldErrors.coverUrl} />
-            <UrlPreview url={coverValue} alt="Превью обложки" />
+            <UrlPreview url={coverValue} alt={t('settings', 'coverPreview')} />
           </div>
         </CardContent>
       </Card>
@@ -435,8 +497,8 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Социальные сети */}
       <Card>
         <CardHeader>
-          <CardTitle>Социальные сети</CardTitle>
-          <CardDescription>Ссылки или username для быстрой связи</CardDescription>
+          <CardTitle>{t('settings', 'social')}</CardTitle>
+          <CardDescription>{t('settings', 'socialDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
@@ -447,7 +509,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                 id="instagram"
                 {...register("instagram")}
                 disabled={readOnly}
-                placeholder="@username или полная ссылка"
+                placeholder={t('settings', 'instagramPlaceholder')}
               />
             </div>
           </div>
@@ -478,12 +540,12 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       {/* Submit */}
       {readOnly ? (
         <p className="text-sm text-muted-foreground text-center pb-6">
-          Только владелец может изменять настройки.
+          {t('dashboard', 'ownerOnly')}
         </p>
       ) : (
         <div className="flex justify-end pb-6">
           <Button type="submit" disabled={loading} className="min-w-32">
-            {loading ? "Сохранение…" : "Сохранить"}
+            {loading ? t('common', 'saving') : t('common', 'save')}
           </Button>
         </div>
       )}

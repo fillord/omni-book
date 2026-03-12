@@ -1,13 +1,17 @@
-import Link from "next/link"
+"use client"
 
-const LINKS = [
-  { label: "О нас", href: "#" },
-  { label: "Тарифы", href: "#pricing" },
-  { label: "Документация", href: "#" },
-  { label: "Поддержка", href: "#" },
-]
+import Link from "next/link"
+import { useI18n } from "@/lib/i18n/context"
 
 export function Footer() {
+  const { t } = useI18n()
+
+  const LINKS = [
+    { label: t('landing', 'about'), href: "#" },
+    { label: t('landing', 'pricing'), href: "#pricing" },
+    { label: t('landing', 'docs'), href: "#" },
+    { label: t('landing', 'support'), href: "#" },
+  ]
   return (
     <footer className="bg-zinc-900 text-zinc-400 py-12">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -15,7 +19,7 @@ export function Footer() {
           <Link href="/" className="font-bold text-lg text-white">
             omni<span className="text-indigo-400">book</span>
           </Link>
-          <p className="text-xs text-zinc-500">Универсальная платформа онлайн-записи</p>
+          <p className="text-xs text-zinc-500">{t('landing', 'heroSubtitle')}</p>
         </div>
 
         <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">

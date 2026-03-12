@@ -17,6 +17,7 @@ export const tenantSettingsSchema = z.object({
     whatsapp:  z.string().optional().or(z.literal("")),
     telegram:  z.string().optional().or(z.literal("")),
   }).optional(),
+  translations: z.record(z.string(), z.record(z.string(), z.string())).optional(),
 })
 
 export type TenantSettingsInput = z.infer<typeof tenantSettingsSchema>

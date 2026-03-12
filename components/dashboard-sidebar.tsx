@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import Link from 'next/link'
@@ -5,21 +7,22 @@ import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import {
   Menu, LogOut, ExternalLink,
-  LayoutDashboard, CalendarDays, Wrench, Scissors, Settings,
+  LayoutDashboard, CalendarDays, Wrench, Scissors, Settings, BarChart3,
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { useI18n } from '@/lib/i18n/context'
+import { LocaleSwitcher } from '@/components/locale-switcher'
 import type { NicheConfig } from '@/lib/niche/config'
 
 // ---- types -----------------------------------------------------------------
 
 type Props = {
   nicheConfig: NicheConfig
-  tenantName: string
-  tenantSlug: string
-  userName: string
-  userEmail: string
+  tenantName:  string
+  tenantSlug:  string
+  userName:    string
+  userEmail:   string
 }
 
 // ---- static color maps (Tailwind requires static strings) ------------------
@@ -38,18 +41,6 @@ const BADGE_CLS: Record<string, string> = {
   green:  'border-green-200 bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-300',
 }
 
-// ---- nav -------------------------------------------------------------------
-
-function navItems(nc: NicheConfig) {
-  return [
-    { href: '/dashboard',           label: 'Обзор',              icon: LayoutDashboard, exact: true  },
-    { href: '/dashboard/resources', label: nc.resourceLabelPlural, icon: Wrench,          exact: false },
-    { href: '/dashboard/services',  label: 'Услуги',             icon: Scissors,        exact: false },
-    { href: '/dashboard/bookings',  label: 'Бронирования',       icon: CalendarDays,    exact: false },
-    { href: '/dashboard/settings',  label: 'Настройки',          icon: Settings,        exact: false },
-  ]
-}
-
 function initials(name: string): string {
   return name
     .split(' ')
@@ -64,10 +55,19 @@ function initials(name: string): string {
 
 function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEmail }: Props) {
   const pathname = usePathname()
-  const items    = navItems(nicheConfig)
+  const { t }    = useI18n()
   const color    = nicheConfig.color ?? 'blue'
-  const active   = ACTIVE_LINK[color]  ?? ACTIVE_LINK.blue
-  const badge    = BADGE_CLS[color]    ?? BADGE_CLS.blue
+  const active   = ACTIVE_LINK[color] ?? ACTIVE_LINK.blue
+  const badge    = BADGE_CLS[color]   ?? BADGE_CLS.blue
+
+  const items = [
+    { href: '/dashboard',           label: t('dashboard', 'overview'),  icon: LayoutDashboard, exact: true  },
+    { href: '/dashboard/resources', label: t('niche', nicheConfig.resourceLabelPlural), icon: Wrench,       exact: false },
+    { href: '/dashboard/services',  label: t('dashboard', 'services'),  icon: Scissors,        exact: false },
+    { href: '/dashboard/bookings',   label: t('dashboard', 'bookings'),  icon: CalendarDays,    exact: false },
+    { href: '/dashboard/analytics', label: t('dashboard', 'analytics'), icon: BarChart3,        exact: false },
+    { href: '/dashboard/settings',  label: t('dashboard', 'settings'),  icon: Settings,        exact: false },
+  ]
 
   return (
     <div className="flex flex-col h-full min-h-screen">
@@ -93,7 +93,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
           {tenantName}
         </p>
         <span className={`mt-1.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${badge}`}>
-          {nicheConfig.label}
+          {t('niche', nicheConfig.label)}
         </span>
       </div>
 
@@ -128,14 +128,20 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, userName, userEma
           className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
           <ExternalLink className="h-4 w-4 shrink-0" />
-          Публичная страница
+          {t('dashboard', 'publicPage')}
         </a>
+
+        {/* Language switcher */}
+        <div className="px-1 py-1">
+          <LocaleSwitcher className="w-full h-8 text-xs" />
+        </div>
+
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Выйти
+          {t('common', 'logout')}
         </button>
       </div>
     </div>

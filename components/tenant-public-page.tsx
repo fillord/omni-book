@@ -7,6 +7,10 @@ import { formatPhone, normalizePhone } from '@/lib/utils/phone'
 import { basePrisma } from '@/lib/db'
 import { getNicheConfig, type NicheConfig, type AttributeField } from '@/lib/niche/config'
 import { BookingForm } from '@/components/booking-form'
+import { LocaleSwitcher } from '@/components/locale-switcher'
+import { getServerT } from '@/lib/i18n/server'
+import { cookies } from 'next/headers'
+import { getDbTranslation } from '@/lib/i18n/db-translations'
 
 // ---- Niche color palette (static strings so Tailwind includes them) ---------
 
@@ -76,12 +80,6 @@ const COLORS: Record<string, ColorClasses> = {
 
 const FALLBACK_COLORS = COLORS.blue
 
-// ---- Constants -------------------------------------------------------------
-
-const SHORT_DAYS: Record<number, string> = {
-  0: 'Вс', 1: 'Пн', 2: 'Вт', 3: 'Ср', 4: 'Чт', 5: 'Пт', 6: 'Сб',
-}
-
 // ---- Types -----------------------------------------------------------------
 
 type TenantResource = {
@@ -125,31 +123,47 @@ function whatsappUrl(phone: string): string {
 
 // ---- Page component --------------------------------------------------------
 
+type Translator = (section: string, key: string) => string
+
 export async function TenantPublicPage({ slug }: { slug: string }) {
-  const tenant = await basePrisma.tenant.findUnique({
-    where: { slug },
-    include: {
-      services: {
-        where:   { isActive: true },
-        orderBy: { name: 'asc' },
-      },
-      resources: {
-        where:   { isActive: true },
-        orderBy: { name: 'asc' },
-        include: {
-          services:  { select: { serviceId: true } },
-          schedules: { select: { dayOfWeek: true, isActive: true } },
+  const cookieStore = await cookies()
+  const locale = cookieStore.get('omnibook-locale')?.value || 'ru'
+
+  const [t, tenant] = await Promise.all([
+    getServerT(),
+    basePrisma.tenant.findUnique({
+      where: { slug },
+      include: {
+        services: {
+          where:   { isActive: true },
+          orderBy: { name: 'asc' },
+        },
+        resources: {
+          where:   { isActive: true },
+          orderBy: { name: 'asc' },
+          include: {
+            services:  { select: { serviceId: true } },
+            schedules: { select: { dayOfWeek: true, isActive: true } },
+          },
         },
       },
-    },
-  })
+    }),
+  ])
 
   if (!tenant) notFound()
+
+  const SHORT_DAYS: Record<number, string> = {
+    0: t('days', 'sun'), 1: t('days', 'mon'), 2: t('days', 'tue'),
+    3: t('days', 'wed'), 4: t('days', 'thu'), 5: t('days', 'fri'), 6: t('days', 'sat'),
+  }
 
   const nicheConfig = getNicheConfig(tenant.niche)
   const colors      = COLORS[nicheConfig.color] ?? FALLBACK_COLORS
   const sections    = nicheConfig.publicPageSections
   const social      = parseSocialLinks(tenant.socialLinks)
+  
+  const tenantName = getDbTranslation(tenant, 'name', locale)
+  const tenantDesc = getDbTranslation(tenant, 'description', locale)
 
   const bookableResources = tenant.resources.filter(
     (r) => r.schedules.some((s) => s.isActive)
@@ -157,8 +171,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
   const bookingServices = tenant.services.map((s) => ({
     id:          s.id,
-    name:        s.name,
-    description: s.description,
+    name:        getDbTranslation(s, 'name', locale),
+    description: getDbTranslation(s, 'description', locale),
     durationMin: s.durationMin,
     price:       s.price,
     currency:    s.currency,
@@ -168,9 +182,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
     const attrs = parseAttrs(r.attributes)
     return {
       id:             r.id,
-      name:           r.name,
+      name:           getDbTranslation(r, 'name', locale),
       type:           r.type,
-      description:    r.description,
+      description:    getDbTranslation(r, 'description', locale),
       specialization: (attrs.specialization as string)   ?? null,
       experienceYears:(attrs.experience_years as number) ?? null,
       attributes:     attrs,
@@ -202,19 +216,22 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                 className="w-7 h-7 rounded-lg object-cover shrink-0"
               />
             )}
-            <span className="font-bold text-zinc-900 truncate">{tenant.name}</span>
+            <span className="font-bold text-zinc-900 truncate">{tenantName}</span>
             <span className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${colors.badge}`}>
-              {nicheConfig.label}
+              {t('niche', nicheConfig.label)}
             </span>
           </div>
-          {canBook && (
-            <a
-              href="#booking"
-              className={`shrink-0 text-sm font-semibold px-4 py-2 rounded-xl transition-colors ${colors.stickyBtn}`}
-            >
-              {nicheConfig.bookingLabel}
-            </a>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            <LocaleSwitcher className="h-8 text-xs" />
+            {canBook && (
+              <a
+                href="#booking"
+                className={`text-sm font-semibold px-4 py-2 rounded-xl transition-colors ${colors.stickyBtn}`}
+              >
+                {t('niche', nicheConfig.bookingLabel)}
+              </a>
+            )}
+          </div>
         </div>
       </header>
 
@@ -233,30 +250,30 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={tenant.logoUrl}
-              alt={tenant.name}
-              className="w-16 h-16 rounded-2xl mb-4 object-cover shadow-lg"
-            />
-          )}
+            alt={tenantName}
+            className="w-16 h-16 rounded-2xl mb-4 object-cover shadow-lg"
+          />
+        )}
 
-          <span className={`inline-block mb-3 text-xs font-semibold uppercase tracking-widest ${colors.heroHint}`}>
-            {nicheConfig.label}
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">
-            {tenant.name}
-          </h1>
+        <span className={`inline-block mb-3 text-xs font-semibold uppercase tracking-widest ${colors.heroHint}`}>
+          {t('niche', nicheConfig.label)}
+        </span>
+        <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">
+          {tenantName}
+        </h1>
 
-          {/* Tenant description (from settings) */}
-          {tenant.description && (
-            <p className="text-lg text-white/85 mb-3 max-w-2xl leading-relaxed">
-              {tenant.description}
-            </p>
-          )}
+        {/* Tenant description (from settings) */}
+        {tenantDesc && (
+          <p className="text-lg text-white/85 mb-3 max-w-2xl leading-relaxed">
+            {tenantDesc}
+          </p>
+        )}
 
           <p className="text-xl md:text-2xl font-medium text-white/80 mb-2">
-            {nicheConfig.heroTitle}
+            {t('niche', nicheConfig.heroTitle)}
           </p>
           <p className="text-base text-white/60 mb-8">
-            {nicheConfig.heroSubtitle}
+            {t('niche', nicheConfig.heroSubtitle)}
           </p>
 
           {canBook && (
@@ -264,7 +281,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               href="#booking"
               className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-base transition-colors shadow-lg ${colors.heroBtn} w-full sm:w-auto`}
             >
-              {nicheConfig.bookingLabel} →
+              {t('niche', nicheConfig.bookingLabel)} →
             </a>
           )}
         </div>
@@ -276,17 +293,17 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
           <div className="max-w-5xl mx-auto px-4 py-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               {tenant.workingHours && (
-                <InfoBlock icon="🕐" label="Часы работы" value={tenant.workingHours} />
+                <InfoBlock icon="🕐" label={t('public', 'workingHours')} value={tenant.workingHours} />
               )}
               {tenant.address && (
                 <InfoBlock
                   icon="📍"
-                  label="Адрес"
+                  label={t('public', 'address')}
                   value={tenant.address + (tenant.city ? `, ${tenant.city}` : '')}
                 />
               )}
               {tenant.phone && (
-                <InfoBlock icon="📞" label="Телефон" value={formatPhone(tenant.phone)} href={`tel:${normalizePhone(tenant.phone)}`} />
+                <InfoBlock icon="📞" label={t('public', 'phone')} value={formatPhone(tenant.phone)} href={`tel:${normalizePhone(tenant.phone)}`} />
               )}
               {tenant.email && (
                 <InfoBlock icon="✉️" label="Email" value={tenant.email} href={`mailto:${tenant.email}`} />
@@ -301,10 +318,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Specialists / Staff ─────────────────────────────────────────── */}
         {sections.includes('specialists') && staffResources.length > 0 && (
           <section>
-            <SectionHeading title={nicheConfig.resourceLabelPlural} />
+            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
             <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {staffResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} />
+                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
               ))}
             </div>
           </section>
@@ -313,10 +330,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Tables / HoReCa ─────────────────────────────────────────────── */}
         {sections.includes('tables') && tableResources.length > 0 && (
           <section>
-            <SectionHeading title={nicheConfig.resourceLabelPlural} />
+            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
             <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {tableResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} isTable />
+                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} isTable shortDays={SHORT_DAYS} t={t} locale={locale} />
               ))}
             </div>
           </section>
@@ -325,10 +342,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Courts / Sports ─────────────────────────────────────────────── */}
         {sections.includes('courts') && courtResources.length > 0 && (
           <section>
-            <SectionHeading title={nicheConfig.resourceLabelPlural} />
+            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
             <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {courtResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} />
+                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
               ))}
             </div>
           </section>
@@ -337,10 +354,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Trainers ────────────────────────────────────────────────────── */}
         {sections.includes('trainers') && staffResources.length > 0 && (
           <section>
-            <SectionHeading title="Тренеры" />
+            <SectionHeading title={t('public', 'trainers')} />
             <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {staffResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} />
+                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
               ))}
             </div>
           </section>
@@ -349,25 +366,25 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Services (horizontal scroll on mobile) ──────────────────────── */}
         {tenant.services.length > 0 && !sections.includes('pricing') && (
           <section>
-            <SectionHeading title={`${nicheConfig.serviceLabel}и`} />
+            <SectionHeading title={t('public', 'services')} />
             <div className="flex gap-4 overflow-x-auto snap-x scroll-smooth pb-2 -mx-4 px-4">
               {tenant.services.map((s) => (
                 <div
                   key={s.id}
                   className={`snap-start shrink-0 w-56 rounded-2xl border-2 ${colors.border} ${colors.light} p-4 flex flex-col gap-2`}
                 >
-                  <p className="font-semibold text-zinc-900 text-sm">{s.name}</p>
-                  {s.description && (
-                    <p className="text-xs text-zinc-500 leading-relaxed">{s.description}</p>
+                  <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s, 'name', locale)}</p>
+                  {getDbTranslation(s, 'description', locale) && (
+                    <p className="text-xs text-zinc-500 leading-relaxed">{getDbTranslation(s, 'description', locale)}</p>
                   )}
                   <div className="flex items-center justify-between mt-auto pt-2">
                     <span className={`text-sm font-bold ${colors.priceAccent}`}>
                       {s.price === null || s.price === 0
-                        ? 'Бесплатно'
+                        ? t('booking', 'free')
                         : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
                     </span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-white text-zinc-500 border border-zinc-200">
-                      {s.durationMin} мин
+                      {s.durationMin} {t('booking', 'minutes')}
                     </span>
                   </div>
                 </div>
@@ -380,11 +397,11 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {sections.includes('gallery') && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <SectionHeading title="Портфолио" className="mb-0" />
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>Скоро</span>
+              <SectionHeading title={t('public', 'portfolio')} className="mb-0" />
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
             <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} p-12 text-center`}>
-              <p className="text-zinc-400 text-sm">Работы наших мастеров появятся здесь совсем скоро</p>
+              <p className="text-zinc-400 text-sm">{t('public', 'galleryPlaceholder')}</p>
             </div>
           </section>
         )}
@@ -393,11 +410,11 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {sections.includes('menu') && (
           <section>
             <div className="flex items-center justify-between mb-4">
-              <SectionHeading title="Меню" className="mb-0" />
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>Скоро</span>
+              <SectionHeading title={t('public', 'menu')} className="mb-0" />
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
             <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} p-12 text-center`}>
-              <p className="text-zinc-400 text-sm">Электронное меню скоро будет доступно здесь</p>
+              <p className="text-zinc-400 text-sm">{t('public', 'menuPlaceholder')}</p>
             </div>
           </section>
         )}
@@ -405,23 +422,23 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {/* ── Pricing / Sports ────────────────────────────────────────────── */}
         {sections.includes('pricing') && tenant.services.length > 0 && (
           <section>
-            <SectionHeading title="Прайс-лист" />
+            <SectionHeading title={t('public', 'priceList')} />
             <div className="rounded-2xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
               {tenant.services.map((s) => (
                 <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-white hover:bg-zinc-50 transition-colors">
                   <div>
-                    <p className="font-semibold text-zinc-900 text-sm">{s.name}</p>
-                    {s.description && (
-                      <p className="text-xs text-zinc-400 mt-0.5">{s.description}</p>
+                    <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s, 'name', locale)}</p>
+                    {getDbTranslation(s, 'description', locale) && (
+                      <p className="text-xs text-zinc-400 mt-0.5">{getDbTranslation(s, 'description', locale)}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0 pl-4">
                     <p className={`font-bold text-sm ${colors.priceAccent}`}>
                       {s.price === null || s.price === 0
-                        ? 'Бесплатно'
+                        ? t('booking', 'free')
                         : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
                     </p>
-                    <p className="text-xs text-zinc-400">{s.durationMin} мин</p>
+                    <p className="text-xs text-zinc-400">{s.durationMin} {t('booking', 'minutes')}</p>
                   </div>
                 </div>
               ))}
@@ -431,23 +448,23 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
         {/* ── Booking form ────────────────────────────────────────────────── */}
         <section id="booking" className={`rounded-2xl ${colors.light} border-2 ${colors.border} p-6 md:p-8`}>
-          <h2 className="text-2xl font-bold text-zinc-900 mb-1">{nicheConfig.bookingLabel}</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-1">{t('niche', nicheConfig.bookingLabel)}</h2>
           <p className="text-zinc-500 text-sm mb-8">
-            Выберите услугу, {nicheConfig.resourceLabel.toLowerCase()} и удобное время
+            {t('public', 'bookingHint').replace('{resource}', t('niche', nicheConfig.resourceLabel).toLowerCase())}
           </p>
 
           {!canBook ? (
             <div className="py-12 text-center">
-              <p className="text-lg font-medium text-zinc-400">Скоро здесь появится онлайн-запись</p>
-              <p className="mt-1 text-sm text-zinc-300">Владелец ещё настраивает сервис</p>
+              <p className="text-lg font-medium text-zinc-400">{t('public', 'soonOpening')}</p>
+              <p className="mt-1 text-sm text-zinc-300">{t('public', 'ownerSetup')}</p>
             </div>
           ) : (
             <BookingForm
               tenantSlug={tenant.slug}
               services={bookingServices}
               resources={bookingResources}
-              bookingLabel={nicheConfig.bookingLabel}
-              resourceLabel={nicheConfig.resourceLabel}
+              bookingLabel={t('niche', nicheConfig.bookingLabel)}
+              resourceLabel={t('niche', nicheConfig.resourceLabel)}
               nicheColor={nicheConfig.color}
             />
           )}
@@ -461,7 +478,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
           {/* Tenant info */}
           <div className="text-center md:text-left">
-            <p className="font-semibold text-white">{tenant.name}</p>
+            <p className="font-semibold text-white">{tenantName}</p>
             {(tenant.address || tenant.city) && (
               <p className="text-sm mt-0.5">
                 {[tenant.address, tenant.city].filter(Boolean).join(', ')}
@@ -515,7 +532,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
           {/* Platform link */}
           <p className="text-xs">
-            Работает на{' '}
+            {t('public', 'poweredBy')}{' '}
             <Link href="/" className="hover:text-white transition-colors font-medium">
               omnibook
             </Link>
@@ -540,21 +557,30 @@ function ResourceCard({
   nicheConfig,
   colors,
   isTable = false,
+  shortDays,
+  t,
+  locale,
 }: {
   resource: TenantResource
   nicheConfig: NicheConfig
   colors: ColorClasses
   isTable?: boolean
+  shortDays: Record<number, string>
+  t: Translator
+  locale: string
 }) {
   const attrs        = parseAttrs(resource.attributes)
   const displayFields = nicheConfig.attributeFields.filter(
     (f) => f.showInTable && (!f.forTypes || f.forTypes.includes(resource.type))
   )
 
+  const resourceName = getDbTranslation(resource, 'name', locale)
+  const resourceDesc = getDbTranslation(resource, 'description', locale)
+
   const workDays = resource.schedules
     .filter((s) => s.isActive)
     .sort((a, b) => (a.dayOfWeek === 0 ? 7 : a.dayOfWeek) - (b.dayOfWeek === 0 ? 7 : b.dayOfWeek))
-    .map((s) => SHORT_DAYS[s.dayOfWeek])
+    .map((s) => shortDays[s.dayOfWeek])
     .join(', ')
 
   return (
@@ -572,9 +598,9 @@ function ResourceCard({
 
       {/* Name */}
       <div>
-        <p className="font-semibold text-zinc-900">{resource.name}</p>
-        {resource.description && (
-          <p className="text-sm text-zinc-500 mt-0.5">{resource.description}</p>
+        <p className="font-semibold text-zinc-900">{resourceName}</p>
+        {resourceDesc && (
+          <p className="text-sm text-zinc-500 mt-0.5">{resourceDesc}</p>
         )}
       </div>
 
@@ -582,7 +608,7 @@ function ResourceCard({
       {displayFields.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {displayFields.map((field) => {
-            const label = formatAttrForCard(field, attrs[field.key])
+            const label = formatAttrForCard(field, attrs[field.key], t)
             if (!label) return null
             return (
               <span
@@ -598,7 +624,7 @@ function ResourceCard({
 
       {/* Work days */}
       {workDays && (
-        <p className="text-xs text-zinc-400 mt-auto">Дни: {workDays}</p>
+        <p className="text-xs text-zinc-400 mt-auto">{t('public', 'workDays')} {workDays}</p>
       )}
     </div>
   )
@@ -641,11 +667,11 @@ function parseAttrs(raw: unknown): Record<string, unknown> {
   return {}
 }
 
-function formatAttrForCard(field: AttributeField, value: unknown): string | null {
+function formatAttrForCard(field: AttributeField, value: unknown, t: Translator): string | null {
   if (value == null || value === '') return null
   if (field.type === 'checkbox')  return (value as boolean) ? field.label : null
   if (field.type === 'multitext') return null
-  if (field.key === 'experience_years') return `${value} лет`
-  if (field.key === 'capacity')         return `до ${value} чел.`
+  if (field.key === 'experience_years') return t('public', 'experienceYears').replace('{n}', String(value))
+  if (field.key === 'capacity')         return t('public', 'capacity').replace('{n}', String(value))
   return String(value)
 }

@@ -55,7 +55,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ slots })
     } catch (err) {
       if (err instanceof DayOffError) {
-        return NextResponse.json({ slots: [], dayOff: true, message: "Не работает в этот день" })
+        const { getServerT } = await import("@/lib/i18n/server")
+        const t = await getServerT()
+        return NextResponse.json({ slots: [], dayOff: true, message: t('booking', 'dayOff') })
       }
       if (err instanceof ResourceNotFoundError || err instanceof ServiceNotFoundError) {
         return NextResponse.json({ error: (err as Error).message }, { status: 404 })

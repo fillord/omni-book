@@ -1,4 +1,7 @@
+"use client"
+
 import { Badge } from '@/components/ui/badge'
+import { useI18n } from '@/lib/i18n/context'
 
 export type BookingStatusValue =
   | 'PENDING'
@@ -9,26 +12,21 @@ export type BookingStatusValue =
 
 const STATUS_CONFIG: Record<
   BookingStatusValue,
-  { label: string; className: string }
+  { className: string }
 > = {
   PENDING: {
-    label: 'Ожидает',
     className: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300',
   },
   CONFIRMED: {
-    label: 'Подтверждено',
     className: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300',
   },
   COMPLETED: {
-    label: 'Завершено',
     className: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300',
   },
   CANCELLED: {
-    label: 'Отменено',
     className: '',  // secondary variant
   },
   NO_SHOW: {
-    label: 'Не пришёл',
     className: '',  // destructive variant
   },
 }
@@ -38,18 +36,20 @@ type Props = {
 }
 
 export function BookingStatusBadge({ status }: Props) {
+  const { t } = useI18n()
   const config = STATUS_CONFIG[status]
+  const label = t('status', status)
 
   if (status === 'CANCELLED') {
-    return <Badge variant="secondary">{config.label}</Badge>
+    return <Badge variant="secondary">{label}</Badge>
   }
   if (status === 'NO_SHOW') {
-    return <Badge variant="destructive">{config.label}</Badge>
+    return <Badge variant="destructive">{label}</Badge>
   }
 
   return (
     <Badge variant="outline" className={config.className}>
-      {config.label}
+      {label}
     </Badge>
   )
 }

@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState } from 'react'
@@ -22,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   createResourceSchema,
   type CreateResourceInput,
@@ -29,18 +32,19 @@ import {
 } from '@/lib/validations/resource'
 import type { ResourceWithRelations, ScheduleEntry } from '@/lib/actions/resources'
 import { getNicheConfig, type AttributeField } from '@/lib/niche/config'
+import { useI18n } from '@/lib/i18n/context'
 
 // ---- constants -------------------------------------------------------------
 
-const DAYS_OF_WEEK = [
-  { value: 1, label: 'Пн' },
-  { value: 2, label: 'Вт' },
-  { value: 3, label: 'Ср' },
-  { value: 4, label: 'Чт' },
-  { value: 5, label: 'Пт' },
-  { value: 6, label: 'Сб' },
-  { value: 0, label: 'Вс' },
-]
+const DAY_KEYS = [
+  { value: 1, key: 'mon' },
+  { value: 2, key: 'tue' },
+  { value: 3, key: 'wed' },
+  { value: 4, key: 'thu' },
+  { value: 5, key: 'fri' },
+  { value: 6, key: 'sat' },
+  { value: 0, key: 'sun' },
+] as const
 
 // ---- types -----------------------------------------------------------------
 
@@ -71,7 +75,7 @@ function buildDefaultSchedule(niche: string | undefined): ScheduleState {
   }
 
   const state: ScheduleState = {}
-  for (const { value } of DAYS_OF_WEEK) {
+  for (const { value } of DAY_KEYS) {
     state[value] = { isActive: activeDays.includes(value), startTime, endTime }
   }
   return state
@@ -82,7 +86,7 @@ function buildScheduleFromExisting(
 ): ScheduleState {
   // Start with all days inactive
   const state: ScheduleState = {}
-  for (const { value } of DAYS_OF_WEEK) {
+  for (const { value } of DAY_KEYS) {
     state[value] = { isActive: false, startTime: '09:00', endTime: '18:00' }
   }
   for (const s of schedules) {
@@ -166,11 +170,13 @@ function AttributeFieldInput({
   value,
   onChange,
   disabled,
+  t,
 }: {
   field: AttributeField
   value: unknown
   onChange: (v: unknown) => void
   disabled: boolean
+  t: (section: string, key: string) => string
 }) {
   switch (field.type) {
     case 'text':
@@ -199,7 +205,7 @@ function AttributeFieldInput({
           disabled={disabled}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder={`Выберите ${field.label.toLowerCase()}`} />
+            <SelectValue placeholder={`${t('form', 'select')} ${field.label.toLowerCase()}`} />
           </SelectTrigger>
           <SelectContent>
             {field.options?.map((opt) => (
@@ -238,14 +244,24 @@ function AttributeFieldInput({
 // ---- ResourceForm ----------------------------------------------------------
 
 export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Props) {
-  const isEdit = !!resource
+  const { t }    = useI18n()
+  const isEdit   = !!resource
   const initialAttrs = parseAttrs(resource?.attributes)
-  const nicheConfig = getNicheConfig(niche)
+  const nicheConfig  = getNicheConfig(niche)
 
-  const form = useForm<CreateResourceInput>({
+  const DAYS_OF_WEEK = DAY_KEYS.map(({ value, key }) => ({
+    value,
+    label: t('days', key),
+  }))
+
+  const form = useForm<CreateResourceInput & { name_kz?: string, desc_kz?: string, name_en?: string, desc_en?: string }>({
     resolver: zodResolver(createResourceSchema),
     defaultValues: {
       name:        resource?.name ?? '',
+      name_kz:     ((resource as any)?.translations?.kz?.name) || '',
+      desc_kz:     ((resource as any)?.translations?.kz?.description) || '',
+      name_en:     ((resource as any)?.translations?.en?.name) || '',
+      desc_en:     ((resource as any)?.translations?.en?.description) || '',
       type:        (resource?.type as CreateResourceInput['type']) ?? nicheConfig.resourceTypes[0]?.value ?? 'staff',
       description: resource?.description ?? '',
       capacity:    resource?.capacity ?? undefined,
@@ -283,14 +299,18 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
     (f) => !f.forTypes || f.forTypes.includes(watchedType)
   )
 
-  async function handleSubmit(values: CreateResourceInput) {
+  async function handleSubmit(values: CreateResourceInput & { name_kz?: string, desc_kz?: string, name_en?: string, desc_en?: string }) {
     setSubmitting(true)
     try {
       const scheduleEntries: ScheduleEntry[] = DAYS_OF_WEEK.map(({ value }) => ({
         dayOfWeek: value,
         ...schedule[value],
       }))
-      await onSubmit({ ...values, attributes: attrs }, scheduleEntries)
+      const translations = {
+        en: { name: values.name_en || '', description: values.desc_en || '' },
+        kz: { name: values.name_kz || '', description: values.desc_kz || '' },
+      }
+      await onSubmit({ ...values, attributes: attrs, translations }, scheduleEntries)
     } finally {
       setSubmitting(false)
     }
@@ -302,20 +322,100 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 
-        {/* Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Название <span className="text-destructive">*</span></FormLabel>
-              <FormControl>
-                <Input {...field} placeholder={`Иван Иванов / ${nicheConfig.resourceLabel} №1`} disabled={isDisabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Tabs defaultValue="ru" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="ru">RU (Основной)</TabsTrigger>
+            <TabsTrigger value="kz">Қазақша</TabsTrigger>
+            <TabsTrigger value="en">English</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="ru" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={`${t('form', 'namePlaceholder')}${t('niche', nicheConfig.resourceLabel)} №1`} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'description')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'descriptionPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="kz" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name_kz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} (KZ)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={`${t('form', 'namePlaceholder')}${t('niche', nicheConfig.resourceLabel)} №1`} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="desc_kz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'description')} (KZ)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'descriptionPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="en" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name_en"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} (EN)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={`${t('form', 'namePlaceholder')}${t('niche', nicheConfig.resourceLabel)} №1`} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="desc_en"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'description')} (EN)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'descriptionPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Type */}
         <FormField
@@ -323,7 +423,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Тип <span className="text-destructive">*</span></FormLabel>
+              <FormLabel>{t('form', 'type')} <span className="text-destructive">*</span></FormLabel>
               <FormControl>
                 <Select
                   value={field.value}
@@ -334,12 +434,12 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
                   disabled={isDisabled}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Выберите тип" />
+                    <SelectValue placeholder={t('form', 'selectType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {nicheConfig.resourceTypes.map((rt) => (
                       <SelectItem key={rt.value} value={rt.value}>
-                        {rt.label}
+                        {t('niche', rt.label)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -350,20 +450,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
           )}
         />
 
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Описание</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Краткое описание" disabled={isDisabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         {/* Capacity */}
         <FormField
@@ -371,7 +458,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
           name="capacity"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Параллельных бронирований</FormLabel>
+              <FormLabel>{t('form', 'concurrentBookings')}</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -393,13 +480,13 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
         {visibleAttrFields.length > 0 && (
           <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Параметры {nicheConfig.resourceLabel.toLowerCase()}а
+              {t('form', 'parameters')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}
             </p>
             {visibleAttrFields.map((field) => (
               <div key={field.key} className="space-y-1">
                 {field.type !== 'checkbox' && (
                   <label className="text-sm font-medium">
-                    {field.label}
+                    {t('niche', field.label)}
                     {field.required && <span className="text-destructive ml-1">*</span>}
                   </label>
                 )}
@@ -408,6 +495,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
                   value={attrs[field.key]}
                   onChange={(v) => setAttr(field.key, v)}
                   disabled={isDisabled}
+                  t={t}
                 />
               </div>
             ))}
@@ -419,7 +507,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
         {/* Schedule */}
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Расписание работы
+            {t('form', 'schedule')}
           </p>
           {DAYS_OF_WEEK.map(({ value: day, label }) => {
             const entry = schedule[day]
@@ -458,7 +546,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
                     />
                   </div>
                 ) : (
-                  <span className="text-sm text-muted-foreground">выходной</span>
+                  <span className="text-sm text-muted-foreground">{t('form', 'dayOff')}</span>
                 )}
               </div>
             )
@@ -470,10 +558,10 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
             {submitting ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Сохранение…
+                {t('common', 'saving')}
               </span>
             ) : (
-              isEdit ? 'Сохранить' : 'Создать'
+              isEdit ? t('common', 'save') : t('common', 'create')
             )}
           </Button>
         </div>

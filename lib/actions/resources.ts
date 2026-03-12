@@ -103,6 +103,7 @@ export async function createResource(
       description: parsed.description,
       capacity:    parsed.capacity,
       attributes:  (parsed.attributes ?? {}) as Prisma.InputJsonValue,
+      translations: (parsed.translations ?? {}) as Prisma.InputJsonValue,
     },
   })
 
@@ -143,6 +144,15 @@ export async function updateResource(
   if ('description' in parsed)         updateData.description = parsed.description ?? null
   if ('capacity' in parsed)            updateData.capacity    = parsed.capacity ?? null
   if (parsed.attributes !== undefined) updateData.attributes  = parsed.attributes as Prisma.InputJsonValue
+
+  if (parsed.translations !== undefined) {
+    const existing = await findOwned(id, tenantId)
+    const existingTranslations = (existing.translations as Record<string, any>) || {}
+    updateData.translations = Object.entries(parsed.translations).reduce((acc, [lang, dict]) => {
+      acc[lang] = { ...(acc[lang] || {}), ...dict }
+      return acc
+    }, { ...existingTranslations }) as Prisma.InputJsonValue
+  }
 
   await basePrisma.resource.update({ where: { id }, data: updateData })
 

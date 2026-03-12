@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState, useEffect, useCallback, useTransition } from 'react'
@@ -17,6 +19,7 @@ import {
 } from '@/components/ui/table'
 import { BookingStatusBadge, type BookingStatusValue } from '@/components/booking-status-badge'
 import { BookingCalendar, type CalendarData, type CalendarBooking, getMonday } from '@/components/booking-calendar'
+import { useI18n } from '@/lib/i18n/context'
 
 // ---- types -----------------------------------------------------------------
 
@@ -59,11 +62,11 @@ const ALL_STATUSES: BookingStatusValue[] = [
 ]
 
 const STATUS_FILTER_LABELS: Record<BookingStatusValue, string> = {
-  PENDING: 'Ожидает',
-  CONFIRMED: 'Подтверждено',
-  COMPLETED: 'Завершено',
-  CANCELLED: 'Отменено',
-  NO_SHOW: 'Не пришёл',
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  NO_SHOW: 'noShow',
 }
 
 // ---- allowed transitions ---------------------------------------------------
@@ -74,11 +77,11 @@ const TRANSITIONS: Partial<Record<BookingStatusValue, BookingStatusValue[]>> = {
 }
 
 const ACTION_LABELS: Record<BookingStatusValue, string> = {
-  CONFIRMED: 'Подтвердить',
-  COMPLETED: 'Завершить',
-  CANCELLED: 'Отменить',
-  NO_SHOW: 'Не пришёл',
-  PENDING: 'В ожидание',
+  CONFIRMED: 'confirm',
+  COMPLETED: 'complete',
+  CANCELLED: 'cancel',
+  NO_SHOW: 'markNoShow',
+  PENDING: 'toPending',
 }
 
 // ---- helpers ---------------------------------------------------------------
@@ -110,6 +113,7 @@ function formatDateTimeRu(utcStr: string, timezone: string): { date: string; tim
 // ---- component -------------------------------------------------------------
 
 export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: Props) {
+  const { t } = useI18n()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -162,7 +166,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
       const json = await res.json()
       setTableData(json)
     } catch (err) {
-      showToast('error', err instanceof Error ? err.message : 'Ошибка загрузки')
+      showToast('error', err instanceof Error ? err.message : t('dashboard', 'errorLoad'))
     } finally {
       setTableLoading(false)
     }
@@ -182,7 +186,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
       const json = await res.json()
       setCalendarData(json.data)
     } catch (err) {
-      showToast('error', err instanceof Error ? err.message : 'Ошибка загрузки')
+      showToast('error', err instanceof Error ? err.message : t('dashboard', 'errorLoad'))
     } finally {
       setCalendarLoading(false)
     }
@@ -235,11 +239,11 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                 : prev
             )
           }
-          throw new Error(err.error ?? 'Ошибка смены статуса')
+          throw new Error(err.error ?? t('dashboard', 'statusError'))
         }
         showToast('success', 'Статус обновлён')
       } catch (err) {
-        showToast('error', err instanceof Error ? err.message : 'Ошибка')
+        showToast('error', err instanceof Error ? err.message : t('dashboard', 'errorStatus'))
         throw err // re-throw so calendar dialog can handle
       }
     } else {
@@ -251,9 +255,9 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
       })
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error ?? 'Ошибка смены статуса')
+        throw new Error(err.error ?? t('dashboard', 'statusError'))
       }
-      showToast('success', 'Статус обновлён')
+      showToast('success', t('dashboard', 'statusUpdated'))
       fetchCalendar()
     }
   }
@@ -289,7 +293,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
           ].join(' ')}
         >
           <Table2 className="h-4 w-4" />
-          Таблица
+          {t('dashboard', 'table')}
         </button>
         <button
           onClick={() => setTab('calendar')}
@@ -301,7 +305,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
           ].join(' ')}
         >
           <CalendarDays className="h-4 w-4" />
-          Календарь
+          {t('dashboard', 'calendar')}
         </button>
       </div>
 
@@ -320,7 +324,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                   : 'border-border hover:border-muted-foreground/50',
               ].join(' ')}
             >
-              {STATUS_FILTER_LABELS[s]}
+              {t('status', STATUS_FILTER_LABELS[s])}
             </button>
           ))}
         </div>
@@ -331,7 +335,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
           onChange={(e) => handleResourceChange(e.target.value)}
           className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
         >
-          <option value="">Все ресурсы</option>
+          <option value="">{t('dashboard', 'allResources')}</option>
           {resources.map((r) => (
             <option key={r.id} value={r.id}>{r.name}</option>
           ))}
@@ -367,7 +371,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
               setPage(1)
             }}
           >
-            Сбросить
+            {t('dashboard', 'reset')}
           </Button>
         )}
       </div>
@@ -377,7 +381,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
         <div className="space-y-3">
           {tableLoading && (
             <div className="flex justify-center py-10 text-sm text-muted-foreground">
-              Загрузка…
+              {t('common', 'loading')}
             </div>
           )}
 
@@ -387,9 +391,9 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                 📅
               </div>
               <div>
-                <p className="font-medium">Нет бронирований</p>
+                <p className="font-medium">{t('dashboard', 'noBookings')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Нет бронирований за выбранный период
+                  {t('dashboard', 'noBookingsDesc')}
                 </p>
               </div>
             </div>
@@ -426,7 +430,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                               onClick={() => handleStatusChange(booking.id, s)}
                               className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted transition-colors"
                             >
-                              {ACTION_LABELS[s]}
+                              {t('status', ACTION_LABELS[s])}
                             </button>
                           ))}
                         </div>
@@ -440,12 +444,12 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
               <Table className="hidden sm:table">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Дата / время</TableHead>
-                    <TableHead>Клиент</TableHead>
-                    <TableHead>Услуга</TableHead>
-                    <TableHead>Ресурс</TableHead>
-                    <TableHead>Статус</TableHead>
-                    {canEdit && <TableHead className="text-right">Действия</TableHead>}
+                    <TableHead>{t('dashboard', 'dateTime')}</TableHead>
+                    <TableHead>{t('booking', 'client')}</TableHead>
+                    <TableHead>{t('booking', 'service')}</TableHead>
+                    <TableHead>{t('form', 'resource')}</TableHead>
+                    <TableHead>{t('dashboard', 'status')}</TableHead>
+                    {canEdit && <TableHead className="text-right">{t('dashboard', 'actions')}</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -497,7 +501,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                                     className="h-7 text-xs"
                                     onClick={() => handleStatusChange(booking.id, s)}
                                   >
-                                    {ACTION_LABELS[s]}
+                                    {t('status', ACTION_LABELS[s])}
                                   </Button>
                                 ))}
                               </div>
@@ -513,8 +517,8 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
               {/* Pagination */}
               <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>
-                  Показано {(page - 1) * LIMIT + 1}–
-                  {Math.min(page * LIMIT, tableData.total)} из {tableData.total}
+                 {t('dashboard', 'shown')} {(page - 1) * LIMIT + 1}–
+                  {Math.min(page * LIMIT, tableData.total)} {t('dashboard', 'outOf')} {tableData.total}
                 </span>
                 <div className="flex items-center gap-1">
                   <Button

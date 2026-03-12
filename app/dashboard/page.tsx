@@ -19,15 +19,9 @@ import {
   Users,
   Clock,
 } from 'lucide-react'
+import { getServerT } from '@/lib/i18n/server'
 
 // ---- helpers ---------------------------------------------------------------
-
-const NICHE_LABELS: Record<string, string> = {
-  medicine: 'Медицина',
-  beauty:   'Красота',
-  horeca:   'HoReCa',
-  sports:   'Спорт и досуг',
-}
 
 function formatUpcomingTime(utcStr: Date | string): string {
   const d = new Date(utcStr)
@@ -70,10 +64,20 @@ export default async function DashboardPage() {
   const session = await getServerSession(authConfig)
   if (!session?.user?.tenantId) redirect('/login')
 
-  const tenant = await getDashboardData(session.user.tenantId)
+  const [tenant, t] = await Promise.all([
+    getDashboardData(session.user.tenantId),
+    getServerT(),
+  ])
   if (!tenant) redirect('/login')
 
   const nicheConfig = getNicheConfig(tenant.niche)
+
+  const NICHE_LABELS: Record<string, string> = {
+    medicine: t('dashboard', 'nicheMedicine'),
+    beauty:   t('dashboard', 'nicheBeauty'),
+    horeca:   t('dashboard', 'nicheHoreca'),
+    sports:   t('dashboard', 'nicheSports'),
+  }
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto">
@@ -83,12 +87,12 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{tenant.name}</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            {NICHE_LABELS[tenant.niche ?? ''] ?? tenant.niche} · Тариф:{' '}
+            {NICHE_LABELS[tenant.niche ?? ''] ?? tenant.niche} · {t('dashboard', 'plan')}{' '}
             <span className="font-medium capitalize">{tenant.plan}</span>
           </p>
         </div>
         <Badge variant={tenant.isActive ? 'default' : 'secondary'} className="shrink-0">
-          {tenant.isActive ? 'Активен' : 'Неактивен'}
+          {tenant.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
         </Badge>
       </div>
 
@@ -101,19 +105,19 @@ export default async function DashboardPage() {
           iconCls="text-blue-600"
         />
         <StatCard
-          label="Услуги"
+          label={t('dashboard', 'servicesCount')}
           value={tenant.services.length}
           icon={Scissors}
           iconCls="text-purple-600"
         />
         <StatCard
-          label="Бронирований"
+          label={t('dashboard', 'bookingsCount')}
           value={tenant._count.bookings}
           icon={CalendarCheck}
           iconCls="text-green-600"
         />
         <StatCard
-          label="Пользователей"
+          label={t('dashboard', 'usersCount')}
           value={tenant._count.users}
           icon={Users}
           iconCls="text-orange-600"
@@ -125,14 +129,14 @@ export default async function DashboardPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
-            Предстоящие записи
+            {t('dashboard', 'upcoming')}
           </CardTitle>
-          <CardDescription>Ближайшие 5 активных бронирований</CardDescription>
+          <CardDescription>{t('dashboard', 'upcomingHint')}</CardDescription>
         </CardHeader>
         <CardContent>
           {tenant.bookings.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
-              Нет предстоящих записей
+              {t('dashboard', 'noUpcoming')}
             </p>
           ) : (
             <div className="space-y-3">

@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
 
@@ -13,38 +12,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { useI18n } from "@/lib/i18n/context"
 
-// ---- Schema ----------------------------------------------------------------
+// ---- Types -----------------------------------------------------------------
 
-const NICHES = [
-  { value: "medicine", label: "Медицина / Консультации" },
-  { value: "beauty",   label: "Красота / Beauty" },
-  { value: "horeca",   label: "HoReCa (кафе, рестораны)" },
-  { value: "sports",   label: "Спорт и досуг" },
-] as const
+type NicheValue = "medicine" | "beauty" | "horeca" | "sports"
 
-type NicheValue = (typeof NICHES)[number]["value"]
-
-const registerSchema = z
-  .object({
-    name:       z.string().min(2, "Минимум 2 символа"),
-    email:      z.string().min(1, "Введите email").email("Некорректный email"),
-    password:   z.string().min(8, "Минимум 8 символов"),
-    confirm:    z.string().min(1, "Подтвердите пароль"),
-    tenantName: z.string().min(2, "Минимум 2 символа"),
-    slug: z
-      .string()
-      .min(3, "Минимум 3 символа")
-      .max(50, "Максимум 50 символов")
-      .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, "Только строчные буквы, цифры и дефис"),
-    niche: z.enum(["medicine", "beauty", "horeca", "sports"], "Выберите нишу"),
-  })
-  .refine((d) => d.password === d.confirm, {
-    message: "Пароли не совпадают",
-    path: ["confirm"],
-  })
-
-type RegisterForm = z.infer<typeof registerSchema>
+type RegisterFormValues = {
+  name:       string
+  email:      string
+  password:   string
+  confirm:    string
+  tenantName: string
+  slug:       string
+  niche:      NicheValue | ""
+}
 
 // ---- Helpers ---------------------------------------------------------------
 
@@ -72,16 +54,60 @@ function Field({
 // ---- Component -------------------------------------------------------------
 
 export default function RegisterPage() {
+  const { t } = useI18n()
   const router = useRouter()
   const [serverErrors, setServerErrors] = useState<Record<string, string>>({})
   const [globalError, setGlobalError]   = useState<string | null>(null)
   const [loading, setLoading]           = useState(false)
 
-  const form = useForm<RegisterForm>({
-    resolver: zodResolver(registerSchema),
+  const NICHES = [
+    { value: "medicine", label: t('auth', 'nicheMedicine') },
+    { value: "beauty",   label: t('auth', 'nicheBeauty') },
+    { value: "horeca",   label: t('auth', 'nicheHoreca') },
+    { value: "sports",   label: t('auth', 'nicheSports') },
+  ] as const
+
+  const registerSchema = z
+    .object({
+      name:       z.string().min(2, t('auth', 'min2')),
+      email:      z.string().min(1, t('auth', 'emailRequired')).email(t('auth', 'emailInvalid')),
+      password:   z.string().min(8, t('auth', 'min8')),
+      confirm:    z.string().min(1, t('auth', 'confirmRequired')),
+      tenantName: z.string().min(2, t('auth', 'min2')),
+      slug: z
+        .string()
+        .min(3, t('auth', 'min3'))
+        .max(50, t('auth', 'max50'))
+        .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/, t('auth', 'slugFormat')),
+      niche: z.enum(["medicine", "beauty", "horeca", "sports"], t('auth', 'selectNiche')),
+    })
+    .refine((d) => d.password === d.confirm, {
+      message: t('auth', 'passwordsMismatch'),
+      path: ["confirm"],
+    })
+
+  const form = useForm<RegisterFormValues>({
+    resolver: async (data, context, options) => {
+      const result = await registerSchema.safeParseAsync(data)
+      if (result.success) {
+        return { values: result.data as RegisterFormValues, errors: {} }
+      }
+      
+      const fieldErrors: Record<string, { type: string, message: string }> = {}
+      for (const [key, value] of Object.entries(result.error.flatten().fieldErrors)) {
+        if (value && value.length > 0) {
+          fieldErrors[key] = { type: 'manual', message: value[0] }
+        }
+      }
+      
+      return {
+        values: {},
+        errors: fieldErrors,
+      } as any
+    },
     defaultValues: {
       name: "", email: "", password: "", confirm: "",
-      tenantName: "", slug: "", niche: undefined,
+      tenantName: "", slug: "", niche: "",
     },
   })
 
@@ -100,7 +126,7 @@ export default function RegisterPage() {
     }
   }
 
-  async function onSubmit(values: RegisterForm) {
+  async function onSubmit(values: RegisterFormValues) {
     setLoading(true)
     setServerErrors({})
     setGlobalError(null)
@@ -125,7 +151,7 @@ export default function RegisterPage() {
         if (data.errors) {
           setServerErrors(data.errors)
         } else {
-          setGlobalError(data.error ?? "Ошибка регистрации")
+          setGlobalError(data.error ?? t('auth', 'registerError'))
         }
         return
       }
@@ -145,7 +171,7 @@ export default function RegisterPage() {
         router.push("/login?registered=1")
       }
     } catch {
-      setGlobalError("Нет соединения с сервером")
+      setGlobalError(t('auth', 'networkError'))
     } finally {
       setLoading(false)
     }
@@ -159,8 +185,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-10">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl font-bold tracking-tight">Регистрация</CardTitle>
-          <CardDescription>Создайте аккаунт владельца бизнеса</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">{t('auth', 'registerTitle')}</CardTitle>
+          <CardDescription>{t('auth', 'registerSubtitle')}</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -174,12 +200,12 @@ export default function RegisterPage() {
             {/* Section: personal */}
             <div className="space-y-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Ваши данные
+                {t('auth', 'yourData')}
               </p>
 
-              <Field label="Имя" error={e.name?.message}>
+              <Field label={t('auth', 'name')} error={e.name?.message}>
                 <Input
-                  placeholder="Иван Иванов"
+                  placeholder={t('auth', 'namePlaceholder')}
                   disabled={loading}
                   autoComplete="name"
                   {...form.register("name")}
@@ -197,17 +223,17 @@ export default function RegisterPage() {
               </Field>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Пароль" error={e.password?.message}>
+                <Field label={t('auth', 'password')} error={e.password?.message}>
                   <Input
                     type="password"
-                    placeholder="Минимум 8 символов"
+                    placeholder={t('auth', 'min8Placeholder')}
                     disabled={loading}
                     autoComplete="new-password"
                     {...form.register("password")}
                   />
                 </Field>
 
-                <Field label="Повторите пароль" error={e.confirm?.message}>
+                <Field label={t('auth', 'confirmPassword')} error={e.confirm?.message}>
                   <Input
                     type="password"
                     placeholder="••••••••"
@@ -224,10 +250,10 @@ export default function RegisterPage() {
             {/* Section: business */}
             <div className="space-y-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Ваш бизнес
+                {t('auth', 'yourBusiness')}
               </p>
 
-              <Field label="Название" error={e.tenantName?.message}>
+              <Field label={t('auth', 'businessName')} error={e.tenantName?.message}>
                 <Input
                   placeholder="City Polyclinic"
                   disabled={loading}
@@ -236,9 +262,9 @@ export default function RegisterPage() {
               </Field>
 
               <Field
-                label="Slug (адрес)"
+                label={t('auth', 'slugLabel')}
                 error={e.slug?.message}
-                hint="Только строчные буквы, цифры и дефис — это будет ваш субдомен"
+                hint={t('auth', 'slugHint')}
               >
                 <div className="flex items-center rounded-md border bg-muted/40 overflow-hidden
                                 focus-within:ring-2 focus-within:ring-ring focus-within:border-ring">
@@ -259,7 +285,7 @@ export default function RegisterPage() {
                 </div>
               </Field>
 
-              <Field label="Ниша" error={e.niche?.message}>
+              <Field label={t('auth', 'nicheLabel')} error={e.niche?.message}>
                 <select
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background
                              focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
@@ -267,7 +293,7 @@ export default function RegisterPage() {
                   disabled={loading}
                   {...form.register("niche")}
                 >
-                  <option value="">— Выберите нишу —</option>
+                  <option value="">{t('auth', 'selectNiche')}</option>
                   {NICHES.map((n) => (
                     <option key={n.value} value={n.value}>{n.label}</option>
                   ))}
@@ -282,18 +308,18 @@ export default function RegisterPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
                   </svg>
-                  Создаём аккаунт…
+                  {t('auth', 'creatingAccount')}
                 </span>
               ) : (
-                "Создать аккаунт"
+                t('auth', 'createAccount')
               )}
             </Button>
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Уже есть аккаунт?{" "}
+            {t('auth', 'hasAccount')}{" "}
             <Link href="/login" className="font-medium underline underline-offset-4 hover:text-foreground">
-              Войти
+              {t('common', 'login')}
             </Link>
           </p>
         </CardContent>

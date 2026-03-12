@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -31,6 +33,8 @@ import {
 } from '@/lib/actions/resources'
 import { getNicheConfig, type AttributeField } from '@/lib/niche/config'
 import type { CreateResourceInput, UpdateResourceInput } from '@/lib/validations/resource'
+import { useI18n } from '@/lib/i18n/context'
+import { getDbTranslation } from '@/lib/i18n/db-translations'
 
 // ---- props -----------------------------------------------------------------
 
@@ -42,7 +46,12 @@ type Props = {
 
 // ---- helpers ---------------------------------------------------------------
 
-function getAttrDisplay(resource: ResourceWithRelations, field: AttributeField): string {
+function getAttrDisplay(
+  resource: ResourceWithRelations,
+  field: AttributeField,
+  yes: string,
+  no: string,
+): string {
   if (field.forTypes && !field.forTypes.includes(resource.type)) return '—'
   const attrs = (
     resource.attributes && typeof resource.attributes === 'object' && !Array.isArray(resource.attributes)
@@ -51,7 +60,7 @@ function getAttrDisplay(resource: ResourceWithRelations, field: AttributeField):
   ) as Record<string, unknown>
   const val = attrs[field.key]
   if (val == null || val === '') return '—'
-  if (typeof val === 'boolean')  return val ? 'Да' : 'Нет'
+  if (typeof val === 'boolean')  return val ? yes : no
   if (Array.isArray(val))        return val.join(', ') || '—'
   return String(val)
 }
@@ -59,6 +68,7 @@ function getAttrDisplay(resource: ResourceWithRelations, field: AttributeField):
 // ---- component -------------------------------------------------------------
 
 export function ResourcesManager({ resources, canEdit, niche }: Props) {
+  const { t, locale }    = useI18n()
   const router   = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -98,9 +108,9 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       await createResource(data as CreateResourceInput, schedule)
       setCreateOpen(false)
       refresh()
-      toast.success(`${nicheConfig.resourceLabel} создан`)
+      toast.success(`${t('niche', nicheConfig.resourceLabel)} ${t('dashboard', 'resourceCreatedSuffix')}`)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка создания'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorCreate')
       setActionError(msg)
       toast.error(msg)
     }
@@ -113,11 +123,11 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       await updateResource(editResource.id, data as UpdateResourceInput, schedule)
       setEditResource(null)
       refresh()
-      toast.success('Изменения сохранены')
+      toast.success(t('dashboard', 'saved'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка сохранения'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorSave')
       const display = msg.includes('Record') || msg.includes('not found')
-        ? 'Данные были изменены, обновите страницу'
+        ? t('dashboard', 'dataChanged')
         : msg
       setActionError(display)
       toast.error(display)
@@ -129,9 +139,9 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
     try {
       await toggleResourceActive(id)
       refresh()
-      toast.success('Статус обновлён')
+      toast.success(t('dashboard', 'statusUpdated'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка'
+      const msg = err instanceof Error ? err.message : t('common', 'error')
       setActionError(msg)
       toast.error(msg)
     }
@@ -143,14 +153,14 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
     try {
       await deleteResource(id)
       refresh()
-      toast.success(`${nicheConfig.resourceLabel} удалён`)
+      toast.success(`${t('niche', nicheConfig.resourceLabel)} ${t('dashboard', 'resourceDeletedSuffix')}`)
     } catch (err) {
       const msg = err instanceof Error ? err.message : ''
       if (msg.startsWith('FUTURE_BOOKINGS:')) {
         const count = parseInt(msg.split(':')[1])
         setFutureWarning({ id, count })
       } else {
-        const display = msg || 'Ошибка удаления'
+        const display = msg || t('dashboard', 'errorDelete')
         setActionError(display)
         toast.error(display)
       }
@@ -170,9 +180,9 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
             onChange={(e) => setFilterType(e.target.value)}
             className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
           >
-            <option value="all">Все типы</option>
+            <option value="all">{t('dashboard', 'allTypes')}</option>
             {nicheConfig.resourceTypes.map((rt) => (
-              <option key={rt.value} value={rt.value}>{rt.label}</option>
+              <option key={rt.value} value={rt.value}>{t('niche', rt.label)}</option>
             ))}
           </select>
           <select
@@ -180,15 +190,15 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
             onChange={(e) => setFilterStatus(e.target.value)}
             className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
           >
-            <option value="all">Все статусы</option>
-            <option value="active">Активные</option>
-            <option value="inactive">Неактивные</option>
+            <option value="all">{t('dashboard', 'allStatuses')}</option>
+            <option value="active">{t('dashboard', 'activeFilter')}</option>
+            <option value="inactive">{t('dashboard', 'inactiveFilter')}</option>
           </select>
         </div>
         {canEdit && (
           <Button size="sm" onClick={() => { setActionError(null); setCreateOpen(true) }}>
             <PlusCircle className="mr-1.5 h-4 w-4" />
-            Добавить {nicheConfig.resourceLabel.toLowerCase()}
+            {t('common', 'add')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}
           </Button>
         )}
       </div>
@@ -204,10 +214,10 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       {futureWarning && (
         <div className="rounded-md border border-amber-400/50 bg-amber-50 px-4 py-3 text-sm dark:bg-amber-950/20">
           <p className="font-medium text-amber-800 dark:text-amber-300">
-            Нельзя удалить: есть {futureWarning.count} будущих бронирований
+            {t('dashboard', 'cantDelete').replace('{n}', String(futureWarning.count))}
           </p>
           <p className="mt-1 text-muted-foreground">
-            Деактивируйте {nicheConfig.resourceLabel.toLowerCase()}, чтобы прекратить принимать новые записи.
+            {t('dashboard', 'deactivateHint')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}, {t('dashboard', 'toStopBookings')}
           </p>
           <div className="mt-2 flex gap-2">
             <Button
@@ -218,10 +228,10 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                 await handleToggle(futureWarning.id)
               }}
             >
-              Деактивировать
+              {t('dashboard', 'deactivate')}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setFutureWarning(null)}>
-              Отмена
+              {t('common', 'cancel')}
             </Button>
           </div>
         </div>
@@ -234,17 +244,17 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
             📋
           </div>
           <div>
-            <p className="font-medium">{nicheConfig.resourceLabelPlural} не найдены</p>
+            <p className="font-medium">{t('niche', nicheConfig.resourceLabelPlural)} {t('dashboard', 'notFound')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {resources.length === 0
-                ? `Добавьте первый${nicheConfig.resourceLabel === 'Площадка' ? 'у' : ''} ${nicheConfig.resourceLabel.toLowerCase()}, чтобы начать принимать бронирования.`
-                : 'Попробуйте изменить фильтры.'}
+                ? `${t('common', 'add')} ${t('niche', nicheConfig.resourceLabel).toLowerCase()}`
+                : t('dashboard', 'changeFilters')}
             </p>
           </div>
           {canEdit && resources.length === 0 && (
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <PlusCircle className="mr-1.5 h-4 w-4" />
-              Добавить {nicheConfig.resourceLabel.toLowerCase()}
+              {t('common', 'add')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}
             </Button>
           )}
         </div>
@@ -259,21 +269,23 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-sm">{r.name}</p>
+                    <p className="font-medium text-sm">{getDbTranslation(r, 'name', locale)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label ?? r.type}
+                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 
+                        ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label) 
+                        : r.type}
                     </p>
                   </div>
                   <Badge variant={r.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
-                    {r.isActive ? 'Активен' : 'Неактивен'}
+                    {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
                   </Badge>
                 </div>
                 {attrColumns.map((f) => {
-                  const val = getAttrDisplay(r, f)
+                  const val = getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'))
                   if (val === '—') return null
                   return (
                     <p key={f.key} className="text-xs text-muted-foreground">
-                      {f.label}: <span className="text-foreground">{val}</span>
+                      {t('niche', f.label)}: <span className="text-foreground">{val}</span>
                     </p>
                   )
                 })}
@@ -281,7 +293,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                   <div className="flex flex-wrap gap-1">
                     {r.services.map((rs) => (
                       <Badge key={rs.service.id} variant="secondary" className="text-xs">
-                        {rs.service.name}
+                        {getDbTranslation(rs.service, 'name', locale)}
                       </Badge>
                     ))}
                   </div>
@@ -307,28 +319,30 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
           <Table className="hidden sm:table">
             <TableHeader>
               <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead>Тип</TableHead>
+                <TableHead>{t('dashboard', 'name')}</TableHead>
+                <TableHead>{t('dashboard', 'type')}</TableHead>
                 {attrColumns.map((f) => (
-                  <TableHead key={f.key}>{f.label}</TableHead>
+                  <TableHead key={f.key}>{t('niche', f.label)}</TableHead>
                 ))}
-                <TableHead>Услуги</TableHead>
-                <TableHead>Статус</TableHead>
-                {canEdit && <TableHead className="text-right">Действия</TableHead>}
+                <TableHead>{t('dashboard', 'services')}</TableHead>
+                <TableHead>{t('dashboard', 'status')}</TableHead>
+                {canEdit && <TableHead className="text-right">{t('dashboard', 'actions')}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((r) => (
                 <TableRow key={r.id} className={!r.isActive ? 'opacity-60' : undefined}>
-                  <TableCell className="font-medium">{r.name}</TableCell>
+                  <TableCell className="font-medium">{getDbTranslation(r, 'name', locale)}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label ?? r.type}
+                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 
+                        ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label) 
+                        : r.type}
                     </Badge>
                   </TableCell>
                   {attrColumns.map((f) => (
                     <TableCell key={f.key} className="text-sm text-muted-foreground">
-                      {getAttrDisplay(r, f)}
+                      {getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'))}
                     </TableCell>
                   ))}
                   <TableCell>
@@ -338,7 +352,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                       ) : (
                         r.services.map((rs) => (
                           <Badge key={rs.service.id} variant="secondary" className="text-xs">
-                            {rs.service.name}
+                            {getDbTranslation(rs.service, 'name', locale)}
                           </Badge>
                         ))
                       )}
@@ -346,19 +360,19 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                   </TableCell>
                   <TableCell>
                     <Badge variant={r.isActive ? 'default' : 'secondary'}>
-                      {r.isActive ? 'Активен' : 'Неактивен'}
+                      {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
                     </Badge>
                   </TableCell>
                   {canEdit && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button size="sm" variant="ghost" title="Редактировать" onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" title={r.isActive ? 'Деактивировать' : 'Активировать'} onClick={() => handleToggle(r.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={r.isActive ? t('dashboard', 'deactivate') : t('dashboard', 'activate')} onClick={() => handleToggle(r.id)} disabled={isPending}>
                           {r.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                         </Button>
-                        <Button size="sm" variant="ghost" title="Удалить" onClick={() => handleDelete(r.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(r.id)} disabled={isPending}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
@@ -376,7 +390,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
         <button
           onClick={() => { setActionError(null); setCreateOpen(true) }}
           className="sm:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-          title={`Добавить ${nicheConfig.resourceLabel.toLowerCase()}`}
+          title={`${t('common', 'add')} ${t('niche', nicheConfig.resourceLabel).toLowerCase()}`}
         >
           <Plus className="h-6 w-6" />
         </button>
@@ -386,7 +400,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Новый {nicheConfig.resourceLabel.toLowerCase()}</DialogTitle>
+            <DialogTitle>{t('common', 'create')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}</DialogTitle>
           </DialogHeader>
           <ResourceForm niche={niche} onSubmit={handleCreate} />
         </DialogContent>
@@ -396,7 +410,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       <Dialog open={!!editResource} onOpenChange={(open) => !open && setEditResource(null)}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Редактировать {nicheConfig.resourceLabel.toLowerCase()}</DialogTitle>
+            <DialogTitle>{t('common', 'edit')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}</DialogTitle>
           </DialogHeader>
           {editResource && (
             <ResourceForm niche={niche} resource={editResource} onSubmit={handleEdit} />

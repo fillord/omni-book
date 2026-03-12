@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState, useTransition } from 'react'
@@ -30,6 +32,8 @@ import {
 } from '@/lib/actions/services'
 import type { ResourceWithRelations } from '@/lib/actions/resources'
 import type { CreateServiceInput, UpdateServiceInput } from '@/lib/validations/service'
+import { useI18n } from '@/lib/i18n/context'
+import { getDbTranslation } from '@/lib/i18n/db-translations'
 
 // ---- props -----------------------------------------------------------------
 
@@ -42,6 +46,7 @@ type Props = {
 // ---- component -------------------------------------------------------------
 
 export function ServicesManager({ services, resources, canEdit }: Props) {
+  const { t, locale } = useI18n()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -75,9 +80,9 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       await createService(data as CreateServiceInput)
       setCreateOpen(false)
       refresh()
-      toast.success('Услуга создана')
+      toast.success(t('dashboard', 'serviceCreated'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка создания'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorCreate')
       setActionError(msg)
       toast.error(msg)
     }
@@ -90,11 +95,11 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       await updateService(editService.id, data as UpdateServiceInput)
       setEditService(null)
       refresh()
-      toast.success('Изменения сохранены')
+      toast.success(t('dashboard', 'saved'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка сохранения'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorSave')
       const display = msg.includes('not found') || msg.includes('не найдена')
-        ? 'Данные были изменены, обновите страницу'
+        ? t('dashboard', 'dataChanged')
         : msg
       setActionError(display)
       toast.error(display)
@@ -106,9 +111,9 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
     try {
       await toggleServiceActive(id)
       refresh()
-      toast.success('Статус обновлён')
+      toast.success(t('dashboard', 'statusUpdated'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorStatus')
       setActionError(msg)
       toast.error(msg)
     }
@@ -119,9 +124,9 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
     try {
       await deleteService(id)
       refresh()
-      toast.success('Услуга удалена')
+      toast.success(t('dashboard', 'serviceDeleted'))
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка удаления'
+      const msg = err instanceof Error ? err.message : t('dashboard', 'errorDelete')
       setActionError(msg)
       toast.error(msg)
     }
@@ -139,14 +144,14 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
           onChange={(e) => setFilterStatus(e.target.value)}
           className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
         >
-          <option value="all">Все статусы</option>
-          <option value="active">Активные</option>
-          <option value="inactive">Неактивные</option>
+          <option value="all">{t('dashboard', 'allStatuses')}</option>
+          <option value="active">{t('dashboard', 'activeFilter')}</option>
+          <option value="inactive">{t('dashboard', 'inactiveFilter')}</option>
         </select>
         {canEdit && (
           <Button size="sm" onClick={() => { setActionError(null); setCreateOpen(true) }}>
             <PlusCircle className="mr-1.5 h-4 w-4" />
-            Добавить услугу
+            {t('dashboard', 'addService')}
           </Button>
         )}
       </div>
@@ -165,17 +170,17 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
             🗂️
           </div>
           <div>
-            <p className="font-medium">Услуги не найдены</p>
+            <p className="font-medium">{t('dashboard', 'servicesEmpty')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {services.length === 0
-                ? 'Добавьте первую услугу для приёма бронирований.'
-                : 'Попробуйте изменить фильтры.'}
+                ? t('dashboard', 'servicesEmptyHint')
+                : t('dashboard', 'changeFilters')}
             </p>
           </div>
           {canEdit && services.length === 0 && (
             <Button size="sm" onClick={() => setCreateOpen(true)}>
               <PlusCircle className="mr-1.5 h-4 w-4" />
-              Добавить услугу
+              {t('dashboard', 'addService')}
             </Button>
           )}
         </div>
@@ -190,23 +195,23 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-sm">{s.name}</p>
-                    {s.description && (
-                      <p className="text-xs text-muted-foreground truncate max-w-xs">{s.description}</p>
+                    <p className="font-medium text-sm">{getDbTranslation(s, 'name', locale)}</p>
+                    {getDbTranslation(s, 'description', locale) && (
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">{getDbTranslation(s, 'description', locale)}</p>
                     )}
                   </div>
                   <Badge variant={s.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
-                    {s.isActive ? 'Активна' : 'Неактивна'}
+                    {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {s.durationMin} мин · {formatPrice(s.price, s.currency)}
+                  {s.durationMin} {t('booking', 'minutes')} · {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
                 </p>
                 {s.resources.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {s.resources.map((rs) => (
                       <Badge key={rs.resource.id} variant="secondary" className="text-xs">
-                        {rs.resource.name}
+                        {getDbTranslation(rs.resource, 'name', locale)}
                       </Badge>
                     ))}
                   </div>
@@ -232,28 +237,28 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
           <Table className="hidden sm:table">
             <TableHeader>
               <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead>Длительность</TableHead>
-                <TableHead>Цена</TableHead>
-                <TableHead>Ресурсы</TableHead>
-                <TableHead>Статус</TableHead>
-                {canEdit && <TableHead className="text-right">Действия</TableHead>}
+                <TableHead>{t('dashboard', 'name')}</TableHead>
+                <TableHead>{t('booking', 'duration')}</TableHead>
+                <TableHead>{t('booking', 'price')}</TableHead>
+                <TableHead>{t('form', 'resources')}</TableHead>
+                <TableHead>{t('dashboard', 'status')}</TableHead>
+                {canEdit && <TableHead className="text-right">{t('dashboard', 'actions')}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((s) => (
                 <TableRow key={s.id} className={!s.isActive ? 'opacity-60' : undefined}>
                   <TableCell>
-                    <div className="font-medium">{s.name}</div>
-                    {s.description && (
+                    <div className="font-medium">{getDbTranslation(s, 'name', locale)}</div>
+                    {getDbTranslation(s, 'description', locale) && (
                       <div className="text-xs text-muted-foreground mt-0.5 max-w-xs truncate">
-                        {s.description}
+                        {getDbTranslation(s, 'description', locale)}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{s.durationMin} мин</TableCell>
+                  <TableCell className="whitespace-nowrap">{s.durationMin} {t('booking', 'minutes')}</TableCell>
                   <TableCell className="whitespace-nowrap font-medium">
-                    {formatPrice(s.price, s.currency)}
+                    {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
@@ -262,7 +267,7 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                       ) : (
                         s.resources.map((rs) => (
                           <Badge key={rs.resource.id} variant="secondary" className="text-xs">
-                            {rs.resource.name}
+                            {getDbTranslation(rs.resource, 'name', locale)}
                           </Badge>
                         ))
                       )}
@@ -270,19 +275,19 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                   </TableCell>
                   <TableCell>
                     <Badge variant={s.isActive ? 'default' : 'secondary'}>
-                      {s.isActive ? 'Активна' : 'Неактивна'}
+                      {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
                     </Badge>
                   </TableCell>
                   {canEdit && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button size="sm" variant="ghost" title="Редактировать" onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button size="sm" variant="ghost" title={s.isActive ? 'Деактивировать' : 'Активировать'} onClick={() => handleToggle(s.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={s.isActive ? t('dashboard', 'deactivate') : t('dashboard', 'activate')} onClick={() => handleToggle(s.id)} disabled={isPending}>
                           {s.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                         </Button>
-                        <Button size="sm" variant="ghost" title="Удалить" onClick={() => handleDelete(s.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(s.id)} disabled={isPending}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
@@ -300,7 +305,7 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
         <button
           onClick={() => { setActionError(null); setCreateOpen(true) }}
           className="sm:hidden fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
-          title="Добавить услугу"
+          title={t('dashboard', 'addService')}
         >
           <Plus className="h-6 w-6" />
         </button>
@@ -310,7 +315,7 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Новая услуга</DialogTitle>
+            <DialogTitle>{t('dashboard', 'newService')}</DialogTitle>
           </DialogHeader>
           <ServiceForm
             availableResources={resources}
@@ -323,7 +328,7 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       <Dialog open={!!editService} onOpenChange={(open) => !open && setEditService(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Редактировать услугу</DialogTitle>
+            <DialogTitle>{t('dashboard', 'editService')}</DialogTitle>
           </DialogHeader>
           {editService && (
             <ServiceForm

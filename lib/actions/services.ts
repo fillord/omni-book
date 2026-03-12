@@ -72,6 +72,7 @@ export async function createService(
       durationMin: parsed.durationMin,
       price:       toMinorUnits(parsed.price),
       currency:    parsed.currency ?? 'KZT',
+      translations: (parsed.translations ?? {}) as Prisma.InputJsonValue,
     },
   })
 
@@ -110,6 +111,15 @@ export async function updateService(
   if (parsed.durationMin !== undefined) updateData.durationMin = parsed.durationMin
   if ('price' in parsed)                updateData.price       = toMinorUnits(parsed.price)
   if (parsed.currency !== undefined)    updateData.currency    = parsed.currency
+
+  if (parsed.translations !== undefined) {
+    const existing = await findOwned(id, tenantId)
+    const existingTranslations = (existing.translations as Record<string, any>) || {}
+    updateData.translations = Object.entries(parsed.translations).reduce((acc, [lang, dict]) => {
+      acc[lang] = { ...(acc[lang] || {}), ...dict }
+      return acc
+    }, { ...existingTranslations }) as Prisma.InputJsonValue
+  }
 
   await basePrisma.service.update({ where: { id }, data: updateData })
 

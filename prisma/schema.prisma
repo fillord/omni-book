@@ -7,45 +7,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ---------------------------------------------------------------------------
-// Tenant — компания/бизнес (один тенант = один клиент платформы)
-// ---------------------------------------------------------------------------
 model Tenant {
-  id           String   @id @default(cuid())
-  slug         String   @unique               // субдомен: acme.omnibook.com
+  id           String     @id @default(cuid())
+  slug         String     @unique
   name         String
-  niche        String?                        // beauty | horeca | sports | medicine
-  plan         String   @default("free")      // free | pro | enterprise
-  isActive     Boolean  @default(true)
-  timezone     String   @default("Asia/Almaty") // IANA timezone
-
-  // Информация о бизнесе (публичная страница)
-  description  String?                        // Описание до 500 символов
-  phone        String?                        // Телефон для клиентов
-  email        String?                        // Email для клиентов
-  address      String?                        // Адрес
-  city         String?                        // Город
-  website      String?                        // Сайт
-  logoUrl      String?                        // URL логотипа
-  coverUrl     String?                        // URL обложки hero-секции
-  workingHours String?                        // "Пн-Пт: 09:00-18:00"
-  socialLinks  Json     @default("{}")        // { instagram?, whatsapp?, telegram? }
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  users     User[]
-  resources Resource[]
-  services  Service[]
-  bookings  Booking[]
+  niche        String?
+  plan         String     @default("free")
+  isActive     Boolean    @default(true)
+  timezone     String     @default("Asia/Almaty")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  address      String?
+  city         String?
+  coverUrl     String?
+  description  String?
+  email        String?
+  logoUrl      String?
+  phone        String?
+  socialLinks  Json       @default("{}")
+  translations Json       @default("{}")
+  website      String?
+  workingHours String?
+  bookings     Booking[]
+  resources    Resource[]
+  services     Service[]
+  users        User[]
 }
 
-// ---------------------------------------------------------------------------
-// User — пользователи: владелец/администратор тенанта, сотрудник, клиент
-// ---------------------------------------------------------------------------
 model User {
   id            String    @id @default(cuid())
-  tenantId      String?                         // null → суперадмин платформы
+  tenantId      String?
   email         String    @unique
   name          String?
   phone         String?
@@ -54,45 +45,27 @@ model User {
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   bookings      Booking[]
+  tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([email])
 }
 
-enum Role {
-  SUPERADMIN  // суперадмин платформы
-  OWNER       // владелец тенанта
-  STAFF       // сотрудник тенанта
-  CUSTOMER    // клиент/посетитель
-}
-
-// ---------------------------------------------------------------------------
-// Resource — сущность для бронирования (столик, врач, корт, фотостудия…)
-// attributes — JSON с нише-специфичными данными (нет хардкода по нишам)
-//
-// Примеры attributes:
-//   Beauty:    { "services": ["haircut","coloring"], "experience_years": 5 }
-//   HoReCa:    { "capacity": 4, "location": "terrace" }
-//   Sports:    { "surface": "clay", "indoor": true }
-//   Medicine:  { "specialization": "psychology", "license": "RU-12345" }
-// ---------------------------------------------------------------------------
 model Resource {
-  id          String    @id @default(cuid())
+  id          String            @id @default(cuid())
   tenantId    String
   name        String
-  type        String                          // staff | room | court | table | other
+  type        String
   description String?
-  capacity    Int?                            // макс. кол-во одновременных клиентов
-  attributes  Json      @default("{}")        // нише-специфичные данные
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  capacity    Int?
+  attributes  Json              @default("{}")
+  translations Json             @default("{}")
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   bookings    Booking[]
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   services    ResourceService[]
   schedules   Schedule[]
 
@@ -100,92 +73,86 @@ model Resource {
   @@index([tenantId, type])
 }
 
-// ---------------------------------------------------------------------------
-// Schedule — рабочий график ресурса по дням недели
-// ---------------------------------------------------------------------------
 model Schedule {
   id         String   @id @default(cuid())
   resourceId String
-  dayOfWeek  Int      // 0=Sunday … 6=Saturday
-  startTime  String   // "09:00"
-  endTime    String   // "18:00"
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
   isActive   Boolean  @default(true)
-
   resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@unique([resourceId, dayOfWeek])
   @@index([resourceId])
 }
 
-// ---------------------------------------------------------------------------
-// Service — услуга тенанта (стрижка, сеанс массажа, аренда корта…)
-// ---------------------------------------------------------------------------
 model Service {
-  id          String    @id @default(cuid())
+  id          String            @id @default(cuid())
   tenantId    String
   name        String
   description String?
-  durationMin Int                             // длительность в минутах
-  price       Int?                            // цена в минимальных единицах валюты (копейки/центы)
-  currency    String    @default("KZT")
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  durationMin Int
+  price       Int?
+  currency    String            @default("KZT")
+  translations Json             @default("{}")
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   bookings    Booking[]
   resources   ResourceService[]
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
 
-// ---------------------------------------------------------------------------
-// ResourceService — M2M: какие услуги оказывает каждый ресурс
-// ---------------------------------------------------------------------------
 model ResourceService {
   resourceId String
   serviceId  String
-
   resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@id([resourceId, serviceId])
 }
 
-// ---------------------------------------------------------------------------
-// Booking — само бронирование
-// ---------------------------------------------------------------------------
 model Booking {
-  id         String        @id @default(cuid())
-  tenantId   String
-  resourceId String
-  serviceId  String?
-  userId     String?                           // null → гостевое бронирование
-  guestName  String?                           // имя гостя (если userId = null)
-  guestPhone String?
-  guestEmail String?
-  startsAt   DateTime
-  endsAt     DateTime
-  status     BookingStatus @default(CONFIRMED)
-  notes      String?                           // комментарий клиента
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  tenant     Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  resource   Resource      @relation(fields: [resourceId], references: [id])
-  service    Service?      @relation(fields: [serviceId], references: [id])
-  user       User?         @relation(fields: [userId], references: [id])
+  id             String        @id @default(cuid())
+  tenantId       String
+  resourceId     String
+  serviceId      String?
+  userId         String?
+  guestName      String?
+  guestPhone     String?
+  guestEmail     String?
+  startsAt       DateTime
+  endsAt         DateTime
+  status         BookingStatus @default(CONFIRMED)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  reminderSentAt DateTime?
+  resource       Resource      @relation(fields: [resourceId], references: [id])
+  service        Service?      @relation(fields: [serviceId], references: [id])
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id])
 
   @@index([tenantId])
-  @@index([tenantId, resourceId, startsAt])   // главный индекс для проверки коллизий
+  @@index([tenantId, resourceId, startsAt])
   @@index([tenantId, status])
   @@index([userId])
+  @@index([startsAt, reminderSentAt])
+}
+
+enum Role {
+  SUPERADMIN
+  OWNER
+  STAFF
+  CUSTOMER
 }
 
 enum BookingStatus {
-  PENDING     // ожидает подтверждения
-  CONFIRMED   // подтверждено
-  CANCELLED   // отменено
-  COMPLETED   // завершено
-  NO_SHOW     // клиент не пришёл
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
 }

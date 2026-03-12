@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -12,6 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { BookingStatusBadge, type BookingStatusValue } from '@/components/booking-status-badge'
+import { useI18n } from '@/lib/i18n/context'
 
 // ---- constants -------------------------------------------------------------
 
@@ -34,7 +37,7 @@ const RESOURCE_PALETTE = [
   { bg: 'bg-teal-100 border-teal-300 text-teal-900', dot: 'bg-teal-500' },
 ]
 
-const DAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+// Day labels are now built dynamically from translations inside the component
 
 // ---- types -----------------------------------------------------------------
 
@@ -167,22 +170,6 @@ const TRANSITIONS: Partial<Record<BookingStatusValue, BookingStatusValue[]>> = {
   CONFIRMED: ['COMPLETED', 'CANCELLED', 'NO_SHOW'],
 }
 
-const STATUS_LABELS: Record<BookingStatusValue, string> = {
-  PENDING: 'Подтвердить',
-  CONFIRMED: 'Завершить',
-  COMPLETED: 'Завершено',
-  CANCELLED: 'Отменить',
-  NO_SHOW: 'Не пришёл',
-}
-
-const ACTION_LABELS: Record<BookingStatusValue, string> = {
-  CONFIRMED: 'Подтвердить',
-  COMPLETED: 'Завершить',
-  CANCELLED: 'Отменить',
-  NO_SHOW: 'Не пришёл',
-  PENDING: 'В ожидание',
-}
-
 // ---- BOOKING DETAIL DIALOG -------------------------------------------------
 
 function BookingDetailDialog({
@@ -200,10 +187,19 @@ function BookingDetailDialog({
   onStatusChange: (id: string, status: BookingStatusValue) => Promise<void>
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const allowed = TRANSITIONS[booking.status] ?? []
+
+  const ACTION_LABELS: Record<BookingStatusValue, string> = {
+    CONFIRMED: t('actions', 'confirm'),
+    COMPLETED: t('actions', 'complete'),
+    CANCELLED: t('actions', 'cancel'),
+    NO_SHOW:   t('actions', 'noShow'),
+    PENDING:   t('actions', 'pending'),
+  }
 
   async function handleChange(status: BookingStatusValue) {
     setError(null)
@@ -212,7 +208,7 @@ function BookingDetailDialog({
       await onStatusChange(booking.id, status)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка')
+      setError(err instanceof Error ? err.message : t('common', 'error'))
     } finally {
       setPending(false)
     }
@@ -241,7 +237,7 @@ function BookingDetailDialog({
           {formatTime(booking.startsAt, timezone)} — {formatTime(booking.endsAt, timezone)}
           {booking.service && (
             <span className="ml-2 text-muted-foreground">
-              ({booking.service.durationMin} мин)
+              ({booking.service.durationMin} {t('booking', 'minutes')})
             </span>
           )}
         </p>
@@ -253,16 +249,16 @@ function BookingDetailDialog({
       {/* Client */}
       <div className="space-y-1 text-sm">
         <p>
-          <span className="text-muted-foreground">Клиент:</span>{' '}
+          <span className="text-muted-foreground">{t('dashboard', 'clientLabel')}</span>{' '}
           <span className="font-medium">{clientName}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">Телефон:</span>{' '}
+          <span className="text-muted-foreground">{t('dashboard', 'phoneLabel')}</span>{' '}
           <span className="font-mono">{clientPhone}</span>
         </p>
         {(booking.user?.email ?? booking.guestEmail) && (
           <p>
-            <span className="text-muted-foreground">Email:</span>{' '}
+            <span className="text-muted-foreground">{t('dashboard', 'emailLabel')}</span>{' '}
             {booking.user?.email ?? booking.guestEmail}
           </p>
         )}
@@ -270,7 +266,7 @@ function BookingDetailDialog({
 
       {/* Status */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Статус:</span>
+        <span className="text-sm text-muted-foreground">{t('dashboard', 'statusLabel')}</span>
         <BookingStatusBadge status={booking.status} />
       </div>
 
@@ -316,7 +312,12 @@ export function BookingCalendar({
   canEdit,
   loading = false,
 }: Props) {
+  const { t } = useI18n()
   const today = new Date()
+  const DAY_LABELS = [
+    t('days', 'mon'), t('days', 'tue'), t('days', 'wed'), t('days', 'thu'),
+    t('days', 'fri'), t('days', 'sat'), t('days', 'sun'),
+  ]
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
 
   const [nowPx, setNowPx] = useState<number | null>(null)
@@ -396,7 +397,7 @@ export function BookingCalendar({
             onClick={() => onWeekChange(getMonday(new Date()))}
           >
             <CalendarDays className="h-3.5 w-3.5 mr-1" />
-            Сегодня
+            {t('dashboard', 'today')}
           </Button>
           <Button
             variant="outline"
@@ -445,7 +446,7 @@ export function BookingCalendar({
       <div className="overflow-x-auto rounded-lg border bg-background">
         {loading && (
           <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <span className="text-sm">Загрузка…</span>
+            <span className="text-sm">{t('common', 'loading')}</span>
           </div>
         )}
         {!loading && (
@@ -580,7 +581,7 @@ export function BookingCalendar({
       {/* Empty state */}
       {!loading && calendarData && Object.keys(calendarData).length === 0 && (
         <div className="py-10 text-center text-sm text-muted-foreground">
-          Нет бронирований за выбранную неделю
+          {t('dashboard', 'noWeekBookings')}
         </div>
       )}
 
@@ -588,7 +589,7 @@ export function BookingCalendar({
       <Dialog open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Бронирование</DialogTitle>
+            <DialogTitle>{t('dashboard', 'booking')}</DialogTitle>
           </DialogHeader>
           {selectedBooking && (
             <BookingDetailDialog

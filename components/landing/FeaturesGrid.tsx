@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Calendar,
   Clock,
@@ -6,48 +8,27 @@ import {
   BarChart3,
   ShieldCheck,
 } from "lucide-react"
-
-const FEATURES = [
-  {
-    icon: Calendar,
-    title: "Онлайн-бронирование 24/7",
-    description: "Клиенты записываются в любое время без звонков и мессенджеров.",
-  },
-  {
-    icon: Clock,
-    title: "Управление расписанием",
-    description: "Гибкие рабочие часы для каждого специалиста или ресурса.",
-  },
-  {
-    icon: Building2,
-    title: "Мультитенантность",
-    description: "Каждый бизнес — отдельный аккаунт с изолированными данными.",
-  },
-  {
-    icon: Smartphone,
-    title: "Адаптивный дизайн",
-    description: "Страница бронирования отлично выглядит на любом устройстве.",
-  },
-  {
-    icon: BarChart3,
-    title: "Dashboard с аналитикой",
-    description: "Бронирования, клиенты и ресурсы в одном удобном интерфейсе.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Защита от спама",
-    description: "Лимиты бронирований по номеру телефона предотвращают злоупотребления.",
-  },
-]
+import { useI18n } from "@/lib/i18n/context"
 
 export function FeaturesGrid() {
+  const { t } = useI18n()
+
+  const FEATURES = [
+    { icon: Calendar,    title: t('landing', 'feature1'), description: t('landing', 'feature1Desc') },
+    { icon: Clock,       title: t('landing', 'feature2'), description: t('landing', 'feature2Desc') },
+    { icon: Building2,   title: t('landing', 'feature3'), description: t('landing', 'feature3Desc') },
+    { icon: Smartphone,  title: t('landing', 'feature4'), description: t('landing', 'feature4Desc') },
+    { icon: BarChart3,   title: t('landing', 'feature5'), description: t('landing', 'feature5Desc') },
+    { icon: ShieldCheck, title: t('landing', 'feature6'), description: t('landing', 'feature6Desc') },
+  ]
+
   return (
     <section id="features" className="py-20 bg-zinc-50">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">Возможности</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('landing', 'features')}</h2>
           <p className="text-zinc-500 max-w-xl mx-auto">
-            Всё необходимое для приёма онлайн-записей — из коробки, без настройки разработчиков.
+            {t('landing', 'featuresSubtitle')}
           </p>
         </div>
 

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
 import { BookingsDashboard } from '@/components/bookings-dashboard'
+import { getServerT } from '@/lib/i18n/server'
 
 export default async function BookingsPage() {
   const session = await getServerSession(authConfig)
@@ -11,7 +12,7 @@ export default async function BookingsPage() {
   const tenantId = session.user.tenantId
 
   // Get tenant timezone + resources for filter dropdown
-  const [tenant, resources] = await Promise.all([
+  const [tenant, resources, t] = await Promise.all([
     basePrisma.tenant.findUnique({
       where: { id: tenantId },
       select: { slug: true, timezone: true },
@@ -21,6 +22,7 @@ export default async function BookingsPage() {
       select: { id: true, name: true, type: true },
       orderBy: { name: 'asc' },
     }),
+    getServerT(),
   ])
 
   if (!tenant) redirect('/login')
@@ -30,9 +32,9 @@ export default async function BookingsPage() {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Бронирования</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('dashboard', 'bookings')}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Управляйте записями: меняйте статусы, просматривайте в таблице или календаре
+          {t('dashboard', 'bookingsSubtitle')}
         </p>
       </div>
       <BookingsDashboard

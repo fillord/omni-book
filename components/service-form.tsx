@@ -1,3 +1,5 @@
+"use client"
+
 'use client'
 
 import { useState } from 'react'
@@ -21,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   createServiceSchema,
   updateServiceSchema,
@@ -32,6 +35,7 @@ import {
 import type { ServiceWithRelations } from '@/lib/actions/services'
 import type { ResourceWithRelations } from '@/lib/actions/resources'
 import { RESOURCE_TYPE_LABELS } from '@/lib/validations/resource'
+import { useI18n } from '@/lib/i18n/context'
 
 // ---- props -----------------------------------------------------------------
 
@@ -47,6 +51,10 @@ type Props = {
 type FormValues = {
   name: string
   description: string
+  name_kz?: string
+  desc_kz?: string
+  name_en?: string
+  desc_en?: string
   durationMin: string
   price: string
   currency: string
@@ -66,6 +74,7 @@ function formatPrice(price: number | null | undefined, currency: string): string
 // ---- ServiceForm -----------------------------------------------------------
 
 export function ServiceForm({ service, availableResources, onSubmit, disabled = false }: Props) {
+  const { t } = useI18n()
   const isEdit = !!service
 
   // Multi-select resource IDs
@@ -78,6 +87,10 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
     defaultValues: {
       name: service?.name ?? '',
       description: service?.description ?? '',
+      name_kz: ((service as any)?.translations?.kz?.name) || '',
+      desc_kz: ((service as any)?.translations?.kz?.description) || '',
+      name_en: ((service as any)?.translations?.en?.name) || '',
+      desc_en: ((service as any)?.translations?.en?.description) || '',
       durationMin: String(service?.durationMin ?? 30),
       price: service?.price != null ? String(service.price / 100) : '',
       currency: service?.currency ?? 'KZT',
@@ -93,7 +106,7 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
 
   async function handleSubmit(values: FormValues) {
     if (selectedResourceIds.length === 0) {
-      setResourceError('Выберите хотя бы один ресурс')
+      setResourceError(t('form', 'selectResource'))
       return
     }
 
@@ -104,6 +117,10 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
       price: values.price !== '' ? parseInt(values.price) : undefined,
       currency: values.currency || 'KZT',
       resourceIds: selectedResourceIds,
+      translations: {
+        en: { name: values.name_en || '', description: values.desc_en || '' },
+        kz: { name: values.name_kz || '', description: values.desc_kz || '' },
+      }
     })
 
     if (!parsed.success) {
@@ -127,35 +144,100 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 
-        {/* Name */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Название <span className="text-destructive">*</span></FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Первичная консультация" disabled={isDisabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <Tabs defaultValue="ru" className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="ru">RU (Основной)</TabsTrigger>
+            <TabsTrigger value="kz">Қазақша</TabsTrigger>
+            <TabsTrigger value="en">English</TabsTrigger>
+          </TabsList>
 
-        {/* Description */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Описание</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Краткое описание услуги" disabled={isDisabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <TabsContent value="ru" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} <span className="text-destructive">*</span></FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceNamePlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'serviceDesc')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceDescPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="kz" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name_kz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} (KZ)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceNamePlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="desc_kz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'serviceDesc')} (KZ)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceDescPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+
+          <TabsContent value="en" className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name_en"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'name')} (EN)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceNamePlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="desc_en"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('form', 'serviceDesc')} (EN)</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder={t('form', 'serviceDescPlaceholder')} disabled={isDisabled} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Duration + Price + Currency */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -164,7 +246,7 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
             name="durationMin"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Длительность <span className="text-destructive">*</span></FormLabel>
+                <FormLabel>{t('form', 'duration')} <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled}>
                     <SelectTrigger className="w-full">
@@ -173,7 +255,7 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
                     <SelectContent>
                       {DURATION_OPTIONS.map((d) => (
                         <SelectItem key={d} value={String(d)}>
-                          {d} мин
+                          {d} {t('booking', 'minutes')}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -189,7 +271,7 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Цена</FormLabel>
+                <FormLabel>{t('form', 'price')}</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -209,7 +291,7 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
             name="currency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Валюта</FormLabel>
+                <FormLabel>{t('form', 'currency')}</FormLabel>
                 <FormControl>
                   <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled}>
                     <SelectTrigger className="w-full">
@@ -231,14 +313,14 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
         {/* Resource multi-select */}
         <div className="space-y-2">
           <p className="text-sm font-medium">
-            Ресурсы <span className="text-destructive">*</span>
+            {t('form', 'resources')} <span className="text-destructive">*</span>
           </p>
           <p className="text-xs text-muted-foreground">
-            Выберите, какие ресурсы оказывают эту услугу
+            {t('form', 'resourcesHint')}
           </p>
           {availableResources.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Нет доступных ресурсов. Сначала создайте ресурс.
+              {t('form', 'noResources')}
             </p>
           ) : (
             <div className="grid gap-2 rounded-lg border p-3 max-h-48 overflow-y-auto">
@@ -274,10 +356,10 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
             {submitting ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Сохранение…
+                {t('common', 'saving')}
               </span>
             ) : (
-              isEdit ? 'Сохранить' : 'Создать'
+              isEdit ? t('common', 'save') : t('common', 'create')
             )}
           </Button>
         </div>

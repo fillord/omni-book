@@ -13,42 +13,43 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { useI18n } from "@/lib/i18n/context"
 
-// ---- Schema ----------------------------------------------------------------
+// ---- Types -----------------------------------------------------------------
 
-const loginSchema = z.object({
-  email:    z.string().min(1, "Введите email").email("Некорректный email"),
-  password: z.string().min(1, "Введите пароль"),
-})
-type LoginForm = z.infer<typeof loginSchema>
+type LoginFormValues = { email: string; password: string }
 
-// ---- Error map from NextAuth -----------------------------------------------
-
-const NEXTAUTH_ERRORS: Record<string, string> = {
-  CredentialsSignin:  "Неверный email или пароль",
-  OAuthAccountNotLinked: "Этот email уже используется с другим способом входа",
-  default:            "Ошибка входа. Попробуйте снова.",
+const NEXTAUTH_ERROR_KEYS: Record<string, string> = {
+  CredentialsSignin:     'credentialsError',
+  OAuthAccountNotLinked: 'oauthLinkedError',
+  default:               'loginError',
 }
 
 // ---- Component -------------------------------------------------------------
 
 function LoginForm() {
+  const { t }    = useI18n()
   const router       = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl  = searchParams.get("from") ?? "/dashboard"
   const authError    = searchParams.get("error")
 
+  const loginSchema = z.object({
+    email:    z.string().min(1, t('auth', 'emailRequired')).email(t('auth', 'emailInvalid')),
+    password: z.string().min(1, t('auth', 'passwordRequired')),
+  })
+
   const [serverError, setServerError] = useState<string | null>(
-    authError ? (NEXTAUTH_ERRORS[authError] ?? NEXTAUTH_ERRORS.default) : null
+    authError ? (t('auth', NEXTAUTH_ERROR_KEYS[authError] ?? NEXTAUTH_ERROR_KEYS.default)) : null
   )
   const [loading, setLoading] = useState(false)
 
-  const form = useForm<LoginForm>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   })
 
-  async function onSubmit(values: LoginForm) {
+  async function onSubmit(values: LoginFormValues) {
     setLoading(true)
     setServerError(null)
 
@@ -61,7 +62,7 @@ function LoginForm() {
     setLoading(false)
 
     if (!result?.ok) {
-      setServerError(NEXTAUTH_ERRORS[result?.error ?? ""] ?? NEXTAUTH_ERRORS.default)
+      setServerError(t('auth', NEXTAUTH_ERROR_KEYS[result?.error ?? ""] ?? NEXTAUTH_ERROR_KEYS.default))
       return
     }
 
@@ -77,8 +78,8 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl font-bold tracking-tight">Вход в OmniBook</CardTitle>
-          <CardDescription>Введите email и пароль для входа</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">{t('auth', 'loginTitle')}</CardTitle>
+          <CardDescription>{t('auth', 'loginSubtitle')}</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -108,7 +109,7 @@ function LoginForm() {
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Пароль</Label>
+                <Label htmlFor="password">{t('auth', 'password')}</Label>
               </div>
               <Input
                 id="password"
@@ -131,10 +132,10 @@ function LoginForm() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
                   </svg>
-                  Входим…
+                  {t('auth', 'signingIn')}
                 </span>
               ) : (
-                "Войти"
+                t('common', 'login')
               )}
             </Button>
           </form>
@@ -145,7 +146,7 @@ function LoginForm() {
               <div className="relative">
                 <Separator />
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                  или
+                  {t('auth', 'or')}
                 </span>
               </div>
               <Button
@@ -161,15 +162,15 @@ function LoginForm() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Войти через Google
+                {t('auth', 'googleSignIn')}
               </Button>
             </>
           )}
 
           <p className="text-center text-sm text-muted-foreground">
-            Нет аккаунта?{" "}
+            {t('auth', 'noAccount')}{" "}
             <Link href="/register" className="font-medium underline underline-offset-4 hover:text-foreground">
-              Зарегистрироваться
+              {t('common', 'register')}
             </Link>
           </p>
         </CardContent>
