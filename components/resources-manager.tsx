@@ -51,6 +51,7 @@ function getAttrDisplay(
   field: AttributeField,
   yes: string,
   no: string,
+  t: (section: string, key: string) => string,
 ): string {
   if (field.forTypes && !field.forTypes.includes(resource.type)) return '—'
   const attrs = (
@@ -62,6 +63,7 @@ function getAttrDisplay(
   if (val == null || val === '') return '—'
   if (typeof val === 'boolean')  return val ? yes : no
   if (Array.isArray(val))        return val.join(', ') || '—'
+  if (field.type === 'select')   return t('niche', String(val))
   return String(val)
 }
 
@@ -281,7 +283,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                   </Badge>
                 </div>
                 {attrColumns.map((f) => {
-                  const val = getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'))
+                  const val = getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'), t)
                   if (val === '—') return null
                   return (
                     <p key={f.key} className="text-xs text-muted-foreground">
@@ -342,7 +344,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                   </TableCell>
                   {attrColumns.map((f) => (
                     <TableCell key={f.key} className="text-sm text-muted-foreground">
-                      {getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'))}
+                      {getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'), t)}
                     </TableCell>
                   ))}
                   <TableCell>

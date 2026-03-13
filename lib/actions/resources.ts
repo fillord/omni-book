@@ -201,7 +201,7 @@ export async function deleteResource(id: string): Promise<void> {
 
   if (futureCount > 0) throw new Error(`FUTURE_BOOKINGS:${futureCount}`)
 
-  await db.resource.update({ where: { id }, data: { isActive: false } })
+  await db.resource.delete({ where: { id } })
 
   revalidatePath('/dashboard/resources')
 }

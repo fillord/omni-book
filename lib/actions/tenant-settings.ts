@@ -27,10 +27,11 @@ export async function getTenantSettings() {
       website:     true,
       logoUrl:     true,
       coverUrl:    true,
-      workingHours: true,
-      timezone:    true,
-      socialLinks: true,
-      translations: true,
+      workingHours:   true,
+      timezone:       true,
+      socialLinks:    true,
+      translations:   true,
+      telegramChatId: true,
     },
   })
 }
@@ -72,8 +73,9 @@ export async function updateTenantSettings(data: TenantSettingsInput) {
       coverUrl:     validated.coverUrl     || null,
       workingHours: validated.workingHours || null,
       timezone:     validated.timezone,
-      socialLinks:  validated.socialLinks  ?? {},
-      translations: mergedTranslations as Prisma.InputJsonValue,
+      socialLinks:    validated.socialLinks  ?? {},
+      translations:   mergedTranslations as Prisma.InputJsonValue,
+      telegramChatId: validated.telegramChatId || null,
     },
   })
 

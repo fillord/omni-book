@@ -156,6 +156,13 @@ function TagInput({
   )
 }
 
+// ---- opt label helper ------------------------------------------------------
+
+/** Translates an opt_xxx key via niche section; passes through any other value as-is */
+function optLabel(t: (s: string, k: string) => string, val: string): string {
+  return val.startsWith('opt_') ? t('niche', val) : val
+}
+
 // ---- parseAttrs ------------------------------------------------------------
 
 function parseAttrs(raw: unknown): Attrs {
@@ -197,7 +204,8 @@ function AttributeFieldInput({
           disabled={disabled}
         />
       )
-    case 'select':
+    case 'select': {
+      const currentLabel = (value as string) ? optLabel(t, value as string) : undefined
       return (
         <Select
           value={(value as string) ?? ''}
@@ -205,15 +213,18 @@ function AttributeFieldInput({
           disabled={disabled}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder={`${t('form', 'select')} ${field.label.toLowerCase()}`} />
+            <SelectValue placeholder={`${t('form', 'select')} ${t('niche', field.label).toLowerCase()}`}>
+              {currentLabel}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {field.options?.map((opt) => (
-              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+              <SelectItem key={opt} value={opt}>{optLabel(t, opt)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       )
+    }
     case 'multitext':
       return (
         <TagInput

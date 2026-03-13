@@ -49,10 +49,11 @@ type TenantData = {
   website:     string | null
   logoUrl:     string | null
   coverUrl:    string | null
-  workingHours: string | null
-  timezone:    string
-  socialLinks: unknown
-  translations?: unknown
+  workingHours:   string | null
+  timezone:       string
+  socialLinks:    unknown
+  translations?:  unknown
+  telegramChatId: string | null
 }
 
 type FormValues = {
@@ -71,9 +72,10 @@ type FormValues = {
   coverUrl:     string
   workingHours: string
   timezone:     string
-  instagram:    string
-  whatsapp:     string
-  telegram:     string
+  instagram:      string
+  whatsapp:       string
+  telegram:       string
+  telegramChatId: string
 }
 
 type Props = {
@@ -170,9 +172,10 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       coverUrl:     tenant.coverUrl     ?? "",
       workingHours: tenant.workingHours ?? "",
       timezone:     tenant.timezone     || "Asia/Almaty",
-      instagram:    social.instagram    ?? "",
-      whatsapp:     social.whatsapp     ?? "",
-      telegram:     social.telegram     ?? "",
+      instagram:      social.instagram        ?? "",
+      whatsapp:       social.whatsapp         ?? "",
+      telegram:       social.telegram         ?? "",
+      telegramChatId: tenant.telegramChatId   ?? "",
     },
   })
 
@@ -200,6 +203,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
         whatsapp:  values.whatsapp,
         telegram:  values.telegram,
       },
+      telegramChatId: values.telegramChatId,
       translations: {
         en: {
           name: values.name_en,
@@ -533,6 +537,41 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                 placeholder="@username"
               />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Telegram уведомления */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Telegram-уведомления</CardTitle>
+          <CardDescription>
+            Введите ваш Telegram Chat ID, чтобы получать уведомления о новых записях прямо в Telegram.
+            Узнать свой Chat ID можно через бота <span className="font-mono text-xs">@userinfobot</span>.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            <Label htmlFor="telegramChatId">Telegram Chat ID</Label>
+            <Input
+              id="telegramChatId"
+              {...register("telegramChatId")}
+              disabled={readOnly}
+              placeholder="123456789"
+            />
+            <p className="text-xs text-muted-foreground">
+              Уведомления приходят от бота{' '}
+              <a
+                href="https://t.me/omni_book_bot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground transition-colors"
+              >
+                @omni_book_bot
+              </a>
+              . Чтобы активировать доставку, найдите бота в Telegram, нажмите{' '}
+              <span className="font-mono">/start</span> и введите полученный ID в это поле.
+            </p>
           </div>
         </CardContent>
       </Card>

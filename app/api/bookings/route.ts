@@ -5,7 +5,10 @@ import { basePrisma, getTenantDB } from '@/lib/db'
 import { resolveTenant, isTenantError } from '@/lib/tenant'
 import { createBooking, BookingConflictError, BookingLimitError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
 import { sendBookingConfirmation } from '@/lib/email/resend'
+import { sendTelegramMessage } from '@/lib/telegram'
 import { normalizePhone } from '@/lib/utils/phone'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 
 // ---- query schema ----------------------------------------------------------
 
@@ -141,11 +144,16 @@ export async function POST(req: NextRequest) {
     })
     console.log(`✅ Booking created: ${booking.id} for ${booking.guestName} at ${booking.startsAt}`)
 
+    // Fetch service/resource names for notifications (email + Telegram).
+    // Uses basePrisma with explicit tenantId — avoids the tenant extension's
+    // post-validation returning null when tenantId is absent from the select.
+    const [service, resource] = await Promise.all([
+      basePrisma.service.findFirst({ where: { id: serviceId, tenantId: tenant.id }, select: { name: true } }),
+      basePrisma.resource.findFirst({ where: { id: resourceId, tenantId: tenant.id }, select: { name: true } }),
+    ])
+
     // Fire-and-forget confirmation email
     if (booking.guestEmail && booking.guestName) {
-      const db = getTenantDB(tenant.id)
-      const service = await db.service.findUnique({ where: { id: serviceId }, select: { name: true } })
-      const resource = await db.resource.findUnique({ where: { id: resourceId }, select: { name: true } })
       sendBookingConfirmation({
         guestName:    booking.guestName,
         guestEmail:   booking.guestEmail,
@@ -154,6 +162,22 @@ export async function POST(req: NextRequest) {
         resourceName: resource?.name ?? '',
         startsAt:     booking.startsAt,
       }).catch(console.error)
+    }
+
+    // Fire-and-forget Telegram notification to business owner
+    const chatId = (tenant as any).telegramChatId as string | null
+    if (chatId) {
+      const startsAt = new Date(booking.startsAt)
+      const dateStr = format(startsAt, 'd MMMM yyyy', { locale: ru })
+      const timeStr = format(startsAt, 'HH:mm')
+      const msg = [
+        '🔔 <b>Новая запись!</b>',
+        `👤 Клиент: ${booking.guestName}`,
+        `📅 Дата: ${dateStr}`,
+        `⏰ Время: ${timeStr}`,
+        `🛠 Услуга: ${service?.name ?? 'Не указана'}`,
+      ].join('\n')
+      sendTelegramMessage(chatId, msg).catch(console.error)
     }
 
     return NextResponse.json({ booking }, { status: 201 })

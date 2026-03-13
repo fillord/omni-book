@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n/context"
 const DEMOS = [
   {
     slug: "city-polyclinic",
-    name: "Городская поликлиника",
+    nameKey: "demoNamePolyclinic",
     descriptionKey: "demoPolyclinicDesc",
     nicheKey: "medicine",
     color: "bg-blue-50 border-blue-200 hover:border-blue-400",
@@ -15,7 +15,7 @@ const DEMOS = [
   },
   {
     slug: "beauty-studio",
-    name: "Beauty Studio",
+    nameKey: "demoNameBeauty",
     descriptionKey: "demoBeautyDesc",
     nicheKey: "beauty",
     color: "bg-pink-50 border-pink-200 hover:border-pink-400",
@@ -24,7 +24,7 @@ const DEMOS = [
   },
   {
     slug: "bistro-central",
-    name: "Bistro Central",
+    nameKey: "demoNameBistro",
     descriptionKey: "demoBistroDesc",
     nicheKey: "horeca",
     color: "bg-orange-50 border-orange-200 hover:border-orange-400",
@@ -33,7 +33,7 @@ const DEMOS = [
   },
   {
     slug: "sport-arena",
-    name: "Sport Arena",
+    nameKey: "demoNameSport",
     descriptionKey: "demoSportDesc",
     nicheKey: "sport",
     color: "bg-green-50 border-green-200 hover:border-green-400",
@@ -56,7 +56,7 @@ export function DemoSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {DEMOS.map(({ slug, name, descriptionKey, nicheKey, color, badge, dot }) => (
+          {DEMOS.map(({ slug, nameKey, descriptionKey, nicheKey, color, badge, dot }) => (
             <a
               key={slug}
               href={`/${slug}`}
@@ -74,7 +74,7 @@ export function DemoSection() {
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 mb-1">{name}</h3>
+                <h3 className="font-semibold text-zinc-900 mb-1">{t('landing', nameKey)}</h3>
                 <p className="text-xs text-zinc-500 leading-relaxed">{t('landing', descriptionKey)}</p>
               </div>
               <div className="flex items-center gap-1.5 mt-auto">

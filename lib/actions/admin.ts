@@ -1,11 +1,10 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { PrismaClient, Plan, PlanStatus } from '@prisma/client'
+import { Plan, PlanStatus } from '@prisma/client'
 import { authConfig } from '@/lib/auth/config'
 import { getServerSession } from 'next-auth'
-
-const prisma = new PrismaClient()
+import { basePrisma } from '@/lib/db'
 
 
 // Безопасная проверка: только админ
@@ -29,7 +28,7 @@ export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus:
     await ensureSuperAdmin()
 
     // Получаем текущий план, чтобы понять — изменился ли он
-    const current = await prisma.tenant.findUnique({
+    const current = await basePrisma.tenant.findUnique({
       where: { id: tenantId },
       select: { plan: true },
     })
@@ -41,7 +40,7 @@ export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus:
       data.maxResources = PLAN_DEFAULT_MAX_RESOURCES[plan]
     }
 
-    await prisma.tenant.update({
+    await basePrisma.tenant.update({
       where: { id: tenantId },
       data,
     })
@@ -59,7 +58,7 @@ export async function updateTenantMaxResources(tenantId: string, maxResources: n
 
     if (maxResources < 1) throw new Error('Количество русурсов не может быть меньше 1')
 
-    await prisma.tenant.update({
+    await basePrisma.tenant.update({
       where: { id: tenantId },
       data: { maxResources }
     })
@@ -75,7 +74,7 @@ export async function banTenant(tenantId: string) {
   try {
     await ensureSuperAdmin()
 
-    await prisma.tenant.update({
+    await basePrisma.tenant.update({
       where: { id: tenantId },
       data: { planStatus: PlanStatus.BANNED }
     })
@@ -92,7 +91,7 @@ export async function deleteTenant(tenantId: string) {
     await ensureSuperAdmin()
 
     // Каскадное удаление: User, Resource, Service, Booking удаляются автоматически (onDelete: Cascade)
-    await prisma.tenant.delete({
+    await basePrisma.tenant.delete({
       where: { id: tenantId }
     })
 

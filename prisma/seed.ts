@@ -32,7 +32,7 @@ async function main() {
   // ===== MEDICINE =====
   const clinic = await prisma.tenant.create({
     data: {
-      slug: "city-polyclinic", name: "Городская поликлиника №1", niche: "medicine", plan: "pro", timezone: "Asia/Almaty",
+      slug: "city-polyclinic", name: "Городская поликлиника №1", niche: "medicine", plan: "PRO", timezone: "Asia/Almaty",
       description: "Многопрофильная поликлиника с опытными специалистами. Современное оборудование, внимательный персонал.",
       phone: "+7 727 123 45 67",
       email: "info@polyclinic.kz",
@@ -72,7 +72,7 @@ async function main() {
   // ===== MEDICINE #2 =====
   const clinic2 = await prisma.tenant.create({
     data: {
-      slug: "zdorovie-med", name: 'Медцентр "Здоровье"', niche: "medicine", plan: "free", timezone: "Asia/Almaty",
+      slug: "zdorovie-med", name: 'Медцентр "Здоровье"', niche: "medicine", plan: "FREE", timezone: "Asia/Almaty",
       description: "Медицинский центр для всей семьи. Неврология, терапия, диагностика.",
       phone: "+7 727 987 65 43",
       address: "пр. Аль-Фараби 17",
@@ -91,7 +91,7 @@ async function main() {
   // ===== BEAUTY =====
   const salon = await prisma.tenant.create({
     data: {
-      slug: "beauty-studio", name: "Beauty Studio Almaty", niche: "beauty", plan: "pro", timezone: "Asia/Almaty",
+      slug: "beauty-studio", name: "Beauty Studio Almaty", niche: "beauty", plan: "PRO", timezone: "Asia/Almaty",
       description: "Студия красоты в центре города. Стрижки, окрашивание, уход за лицом и телом.",
       phone: "+7 701 555 00 11",
       address: "пр. Достык 89",
@@ -128,7 +128,7 @@ async function main() {
   // ===== HORECA =====
   const bistro = await prisma.tenant.create({
     data: {
-      slug: "bistro-central", name: "Bistro Central", niche: "horeca", plan: "pro", timezone: "Asia/Almaty",
+      slug: "bistro-central", name: "Bistro Central", niche: "horeca", plan: "PRO", timezone: "Asia/Almaty",
       description: "Уютное бистро в центре Алматы. Европейская кухня, живая музыка по выходным, банкетный зал.",
       phone: "+7 727 300 10 20",
       email: "reserve@bistro-central.kz",
@@ -166,7 +166,7 @@ async function main() {
   // ===== SPORTS =====
   const sport = await prisma.tenant.create({
     data: {
-      slug: "sport-arena", name: "Sport Arena", niche: "sports", plan: "free", timezone: "Asia/Almaty",
+      slug: "sport-arena", name: "Sport Arena", niche: "sports", plan: "FREE", timezone: "Asia/Almaty",
       description: "Теннисные корты для любителей и профессионалов. Грунтовые и хард-покрытия, прокат инвентаря.",
       phone: "+7 705 222 33 44",
       address: "ул. Тимирязева 28",

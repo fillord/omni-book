@@ -30,8 +30,9 @@ model Tenant {
   socialLinks  Json       @default("{}")
   translations Json       @default("{}")
   website      String?
-  workingHours String?
-  bookings     Booking[]
+  workingHours    String?
+  telegramChatId  String?
+  bookings        Booking[]
   resources    Resource[]
   services     Service[]
   users        User[]
@@ -133,7 +134,7 @@ model Booking {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   reminderSentAt DateTime?
-  resource       Resource      @relation(fields: [resourceId], references: [id])
+  resource       Resource      @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   service        Service?      @relation(fields: [serviceId], references: [id])
   tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user           User?         @relation(fields: [userId], references: [id])

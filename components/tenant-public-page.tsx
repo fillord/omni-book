@@ -222,6 +222,25 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {hasSocial && (
+              <div className="hidden sm:flex items-center gap-2 mr-1">
+                {social.instagram && (
+                  <a href={instagramUrl(social.instagram)} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-700 transition-colors" title="Instagram">
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {social.whatsapp && (
+                  <a href={whatsappUrl(social.whatsapp)} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-700 transition-colors" title="WhatsApp">
+                    <MessageCircle className="w-4 h-4" />
+                  </a>
+                )}
+                {social.telegram && (
+                  <a href={telegramUrl(social.telegram)} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-700 transition-colors" title="Telegram">
+                    <Send className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            )}
             <LocaleSwitcher className="h-8 text-xs" />
             {canBook && (
               <a

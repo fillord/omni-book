@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const tenantPlanStatus = (tenant as any)?.planStatus || 'ACTIVE'
 
   if (tenantPlanStatus === 'BANNED') {
-    redirect('/banned')
+    redirect('/api/force-signout')
   }
 
   const nicheConfig = getNicheConfig(tenant?.niche)
