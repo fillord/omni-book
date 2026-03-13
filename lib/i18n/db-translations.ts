@@ -1,7 +1,9 @@
 import type { Locale } from './translations'
 
+type Translations = Record<string, Record<string, string>>
+
 export function getDbTranslation(
-  entity: { name: string; description?: string | null; translations?: any },
+  entity: { name: string; description?: string | null; translations?: Translations | null },
   field: 'name' | 'description',
   locale: Locale | string
 ): string {

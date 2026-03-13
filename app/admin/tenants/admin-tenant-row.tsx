@@ -4,7 +4,18 @@ import { useState } from 'react'
 import { Plan, PlanStatus } from '@prisma/client'
 import { updateTenantPlan, updateTenantMaxResources, banTenant, deleteTenant } from '@/lib/actions/admin'
 
-export function AdminTenantRow({ tenant }: { tenant: any }) {
+interface Tenant {
+  id: string
+  name: string
+  slug: string
+  email: string | null
+  plan: Plan
+  planStatus: PlanStatus
+  maxResources: number
+  createdAt: Date | string
+}
+
+export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 

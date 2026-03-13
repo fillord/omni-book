@@ -50,7 +50,7 @@ export async function updateTenantSettings(data: TenantSettingsInput) {
     where: { id: session.user.tenantId },
     select: { translations: true },
   })
-  const existingTranslations = (existingTenant?.translations as Record<string, any>) || {}
+  const existingTranslations = (existingTenant?.translations as Record<string, Record<string, string>>) || {}
   
   const mergedTranslations = validated.translations
     ? Object.entries(validated.translations).reduce((acc, [lang, dict]) => {

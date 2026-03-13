@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fire-and-forget Telegram notification to business owner
-    const chatId = (tenant as any).telegramChatId as string | null
+    const chatId = (tenant as unknown as { telegramChatId?: string | null }).telegramChatId ?? null
     if (chatId) {
       const startsAt = new Date(booking.startsAt)
       const dateStr = format(startsAt, 'd MMMM yyyy', { locale: ru })

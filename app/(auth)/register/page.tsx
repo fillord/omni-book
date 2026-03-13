@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { useForm } from "react-hook-form"
+import { useForm, type ResolverResult } from "react-hook-form"
 import { z } from "zod"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
@@ -104,7 +104,7 @@ export default function RegisterPage() {
       return {
         values: {},
         errors: fieldErrors,
-      } as any
+      } as ResolverResult<RegisterFormValues>
     },
     defaultValues: {
       name: "", email: "", password: "", confirm: "",
