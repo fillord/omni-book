@@ -14,6 +14,11 @@ import {
 
 // ---- types -----------------------------------------------------------------
 
+interface TenantPlanInfo {
+  maxResources?: number
+  maxServices?: number
+}
+
 const RESOURCE_INCLUDE = {
   schedules: true,
   services: {
@@ -107,8 +112,7 @@ export async function createResource(
     where: { tenantId }
   })
 
-  // Используем каст к any чтобы обойти временный кэш типов TS-сервера (мы только что сделали db push)
-  const maxRes = (tenantObj as any).maxResources || 1
+  const maxRes = (tenantObj as unknown as TenantPlanInfo).maxResources || 1
 
   if (currentResourceCount >= maxRes) {
     throw new Error('Лимит ресурсов исчерпан. Пожалуйста, обновите тарифный план или обратитесь в поддержку.')
@@ -116,6 +120,7 @@ export async function createResource(
 
   const resource = await db.resource.create({
     data: {
+      tenantId,
       name:        parsed.name,
       type:        parsed.type,
       description: parsed.description,
@@ -161,7 +166,7 @@ export async function updateResource(
 
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)
-    const existingTranslations = (existing.translations as Record<string, any>) || {}
+    const existingTranslations = (existing.translations as Record<string, Record<string, string>>) || {}
     updateData.translations = Object.entries(parsed.translations).reduce((acc, [lang, dict]) => {
       acc[lang] = { ...(acc[lang] || {}), ...dict }
       return acc

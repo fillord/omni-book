@@ -12,6 +12,13 @@ import {
   type UpdateServiceInput,
 } from '@/lib/validations/service'
 
+// ---- types -----------------------------------------------------------------
+
+interface TenantPlanInfo {
+  maxResources?: number
+  maxServices?: number
+}
+
 // ---- include shape ---------------------------------------------------------
 
 const SERVICE_INCLUDE = {
@@ -68,6 +75,7 @@ export async function createService(
 
   const svc = await db.service.create({
     data: {
+      tenantId:    tenantId,
       name:        parsed.name,
       description: parsed.description,
       durationMin: parsed.durationMin,
@@ -115,7 +123,7 @@ export async function updateService(
 
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)
-    const existingTranslations = (existing.translations as Record<string, any>) || {}
+    const existingTranslations = (existing.translations as Record<string, Record<string, string>>) || {}
     updateData.translations = Object.entries(parsed.translations).reduce((acc, [lang, dict]) => {
       acc[lang] = { ...(acc[lang] || {}), ...dict }
       return acc

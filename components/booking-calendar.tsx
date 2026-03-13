@@ -2,11 +2,10 @@
 
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { toZonedTime } from 'date-fns-tz'
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -305,7 +304,7 @@ function BookingDetailDialog({
 export function BookingCalendar({
   calendarData,
   timezone,
-  tenantSlug,
+  tenantSlug: _tenantSlug,
   weekStart,
   onWeekChange,
   onStatusChange,

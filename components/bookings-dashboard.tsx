@@ -2,13 +2,11 @@
 
 'use client'
 
-import { useState, useEffect, useCallback, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
 import { CalendarDays, Table2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatPhone } from '@/lib/utils/phone'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -18,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { BookingStatusBadge, type BookingStatusValue } from '@/components/booking-status-badge'
-import { BookingCalendar, type CalendarData, type CalendarBooking, getMonday } from '@/components/booking-calendar'
+import { BookingCalendar, type CalendarData, getMonday } from '@/components/booking-calendar'
 import { useI18n } from '@/lib/i18n/context'
 
 // ---- types -----------------------------------------------------------------
@@ -114,9 +112,6 @@ function formatDateTimeRu(utcStr: string, timezone: string): { date: string; tim
 
 export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: Props) {
   const { t } = useI18n()
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-
   // Tab
   const [tab, setTab] = useState<'table' | 'calendar'>('table')
 

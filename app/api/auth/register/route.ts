@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { basePrisma } from '@/lib/db'
-import { Prisma } from '@prisma/client'
+import { Prisma, Plan, PlanStatus } from '@prisma/client'
 import { getServerT } from '@/lib/i18n/server'
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/
 
@@ -53,9 +53,9 @@ export async function POST(req: NextRequest) {
           slug:  slug.trim().toLowerCase(),
           name:  tenantName.trim(),
           niche: niche,
-          plan:  'FREE',
-          planStatus: 'ACTIVE',
-        } as any,
+          plan:  Plan.FREE,
+          planStatus: PlanStatus.ACTIVE,
+        },
       })
 
       const user = await tx.user.create({

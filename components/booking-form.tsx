@@ -334,7 +334,7 @@ export function BookingForm({
       .catch(() => {})
       .finally(() => setSlotsLoading(false))
     return () => controller.abort()
-  }, [selectedResourceId, selectedServiceId, selectedDate])
+  }, [selectedResourceId, selectedServiceId, selectedDate, tenantSlug])
 
   const selectedService  = services.find((s) => s.id === selectedServiceId)
   const selectedResource = resources.find((r) => r.id === selectedResourceId)

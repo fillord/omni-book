@@ -6,6 +6,12 @@ import { getNicheConfig } from '@/lib/niche/config'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { Toaster } from '@/components/ui/sonner'
 
+interface TenantInfo {
+  id: string
+  plan: string
+  planStatus: string
+}
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authConfig)
 
@@ -25,8 +31,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     where:  { id: session.user.tenantId },
   })
 
-  const tenantPlan = (tenant as any)?.plan || 'FREE'
-  const tenantPlanStatus = (tenant as any)?.planStatus || 'ACTIVE'
+  const tenantInfo = tenant as unknown as TenantInfo | null
+  const tenantPlan = tenantInfo?.plan || 'FREE'
+  const tenantPlanStatus = tenantInfo?.planStatus || 'ACTIVE'
 
   if (tenantPlanStatus === 'BANNED') {
     redirect('/api/force-signout')

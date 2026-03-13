@@ -47,8 +47,8 @@ export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus:
 
     revalidatePath('/admin/tenants')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Ошибка обновления плана' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка обновления плана' }
   }
 }
 
@@ -65,8 +65,8 @@ export async function updateTenantMaxResources(tenantId: string, maxResources: n
 
     revalidatePath('/admin/tenants')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Ошибка обновления лимитов' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка обновления лимитов' }
   }
 }
 
@@ -81,8 +81,8 @@ export async function banTenant(tenantId: string) {
 
     revalidatePath('/admin/tenants')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Ошибка при бане компании' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка при бане компании' }
   }
 }
 
@@ -97,7 +97,7 @@ export async function deleteTenant(tenantId: string) {
 
     revalidatePath('/admin/tenants')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message || 'Ошибка при удалении компании' }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка при удалении компании' }
   }
 }
