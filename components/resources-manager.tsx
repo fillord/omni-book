@@ -36,6 +36,13 @@ import type { CreateResourceInput, UpdateResourceInput } from '@/lib/validations
 import { useI18n } from '@/lib/i18n/context'
 import { getDbTranslation } from '@/lib/i18n/db-translations'
 
+
+interface SafeTranslation {
+  [key: string]: {
+    [key: string]: string;
+  };
+}
+
 // ---- props -----------------------------------------------------------------
 
 type Props = {
@@ -271,7 +278,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-sm">{getDbTranslation(r, 'name', locale)}</p>
+                    <p className="font-medium text-sm">{getDbTranslation(r as unknown as { name: string; translations: SafeTranslation }, 'name', locale)}</p>
                     <p className="text-xs text-muted-foreground">
                       {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 
                         ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label) 
@@ -334,7 +341,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
             <TableBody>
               {filtered.map((r) => (
                 <TableRow key={r.id} className={!r.isActive ? 'opacity-60' : undefined}>
-                  <TableCell className="font-medium">{getDbTranslation(r, 'name', locale)}</TableCell>
+                  <TableCell className="font-medium">{getDbTranslation(r as unknown as { name: string; translations: SafeTranslation }, 'name', locale)}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
                       {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 

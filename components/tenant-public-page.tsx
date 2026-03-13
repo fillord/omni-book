@@ -162,8 +162,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
   const sections    = nicheConfig.publicPageSections
   const social      = parseSocialLinks(tenant.socialLinks)
   
-  const tenantName = getDbTranslation(tenant, 'name', locale)
-  const tenantDesc = getDbTranslation(tenant, 'description', locale)
+  const tenantName = getDbTranslation(tenant as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)
+  const tenantDesc = getDbTranslation(tenant as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)
 
   const bookableResources = tenant.resources.filter(
     (r) => r.schedules.some((s) => s.isActive)
@@ -171,8 +171,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
   const bookingServices = tenant.services.map((s) => ({
     id:          s.id,
-    name:        getDbTranslation(s, 'name', locale),
-    description: getDbTranslation(s, 'description', locale),
+    name:        getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale),
+    description: getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale),
     durationMin: s.durationMin,
     price:       s.price,
     currency:    s.currency,
@@ -182,9 +182,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
     const attrs = parseAttrs(r.attributes)
     return {
       id:             r.id,
-      name:           getDbTranslation(r, 'name', locale),
+      name:           getDbTranslation(r as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale),
       type:           r.type,
-      description:    getDbTranslation(r, 'description', locale),
+      description:    getDbTranslation(r as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale),
       specialization: (attrs.specialization as string)   ?? null,
       experienceYears:(attrs.experience_years as number) ?? null,
       attributes:     attrs,
@@ -392,9 +392,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                   key={s.id}
                   className={`snap-start shrink-0 w-56 rounded-2xl border-2 ${colors.border} ${colors.light} p-4 flex flex-col gap-2`}
                 >
-                  <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s, 'name', locale)}</p>
-                  {getDbTranslation(s, 'description', locale) && (
-                    <p className="text-xs text-zinc-500 leading-relaxed">{getDbTranslation(s, 'description', locale)}</p>
+                  <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                  {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
+                    <p className="text-xs text-zinc-500 leading-relaxed">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                   )}
                   <div className="flex items-center justify-between mt-auto pt-2">
                     <span className={`text-sm font-bold ${colors.priceAccent}`}>
@@ -446,9 +446,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               {tenant.services.map((s) => (
                 <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-white hover:bg-zinc-50 transition-colors">
                   <div>
-                    <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s, 'name', locale)}</p>
-                    {getDbTranslation(s, 'description', locale) && (
-                      <p className="text-xs text-zinc-400 mt-0.5">{getDbTranslation(s, 'description', locale)}</p>
+                    <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                    {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
+                      <p className="text-xs text-zinc-400 mt-0.5">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0 pl-4">

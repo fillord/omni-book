@@ -32,3 +32,6 @@ __pycache__/
 # Prisma
 prisma/generated/
 
+
+db/data/
+pgdata/

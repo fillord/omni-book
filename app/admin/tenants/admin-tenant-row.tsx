@@ -13,6 +13,9 @@ interface Tenant {
   planStatus: PlanStatus
   maxResources: number
   createdAt: Date | string
+  _count: {
+    resources: number
+  }
 }
 
 export function AdminTenantRow({ tenant }: { tenant: Tenant }) {

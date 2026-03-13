@@ -195,9 +195,9 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-sm">{getDbTranslation(s, 'name', locale)}</p>
-                    {getDbTranslation(s, 'description', locale) && (
-                      <p className="text-xs text-muted-foreground truncate max-w-xs">{getDbTranslation(s, 'description', locale)}</p>
+                    <p className="font-medium text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                    {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
                   <Badge variant={s.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
@@ -249,10 +249,10 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
               {filtered.map((s) => (
                 <TableRow key={s.id} className={!s.isActive ? 'opacity-60' : undefined}>
                   <TableCell>
-                    <div className="font-medium">{getDbTranslation(s, 'name', locale)}</div>
-                    {getDbTranslation(s, 'description', locale) && (
+                    <div className="font-medium">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</div>
+                    {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
                       <div className="text-xs text-muted-foreground mt-0.5 max-w-xs truncate">
-                        {getDbTranslation(s, 'description', locale)}
+                        {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}
                       </div>
                     )}
                   </TableCell>
