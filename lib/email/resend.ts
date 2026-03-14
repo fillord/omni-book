@@ -126,3 +126,69 @@ export async function sendBookingCancellation(data: BookingEmailData): Promise<v
     `,
   })
 }
+
+// ---- Booking status emails (high-level API) ----------------------------------
+
+/**
+ * Generic typed helpers for booking status notifications.
+ * These wrap the more specific templates above so that business logic can
+ * depend on semantic names instead of template details.
+ */
+
+export async function sendConfirmationEmail(data: BookingEmailData): Promise<void> {
+  return sendBookingConfirmation(data)
+}
+
+export async function sendCancellationEmail(data: BookingEmailData): Promise<void> {
+  return sendBookingCancellation(data)
+}
+
+export async function sendCompletionEmail(data: BookingEmailData): Promise<void> {
+  if (!resend || !data.guestEmail) return
+
+  await resend.emails.send({
+    from: 'Omni-Book <noreply@omni-book.site>',
+    to: data.guestEmail,
+    subject: `Спасибо за визит: ${data.serviceName} в ${data.tenantName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+        <h2 style="color:#16a34a">Спасибо, что посетили нас!</h2>
+        <p>Здравствуйте, <strong>${data.guestName}</strong>!</p>
+        <p>Спасибо за ваш визит в <strong>${data.tenantName}</strong>.</p>
+        <table style="border-collapse:collapse;width:100%;margin:16px 0">
+          <tr><td style="padding:6px 0;color:#6b7280">Услуга</td><td style="padding:6px 0;font-weight:600">${data.serviceName}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Специалист</td><td style="padding:6px 0">${data.resourceName}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Дата и время визита</td><td style="padding:6px 0">${fmtDateTime(data.startsAt, data.timezone)}</td></tr>
+        </table>
+        <p style="color:#6b7280;font-size:14px">
+          Нам важно ваше мнение. Если у вас есть пожелания или обратная связь, пожалуйста, ответьте на это письмо.
+        </p>
+      </div>
+    `,
+  })
+}
+
+export async function sendNoShowEmail(data: BookingEmailData): Promise<void> {
+  if (!resend || !data.guestEmail) return
+
+  await resend.emails.send({
+    from: 'Omni-Book <noreply@omni-book.site>',
+    to: data.guestEmail,
+    subject: `Вы пропустили запись: ${data.serviceName} в ${data.tenantName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+        <h2 style="color:#ea580c">Мы вас не дождались</h2>
+        <p>Здравствуйте, <strong>${data.guestName}</strong>!</p>
+        <p>Похоже, вы не смогли прийти на запись в <strong>${data.tenantName}</strong>.</p>
+        <table style="border-collapse:collapse;width:100%;margin:16px 0">
+          <tr><td style="padding:6px 0;color:#6b7280">Услуга</td><td style="padding:6px 0;font-weight:600">${data.serviceName}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Специалист</td><td style="padding:6px 0">${data.resourceName}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Запланированное время</td><td style="padding:6px 0">${fmtDateTime(data.startsAt, data.timezone)}</td></tr>
+        </table>
+        <p style="color:#6b7280;font-size:14px">
+          Если вы хотите перенести визит, пожалуйста, запишитесь заново в удобное для вас время.
+        </p>
+      </div>
+    `,
+  })
+}

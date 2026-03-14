@@ -4,7 +4,12 @@ import { BookingStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth/next'
 import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
-import { sendBookingCancellation } from '@/lib/email/resend'
+import {
+  sendCancellationEmail,
+  sendCompletionEmail,
+  sendConfirmationEmail,
+  sendNoShowEmail,
+} from '@/lib/email/resend'
 
 // ---- Allowed status transitions --------------------------------------------
 
@@ -93,20 +98,38 @@ export async function PATCH(
     include: {
       resource: { select: { id: true, name: true, type: true } },
       service:  { select: { id: true, name: true, durationMin: true } },
-      tenant:   { select: { name: true } },
+      tenant:   { select: { name: true, timezone: true } },
     },
   })
 
-  // Fire-and-forget cancellation email
-  if (newStatus === 'CANCELLED' && booking.guestEmail && booking.guestName) {
-    sendBookingCancellation({
-      guestName:    booking.guestName,
-      guestEmail:   booking.guestEmail,
-      tenantName:   result.tenant.name,
-      serviceName:  result.service?.name ?? '',
+  // Fire-and-forget status-based emails
+  if (booking.guestEmail && booking.guestName) {
+    const emailData = {
+      guestName: booking.guestName,
+      guestEmail: booking.guestEmail,
+      tenantName: result.tenant.name,
+      serviceName: result.service?.name ?? 'Услуга',
       resourceName: result.resource.name,
-      startsAt:     booking.startsAt,
-    }).catch(console.error)
+      startsAt: booking.startsAt,
+      timezone: result.tenant.timezone ?? 'Asia/Almaty',
+    }
+
+    switch (newStatus) {
+      case 'CANCELLED':
+        sendCancellationEmail(emailData).catch(console.error)
+        break
+      case 'CONFIRMED':
+        sendConfirmationEmail(emailData).catch(console.error)
+        break
+      case 'COMPLETED':
+        sendCompletionEmail(emailData).catch(console.error)
+        break
+      case 'NO_SHOW':
+        sendNoShowEmail(emailData).catch(console.error)
+        break
+      default:
+        break
+    }
   }
 
   return NextResponse.json({ booking: result })
