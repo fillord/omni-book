@@ -48,6 +48,14 @@ export class BookingLimitError extends Error {
   }
 }
 
+export class PastDateError extends Error {
+  readonly statusCode = 422
+  constructor() {
+    super("Нельзя создать запись в прошлом времени.")
+    this.name = "PastDateError"
+  }
+}
+
 // ---- Types -----------------------------------------------------------------
 
 export interface SlotResult {
@@ -160,10 +168,17 @@ export async function getAvailableSlots(
   const slots: SlotResult[] = []
   let cursor = dayStart.getTime()
   const end   = dayEnd.getTime()
+  const now   = new Date()
 
   while (cursor + durationMs <= end) {
     const slotStart = new Date(cursor)
     const slotEnd   = new Date(cursor + durationMs)
+
+    // Skip slots that start in the past (relative to current moment)
+    if (slotStart < now) {
+      cursor += durationMs
+      continue
+    }
 
     // Check overlap with any existing booking
     const busy = existingBookings.some(
@@ -200,6 +215,10 @@ export async function createBooking(params: CreateBookingParams) {
   const startsAtDate = new Date(startsAt)
   if (isNaN(startsAtDate.getTime())) {
     throw new Error("Invalid startsAt datetime")
+  }
+
+  if (startsAtDate.getTime() < Date.now()) {
+    throw new PastDateError()
   }
 
   const normalizedPhone = normalizePhone(guestPhone)

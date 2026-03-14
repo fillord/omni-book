@@ -11,6 +11,7 @@ import { LocaleSwitcher } from '@/components/locale-switcher'
 import { getServerT } from '@/lib/i18n/server'
 import { cookies } from 'next/headers'
 import { getDbTranslation } from '@/lib/i18n/db-translations'
+import { PublicThemeToggle } from '@/components/public-theme-toggle'
 
 // ---- Niche color palette (static strings so Tailwind includes them) ---------
 
@@ -202,10 +203,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
   const hasSocial   = !!(social.instagram || social.whatsapp || social.telegram)
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-zinc-950 dark:text-slate-50 transition-colors duration-300">
 
       {/* ── Sticky header ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-zinc-200">
+      <header className="sticky top-0 z-50 bg-white dark:bg-zinc-900 backdrop-blur border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -216,7 +217,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                 className="w-7 h-7 rounded-lg object-cover shrink-0"
               />
             )}
-            <span className="font-bold text-zinc-900 truncate">{tenantName}</span>
+            <span className="font-bold text-zinc-900 dark:text-slate-50 truncate">{tenantName}</span>
             <span className={`hidden sm:inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${colors.badge}`}>
               {t('niche', nicheConfig.label)}
             </span>
@@ -242,6 +243,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               </div>
             )}
             <LocaleSwitcher className="h-8 text-xs" />
+            <PublicThemeToggle className="hidden sm:inline-flex" />
             {canBook && (
               <a
                 href="#booking"
@@ -308,7 +310,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
       {/* ── Contact info bar ──────────────────────────────────────────────── */}
       {hasContacts && (
-        <section className={`border-b ${colors.border} ${colors.light}`}>
+        <section className={`border-b ${colors.border} ${colors.light} dark:border-zinc-800 dark:bg-zinc-900/50`}>
           <div className="max-w-5xl mx-auto px-4 py-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               {tenant.workingHours && (
@@ -390,11 +392,11 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               {tenant.services.map((s) => (
                 <div
                   key={s.id}
-                  className={`snap-start shrink-0 w-56 rounded-2xl border-2 ${colors.border} ${colors.light} p-4 flex flex-col gap-2`}
+                  className={`snap-start shrink-0 w-56 rounded-2xl border-2 ${colors.border} ${colors.light} dark:bg-zinc-900 dark:border-zinc-800 p-4 flex flex-col gap-2`}
                 >
-                  <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                  <p className="font-semibold text-zinc-900 dark:text-slate-50 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                   {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
-                    <p className="text-xs text-zinc-500 leading-relaxed">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                   )}
                   <div className="flex items-center justify-between mt-auto pt-2">
                     <span className={`text-sm font-bold ${colors.priceAccent}`}>
@@ -402,7 +404,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                         ? t('booking', 'free')
                         : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-white text-zinc-500 border border-zinc-200">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
                       {s.durationMin} {t('booking', 'minutes')}
                     </span>
                   </div>
@@ -419,8 +421,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'portfolio')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} p-12 text-center`}>
-              <p className="text-zinc-400 text-sm">{t('public', 'galleryPlaceholder')}</p>
+            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} dark:border-zinc-800 dark:bg-zinc-900/50 p-12 text-center`}>
+              <p className="text-zinc-400 dark:text-zinc-500 text-sm">{t('public', 'galleryPlaceholder')}</p>
             </div>
           </section>
         )}
@@ -432,8 +434,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'menu')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} p-12 text-center`}>
-              <p className="text-zinc-400 text-sm">{t('public', 'menuPlaceholder')}</p>
+            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} dark:border-zinc-800 dark:bg-zinc-900/50 p-12 text-center`}>
+              <p className="text-zinc-400 dark:text-zinc-500 text-sm">{t('public', 'menuPlaceholder')}</p>
             </div>
           </section>
         )}
@@ -442,13 +444,13 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {sections.includes('pricing') && tenant.services.length > 0 && (
           <section>
             <SectionHeading title={t('public', 'priceList')} />
-            <div className="rounded-2xl border border-zinc-200 overflow-hidden divide-y divide-zinc-100">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
               {tenant.services.map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-white hover:bg-zinc-50 transition-colors">
+                <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
                   <div>
-                    <p className="font-semibold text-zinc-900 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                    <p className="font-semibold text-zinc-900 dark:text-slate-50 text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                     {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
-                      <p className="text-xs text-zinc-400 mt-0.5">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
+                      <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-0.5">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
                   <div className="text-right shrink-0 pl-4">
@@ -457,7 +459,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                         ? t('booking', 'free')
                         : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
                     </p>
-                    <p className="text-xs text-zinc-400">{s.durationMin} {t('booking', 'minutes')}</p>
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">{s.durationMin} {t('booking', 'minutes')}</p>
                   </div>
                 </div>
               ))}
@@ -466,16 +468,16 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         )}
 
         {/* ── Booking form ────────────────────────────────────────────────── */}
-        <section id="booking" className={`rounded-2xl ${colors.light} border-2 ${colors.border} p-6 md:p-8`}>
-          <h2 className="text-2xl font-bold text-zinc-900 mb-1">{t('niche', nicheConfig.bookingLabel)}</h2>
-          <p className="text-zinc-500 text-sm mb-8">
+        <section id="booking" className={`rounded-2xl ${colors.light} ${colors.border} dark:bg-zinc-900 dark:border-zinc-800 border-2 p-6 md:p-8`}>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-slate-50 mb-1">{t('niche', nicheConfig.bookingLabel)}</h2>
+          <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-8">
             {t('public', 'bookingHint').replace('{resource}', t('niche', nicheConfig.resourceLabel).toLowerCase())}
           </p>
 
           {!canBook ? (
             <div className="py-12 text-center">
-              <p className="text-lg font-medium text-zinc-400">{t('public', 'soonOpening')}</p>
-              <p className="mt-1 text-sm text-zinc-300">{t('public', 'ownerSetup')}</p>
+              <p className="text-lg font-medium text-zinc-400 dark:text-zinc-500">{t('public', 'soonOpening')}</p>
+              <p className="mt-1 text-sm text-zinc-300 dark:text-zinc-500">{t('public', 'ownerSetup')}</p>
             </div>
           ) : (
             <BookingForm
@@ -567,7 +569,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
 function SectionHeading({ title, className = "mb-6" }: { title: string; className?: string }) {
   return (
-    <h2 className={`text-2xl font-bold text-zinc-900 ${className}`}>{title}</h2>
+    <h2 className={`text-2xl font-bold text-zinc-900 dark:text-slate-50 ${className}`}>{title}</h2>
   )
 }
 
@@ -603,7 +605,7 @@ function ResourceCard({
     .join(', ')
 
   return (
-    <div className="group rounded-2xl border-2 border-zinc-100 bg-white p-5 flex flex-col gap-4 hover:border-zinc-200 hover:shadow-lg hover:shadow-zinc-100 hover:-translate-y-0.5 transition-all duration-200">
+    <div className="group rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 flex flex-col gap-4 hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-lg hover:shadow-zinc-100 dark:hover:shadow-zinc-900/50 hover:-translate-y-0.5 transition-all duration-200">
       {/* Avatar / Icon */}
       {isTable ? (
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${colors.light}`}>
@@ -617,9 +619,9 @@ function ResourceCard({
 
       {/* Name */}
       <div>
-        <p className="font-semibold text-zinc-900">{resourceName}</p>
+        <p className="font-semibold text-zinc-900 dark:text-slate-50">{resourceName}</p>
         {resourceDesc && (
-          <p className="text-sm text-zinc-500 mt-0.5">{resourceDesc}</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{resourceDesc}</p>
         )}
       </div>
 
@@ -643,7 +645,7 @@ function ResourceCard({
 
       {/* Work days */}
       {workDays && (
-        <p className="text-xs text-zinc-400 mt-auto">{t('public', 'workDays')} {workDays}</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-auto">{t('public', 'workDays')} {workDays}</p>
       )}
     </div>
   )
@@ -664,13 +666,13 @@ function InfoBlock({
     <div className="flex items-center gap-3">
       <span className="text-xl">{icon}</span>
       <div>
-        <p className="text-xs text-zinc-400">{label}</p>
+        <p className="text-xs text-zinc-400 dark:text-zinc-500">{label}</p>
         {href ? (
-          <a href={href} className="font-semibold text-zinc-800 text-sm hover:underline">
+          <a href={href} className="font-semibold text-zinc-800 dark:text-slate-200 text-sm hover:underline">
             {value}
           </a>
         ) : (
-          <p className="font-semibold text-zinc-800 text-sm">{value}</p>
+          <p className="font-semibold text-zinc-800 dark:text-slate-200 text-sm">{value}</p>
         )}
       </div>
     </div>

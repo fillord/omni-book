@@ -374,9 +374,9 @@ export function BookingForm({
     ? resources.filter((r) => r.serviceIds.includes(selectedServiceId))
     : resources
 
-  const minDate = new Date()
-  minDate.setDate(minDate.getDate() + 1)
-  const minDateStr = minDate.toISOString().split('T')[0]
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const minDateStr = today.toISOString().split('T')[0]
 
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'kz' ? 'kk-KZ' : 'ru-RU'
 

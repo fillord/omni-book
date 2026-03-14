@@ -83,7 +83,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
   ]
 
   return (
-    <div className="flex flex-col h-full min-h-screen">
+    <div className="flex flex-col h-full bg-background border-r border-border">
 
       {/* Owner avatar */}
       <div className="px-4 py-4 border-b flex items-center gap-3">
@@ -115,8 +115,8 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5">
+      {/* Navigation (scrollable middle section) */}
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto scrollbar-hide">
         {items.map(({ href, section, tKey, icon: Icon, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href)
           return (
@@ -137,8 +137,8 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
         })}
       </nav>
 
-      {/* Upgrade Banner & Footer links */}
-      <div className="px-3 py-4 border-t space-y-1">
+      {/* Upgrade Banner & Footer links (pinned to bottom) */}
+      <div className="mt-auto px-4 py-4 bg-background border-t border-border space-y-1 z-10">
         {tenantPlan === 'FREE' && tenantPlanStatus !== 'PENDING' && (
           <Link
             href="/dashboard/settings/billing"
@@ -204,7 +204,7 @@ export function DashboardSidebar(props: Props) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 border-r bg-card flex-col">
+      <aside className="hidden md:flex w-64 shrink-0 h-full">
         <SidebarContent {...props} />
       </aside>
 

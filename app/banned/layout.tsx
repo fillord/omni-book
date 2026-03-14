@@ -1,5 +1,5 @@
 import { AdminThemeProvider } from '@/components/theme-providers'
 
-export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+export default function BannedLayout({ children }: { children: React.ReactNode }) {
   return <AdminThemeProvider>{children}</AdminThemeProvider>
 }

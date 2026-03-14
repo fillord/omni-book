@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ShieldCheck, Users, LayoutDashboard, LogOut } from 'lucide-react'
 import { SignOutButton } from '@/components/sign-out-button'
+import { AdminThemeProvider } from '@/components/theme-providers'
 
 export default async function AdminLayout({
   children,
@@ -22,6 +23,7 @@ export default async function AdminLayout({
   }
 
   return (
+    <AdminThemeProvider>
     <div className="min-h-screen bg-zinc-50 flex flex-col md:flex-row">
       <aside className="w-full md:w-64 bg-zinc-900 border-r border-zinc-800 text-white flex-shrink-0 flex flex-col">
         <div className="p-6">
@@ -76,5 +78,6 @@ export default async function AdminLayout({
         {children}
       </main>
     </div>
+    </AdminThemeProvider>
   )
 }

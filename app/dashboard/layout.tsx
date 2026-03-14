@@ -5,6 +5,7 @@ import { basePrisma } from '@/lib/db'
 import { getNicheConfig } from '@/lib/niche/config'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { Toaster } from '@/components/ui/sonner'
+import { AdminThemeProvider } from '@/components/theme-providers'
 
 interface TenantInfo {
   id: string
@@ -42,7 +43,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const nicheConfig = getNicheConfig(tenant?.niche)
 
   return (
-    <div className="flex min-h-screen">
+    <AdminThemeProvider>
+    <div className="flex h-screen overflow-hidden">
       <DashboardSidebar
         nicheConfig={nicheConfig}
         tenantName={tenant?.name ?? ''}
@@ -53,8 +55,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userEmail={session.user.email ?? ''}
         userRole={session.user.role ?? ''}
       />
-      <main className="flex-1 overflow-auto pt-14 md:pt-0">{children}</main>
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
+        {children}
+      </main>
       <Toaster richColors />
     </div>
+    </AdminThemeProvider>
   )
 }

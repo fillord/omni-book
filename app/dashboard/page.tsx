@@ -13,10 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { BookingStatusBadge } from '@/components/booking-status-badge'
 import {
-  Briefcase,
-  Scissors,
   CalendarCheck,
-  Users,
   Clock,
   Sparkles,
 } from 'lucide-react'
@@ -137,10 +134,10 @@ export default async function DashboardPage() {
   }))
 
   const stats = [
-    { label: t('niche', nicheConfig.resourceLabelPlural), value: tenant.resources.length, icon: Briefcase, iconCls: 'text-blue-600 dark:text-blue-400' },
-    { label: t('dashboard', 'servicesCount'), value: tenant.services.length, icon: Scissors, iconCls: 'text-purple-600 dark:text-purple-400' },
-    { label: t('dashboard', 'bookingsCount'), value: tenant._count.bookings, icon: CalendarCheck, iconCls: 'text-green-600 dark:text-green-400' },
-    { label: t('dashboard', 'usersCount'), value: tenant._count.users, icon: Users, iconCls: 'text-orange-600 dark:text-orange-400' },
+    { label: t('niche', nicheConfig.resourceLabelPlural), value: tenant.resources.length, iconKey: 'resources' as const, iconCls: 'text-blue-600 dark:text-blue-400' },
+    { label: t('dashboard', 'servicesCount'), value: tenant.services.length, iconKey: 'services' as const, iconCls: 'text-purple-600 dark:text-purple-400' },
+    { label: t('dashboard', 'bookingsCount'), value: tenant._count.bookings, iconKey: 'bookings' as const, iconCls: 'text-green-600 dark:text-green-400' },
+    { label: t('dashboard', 'usersCount'), value: tenant._count.users, iconKey: 'users' as const, iconCls: 'text-orange-600 dark:text-orange-400' },
   ]
 
   return (

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { BookingStatus } from '@prisma/client'
 import { basePrisma, getTenantDB } from '@/lib/db'
 import { resolveTenant, isTenantError } from '@/lib/tenant'
-import { createBooking, BookingConflictError, BookingLimitError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
+import { createBooking, BookingConflictError, BookingLimitError, PastDateError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
 import { sendBookingConfirmation } from '@/lib/email/resend'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { normalizePhone } from '@/lib/utils/phone'
@@ -184,6 +184,9 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof BookingLimitError) {
       return NextResponse.json({ error: err.message }, { status: 429 })
+    }
+    if (err instanceof PastDateError) {
+      return NextResponse.json({ error: err.message }, { status: 422 })
     }
     if (err instanceof BookingConflictError) {
       return NextResponse.json({ error: err.message }, { status: 409 })
