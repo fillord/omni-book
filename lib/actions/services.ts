@@ -73,6 +73,24 @@ export async function createService(
   const tenantId = session.user.tenantId
   const db       = getTenantDB(tenantId)
 
+  // Ensure all resources belong to the current tenant
+  if (parsed.resourceIds.length > 0) {
+    const resources = await db.resource.findMany({
+      where: {
+        id:       { in: parsed.resourceIds },
+        tenantId: tenantId,
+      },
+      select: { id: true },
+    })
+
+    const allowedIds = new Set(resources.map((r) => r.id))
+    const invalidIds = parsed.resourceIds.filter((id) => !allowedIds.has(id))
+
+    if (invalidIds.length > 0) {
+      throw new Error('Некорректные ресурсы: обнаружены ресурсы, не принадлежащие вашему аккаунту')
+    }
+  }
+
   const svc = await db.service.create({
     data: {
       tenantId:    tenantId,
@@ -85,13 +103,15 @@ export async function createService(
     },
   })
 
-  await basePrisma.resourceService.createMany({
-    data: parsed.resourceIds.map((resourceId) => ({
-      resourceId,
-      serviceId: svc.id,
-    })),
-    skipDuplicates: true,
-  })
+  if (parsed.resourceIds.length > 0) {
+    await basePrisma.resourceService.createMany({
+      data: parsed.resourceIds.map((resourceId) => ({
+        resourceId,
+        serviceId: svc.id,
+      })),
+      skipDuplicates: true,
+    })
+  }
 
   const result = await db.service.findUnique({
     where:   { id: svc.id },
@@ -134,11 +154,31 @@ export async function updateService(
   await db.service.update({ where: { id }, data: updateData })
 
   if (parsed.resourceIds !== undefined) {
+    if (parsed.resourceIds.length > 0) {
+      const resources = await db.resource.findMany({
+        where: {
+          id:       { in: parsed.resourceIds },
+          tenantId: tenantId,
+        },
+        select: { id: true },
+      })
+
+      const allowedIds = new Set(resources.map((r) => r.id))
+      const invalidIds = parsed.resourceIds.filter((resourceId) => !allowedIds.has(resourceId))
+
+      if (invalidIds.length > 0) {
+        throw new Error('Некорректные ресурсы: обнаружены ресурсы, не принадлежащие вашему аккаунту')
+      }
+    }
+
     await basePrisma.resourceService.deleteMany({ where: { serviceId: id } })
-    await basePrisma.resourceService.createMany({
-      data: parsed.resourceIds.map((resourceId) => ({ resourceId, serviceId: id })),
-      skipDuplicates: true,
-    })
+
+    if (parsed.resourceIds.length > 0) {
+      await basePrisma.resourceService.createMany({
+        data: parsed.resourceIds.map((resourceId) => ({ resourceId, serviceId: id })),
+        skipDuplicates: true,
+      })
+    }
   }
 
   const result = await db.service.findUnique({

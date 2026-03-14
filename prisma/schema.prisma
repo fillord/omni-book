@@ -133,7 +133,9 @@ model Booking {
   notes          String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  reminderSentAt DateTime?
+  reminder24hSentAt DateTime?
+  reminder2hSentAt  DateTime?
+  reminder1hSentAt  DateTime?
   resource       Resource      @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   service        Service?      @relation(fields: [serviceId], references: [id])
   tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -143,7 +145,9 @@ model Booking {
   @@index([tenantId, resourceId, startsAt])
   @@index([tenantId, status])
   @@index([userId])
-  @@index([startsAt, reminderSentAt])
+  @@index([startsAt, reminder24hSentAt])
+  @@index([startsAt, reminder2hSentAt])
+  @@index([startsAt, reminder1hSentAt])
 }
 
 enum Role {
