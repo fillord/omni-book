@@ -29,7 +29,7 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<v
   if (!resend || !data.guestEmail) return
 
   await resend.emails.send({
-    from: 'OmniBook <noreply@omnibook.com>',
+    from: 'Omni-Book <noreply@omni-book.site>',
     to: data.guestEmail,
     subject: `Запись подтверждена: ${data.serviceName} в ${data.tenantName}`,
     html: `
@@ -74,7 +74,7 @@ export async function sendBookingReminder(data: ReminderEmailData): Promise<void
   const timeStr = formatInTimeZone(data.startsAt, data.timezone, 'HH:mm')
 
   await resend.emails.send({
-    from: 'OmniBook <noreply@omnibook.com>',
+    from: 'Omni-Book <noreply@omni-book.site>',
     to: data.to,
     subject: `Напоминание: ${data.serviceName} завтра в ${timeStr}`,
     html: `
@@ -108,7 +108,7 @@ export async function sendBookingCancellation(data: BookingEmailData): Promise<v
   if (!resend || !data.guestEmail) return
 
   await resend.emails.send({
-    from: 'OmniBook <noreply@omnibook.com>',
+    from: 'Omni-Book <noreply@omni-book.site>',
     to: data.guestEmail,
     subject: `Запись отменена: ${data.serviceName} в ${data.tenantName}`,
     html: `
