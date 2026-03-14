@@ -92,6 +92,29 @@ const TIMEZONES = [
   { value: "UTC",           label: "UTC+0" },
 ]
 
+const CITIES = [
+  // Крупнейшие города
+  { value: "Almaty", label: "Алматы" },
+  { value: "Astana", label: "Астана" },
+  { value: "Shymkent", label: "Шымкент" },
+
+  // Областные центры и крупные города
+  { value: "Karaganda", label: "Караганда" },
+  { value: "Aktobe", label: "Актобе" },
+  { value: "Taraz", label: "Тараз" },
+  { value: "Pavlodar", label: "Павлодар" },
+  { value: "Oskemen", label: "Усть-Каменогорск" },
+  { value: "Semey", label: "Семей" },
+  { value: "Atyrau", label: "Атырау" },
+  { value: "Kokshetau", label: "Кокшетау" },
+  { value: "Kostanay", label: "Костанай" },
+  { value: "Kyzylorda", label: "Кызылорда" },
+  { value: "Oral", label: "Уральск" },
+  { value: "Petropavl", label: "Петропавловск" },
+  { value: "Taldykorgan", label: "Талдыкорган" },
+  { value: "Turkistan", label: "Туркестан" },
+]
+
 function parseSocialLinks(raw: unknown): SocialLinks {
   if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     return raw as SocialLinks
@@ -148,6 +171,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
   const { t }  = useI18n()
   const social = parseSocialLinks(tenant.socialLinks)
   const [loading, setLoading] = useState(false)
+  const [logoUploading, setLogoUploading] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormValues, string>>>({})
 
   const {
@@ -183,6 +207,36 @@ export function SettingsForm({ tenant, readOnly }: Props) {
   const logoValue  = watch("logoUrl")     ?? ""
   const coverValue = watch("coverUrl")    ?? ""
   const timezone   = watch("timezone")
+
+  async function handleLogoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    setLogoUploading(true)
+    try {
+      const res = await fetch("/api/upload/logo", {
+        method: "POST",
+        body: formData,
+      })
+      const json = await res.json()
+      if (!res.ok || !json?.url) {
+        throw new Error(json?.error || "Не удалось загрузить логотип")
+      }
+      setValue("logoUrl", json.url)
+      toast.success(t("settings", "logoUploaded") ?? "Логотип загружен")
+    } catch (err) {
+      toast.error(
+        t("settings", "logoUploadError") ??
+          (err instanceof Error ? err.message : "Ошибка загрузки логотипа"),
+      )
+    } finally {
+      setLogoUploading(false)
+      e.target.value = ""
+    }
+  }
 
   async function onSubmit(values: FormValues) {
     setFieldErrors({})
@@ -408,12 +462,22 @@ export function SettingsForm({ tenant, readOnly }: Props) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="city">{t('settings', 'city')}</Label>
-              <Input
-                id="city"
-                {...register("city")}
+              <Select
+                value={watch("city")}
+                onValueChange={(v) => { if (v) setValue("city", v) }}
                 disabled={readOnly}
-                placeholder={t('settings', 'cityPlaceholder') || "Almaty"}
-              />
+              >
+                <SelectTrigger id="city">
+                  <SelectValue placeholder={t('settings', 'cityPlaceholder') || "Алматы"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {CITIES.map((city) => (
+                    <SelectItem key={city.value} value={city.value}>
+                      {city.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="address">{t('settings', 'address')}</Label>
@@ -470,13 +534,33 @@ export function SettingsForm({ tenant, readOnly }: Props) {
         <CardContent className="space-y-5">
           <div className="space-y-1.5">
             <Label htmlFor="logoUrl">{t('settings', 'logoUrl')}</Label>
-            <Input
-              id="logoUrl"
-              type="url"
-              {...register("logoUrl")}
-              disabled={readOnly}
-              placeholder="https://i.imgur.com/…"
-            />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input
+                id="logoUrl"
+                type="url"
+                {...register("logoUrl")}
+                disabled={readOnly}
+                placeholder="https://i.imgur.com/…"
+              />
+              {!readOnly && (
+                <div className="flex items-center">
+                  <Label
+                    htmlFor="logoFile"
+                    className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {logoUploading ? t('common', 'saving') : (t('settings', 'uploadLogo') ?? 'Загрузить')}
+                  </Label>
+                  <input
+                    id="logoFile"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleLogoFileChange}
+                    disabled={logoUploading}
+                  />
+                </div>
+              )}
+            </div>
             <FieldError msg={fieldErrors.logoUrl} />
             <UrlPreview url={logoValue} alt={t('settings', 'logoPreview')} />
           </div>

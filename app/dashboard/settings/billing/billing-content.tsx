@@ -151,8 +151,8 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                       <div>
                         <h4 className="font-semibold text-zinc-900">Перевод Kaspi Bank</h4>
                         <p className="text-sm text-zinc-600 mt-1">Отправьте перевод на номер:</p>
-                        <p className="text-lg font-mono font-medium text-indigo-600 mt-1">+7 (705) 123-45-67</p>
-                        <p className="text-xs text-zinc-500 mt-1">Получатель: OmniBook</p>
+                        <p className="text-lg font-mono font-medium text-indigo-600 mt-1">+7 (707) 343-64-23</p>
+                        <p className="text-xs text-zinc-500 mt-1">Получатель: Нұрсұлтан Г.</p>
                       </div>
                     </div>
                   </div>
