@@ -134,7 +134,7 @@ export async function getAvailableSlots(
 
   // Load tenant timezone + resource schedule + service duration in parallel
   const [tenant, schedule, service] = await Promise.all([
-    db.tenant.findUnique({ where: { id: tenantId }, select: { timezone: true, bookingWindowDays: true } }),
+    db.tenant.findUnique({ where: { id: tenantId } }),
     db.schedule.findFirst({
       where: {
         resourceId,
@@ -153,7 +153,7 @@ export async function getAvailableSlots(
   if (!schedule) throw new DayOffError()
 
   const timezone = tenant.timezone
-  const bookingWindowDays = tenant.bookingWindowDays ?? 14
+  const bookingWindowDays = (tenant as unknown as { bookingWindowDays?: number }).bookingWindowDays ?? 14
   const durationMs = service.durationMin * 60 * 1000
 
   // Check if the requested date exceeds booking window
@@ -242,9 +242,8 @@ export async function createBooking(params: CreateBookingParams) {
   // Validate booking window
   const tenantForWindow = await basePrisma.tenant.findUnique({
     where: { id: tenantId },
-    select: { bookingWindowDays: true },
   })
-  const bookingWindowDays = tenantForWindow?.bookingWindowDays ?? 14
+  const bookingWindowDays = (tenantForWindow as unknown as { bookingWindowDays?: number })?.bookingWindowDays ?? 14
   const maxAllowedDate = new Date()
   maxAllowedDate.setDate(maxAllowedDate.getDate() + bookingWindowDays)
   maxAllowedDate.setHours(23, 59, 59, 999)
