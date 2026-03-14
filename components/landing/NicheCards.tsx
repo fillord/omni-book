@@ -52,7 +52,7 @@ export function NicheCards() {
             return (
               <div
                 key={title}
-                className={`rounded-2xl border ${c.border} ${c.bg} p-6 flex flex-col gap-4`}
+                className={`rounded-2xl border ${c.border} ${c.bg} p-6 flex flex-col gap-4 hover-lift cursor-default`}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.icon}`}>
                   <Icon size={24} />

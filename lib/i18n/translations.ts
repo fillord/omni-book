@@ -317,6 +317,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       noBookingsDesc:    'Попробуйте изменить фильтры или сбросить их',
       outOf:             'из',
       statusError:       'Ошибка смены статуса',
+      goodMorning:       'Доброе утро,',
+      goodAfternoon:     'Добрый день,',
+      goodEvening:       'Добрый вечер,',
+      goodNight:         'Доброй ночи,',
+      bookingsToday:     'записей сегодня',
     },
     status: {
       // Uppercase — used by BookingStatusBadge (t('status', booking.status))
@@ -847,6 +852,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       noBookingsDesc:    'Сүзгілерді өзгертіп немесе тазалап көріңіз',
       outOf:             'ішінен',
       statusError:       'Мәртебені өзгерту қатесі',
+      goodMorning:       'Қайырлы таң,',
+      goodAfternoon:     'Қайырлы күн,',
+      goodEvening:       'Қайырлы кеш,',
+      goodNight:         'Қайырлы түн,',
+      bookingsToday:     'бүгінгі жазылулар',
     },
     status: {
       PENDING:   'Күтуде',
@@ -1374,6 +1384,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       noBookingsDesc:    'Try changing or resetting the filters',
       outOf:             'out of',
       statusError:       'Status change error',
+      goodMorning:       'Good morning,',
+      goodAfternoon:     'Good afternoon,',
+      goodEvening:       'Good evening,',
+      goodNight:         'Good night,',
+      bookingsToday:     'bookings today',
     },
     status: {
       PENDING:   'Pending',

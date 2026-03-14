@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = localeHeader || localeCookie || DEFAULT_LOCALE
 
   return (
-    <html lang={locale} className={cn("font-sans", geist.variable)}>
+    <html lang={locale} className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <body><Providers initialLocale={locale}>{children}</Providers></body>
     </html>
   )

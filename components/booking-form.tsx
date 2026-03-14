@@ -1,7 +1,5 @@
 "use client"
 
-'use client'
-
 import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -202,6 +200,10 @@ function SuccessScreen({
   const [visible, setVisible] = useState(false)
   useEffect(() => { setTimeout(() => setVisible(true), 50) }, [])
 
+  // Confetti particles
+  const confettiColors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6']
+
+
   function downloadICS() {
     const ics = generateICS({
       summary:     service.name,
@@ -222,7 +224,7 @@ function SuccessScreen({
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'kz' ? 'kk-KZ' : 'ru-RU'
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8 text-center">
+    <div className="flex flex-col items-center gap-6 py-8 text-center relative">
       <div
         className={[
           'w-20 h-20 rounded-full bg-green-100 flex items-center justify-center transition-all duration-500',
@@ -236,6 +238,24 @@ function SuccessScreen({
           />
         </svg>
       </div>
+
+      {/* Confetti */}
+      {visible && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden>
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full"
+              style={{
+                left: `${10 + Math.random() * 80}%`,
+                top: `-5%`,
+                backgroundColor: confettiColors[i % confettiColors.length],
+                animation: `confetti-fall ${1.5 + Math.random()}s ease-out ${Math.random() * 0.8}s forwards`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="space-y-1">
         <h3 className="text-2xl font-bold text-zinc-900">{t('booking', 'success')}</h3>
@@ -312,6 +332,16 @@ export function BookingForm({
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
+  const [slideDir,  setSlideDir]  = useState<'left' | 'right'>('left')
+
+  function goForward(nextStep: Step) {
+    setSlideDir('left')
+    setStep(nextStep)
+  }
+  function goBack(prevStep: Step) {
+    setSlideDir('right')
+    setStep(prevStep)
+  }
 
   useEffect(() => {
     if (!selectedResourceId || !selectedServiceId || !selectedDate) {
@@ -425,7 +455,7 @@ export function BookingForm({
 
       {/* STEP 1 — Service */}
       {step === 'service' && (
-        <div className="space-y-4">
+        <div className={`space-y-4 animate-slide-${slideDir}`}>
           <h3 className="font-semibold text-zinc-900">{t('booking', 'selectService')}</h3>
           <RadioGroup
             value={selectedServiceId}
@@ -464,7 +494,7 @@ export function BookingForm({
           <div className="flex justify-end pt-2">
             <button
               disabled={!selectedServiceId}
-              onClick={() => setStep('resource')}
+              onClick={() => goForward('resource')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
@@ -475,7 +505,7 @@ export function BookingForm({
 
       {/* STEP 2 — Resource */}
       {step === 'resource' && (
-        <div className="space-y-4">
+        <div className={`space-y-4 animate-slide-${slideDir}`}>
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-semibold text-zinc-900">
               {t('booking', 'selectResource').replace('{resource}', (resourceLabel ?? t('booking', 'specialist')).toLowerCase())}
@@ -537,12 +567,12 @@ export function BookingForm({
             ))}
           </RadioGroup>
           <div className="flex justify-between pt-2">
-            <button onClick={() => setStep('service')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
+            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedResourceId}
-              onClick={() => setStep('datetime')}
+              onClick={() => goForward('datetime')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
@@ -553,7 +583,7 @@ export function BookingForm({
 
       {/* STEP 3 — Date & Time */}
       {step === 'datetime' && (
-        <div className="space-y-5">
+        <div className={`space-y-5 animate-slide-${slideDir}`}>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-semibold text-zinc-900">{t('booking', 'datetime')}</h3>
             <div className="flex gap-1.5 ml-auto">
@@ -627,12 +657,12 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => setStep('resource')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
+            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedDate || !selectedTime}
-              onClick={() => setStep('confirm')}
+              onClick={() => goForward('confirm')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
@@ -643,7 +673,7 @@ export function BookingForm({
 
       {/* STEP 4 — Confirm */}
       {step === 'confirm' && (
-        <div className="space-y-5">
+        <div className={`space-y-5 animate-slide-${slideDir}`}>
           <h3 className="font-semibold text-zinc-900">{t('booking', 'confirmBooking')}</h3>
 
           <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 space-y-3 text-sm">
@@ -697,7 +727,7 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => setStep('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40">
+            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40">
               ← {t('common', 'back')}
             </button>
             <button

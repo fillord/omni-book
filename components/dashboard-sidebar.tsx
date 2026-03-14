@@ -17,6 +17,7 @@ import { LocaleSwitcher } from '@/components/locale-switcher'
 import type { NicheConfig } from '@/lib/niche/config'
 import { useState, useEffect } from 'react'
 import { ShieldCheck } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 // ---- types -----------------------------------------------------------------
 
@@ -181,6 +182,9 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
         <div className="px-1 py-1">
           <LocaleSwitcher className="w-full h-8 text-xs" />
         </div>
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
