@@ -38,6 +38,8 @@ type Props = {
   resourceLabel?:string
   /** Niche color key: "blue" | "pink" | "orange" | "green" */
   nicheColor?:   string
+  /** Rolling booking window: max days ahead for booking */
+  bookingWindowDays?: number
 }
 
 type Step = 'service' | 'resource' | 'datetime' | 'confirm'
@@ -304,6 +306,7 @@ export function BookingForm({
   bookingLabel,
   resourceLabel,
   nicheColor,
+  bookingWindowDays = 14,
 }: Props) {
   const { t, locale } = useI18n()
   const colors = BOOKING_COLORS[nicheColor ?? 'blue'] ?? FALLBACK_COLORS
@@ -377,6 +380,10 @@ export function BookingForm({
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const minDateStr = today.toISOString().split('T')[0]
+
+  const maxDate = new Date()
+  maxDate.setDate(maxDate.getDate() + bookingWindowDays)
+  const maxDateStr = maxDate.toISOString().split('T')[0]
 
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'kz' ? 'kk-KZ' : 'ru-RU'
 
@@ -597,6 +604,7 @@ export function BookingForm({
             <input
               type="date"
               min={minDateStr}
+              max={maxDateStr}
               value={selectedDate}
               onChange={(e) => { setSelectedDate(e.target.value); setSelectedTime('') }}
               className="block w-full sm:max-w-xs rounded-xl border-2 border-zinc-200 px-3 py-2.5 text-sm focus:outline-none focus:border-zinc-400 transition-colors bg-white"

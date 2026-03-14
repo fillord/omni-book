@@ -31,6 +31,7 @@ model Tenant {
   translations Json       @default("{}")
   website      String?
   workingHours    String?
+  bookingWindowDays Int        @default(14)
   telegramChatId  String?
   bookings        Booking[]
   resources    Resource[]

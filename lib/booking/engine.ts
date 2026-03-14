@@ -56,6 +56,14 @@ export class PastDateError extends Error {
   }
 }
 
+export class BookingWindowError extends Error {
+  readonly statusCode = 422
+  constructor(days: number) {
+    super(`Запись возможна только на ${days} дней вперед.`)
+    this.name = "BookingWindowError"
+  }
+}
+
 // ---- Types -----------------------------------------------------------------
 
 export interface SlotResult {
@@ -126,7 +134,7 @@ export async function getAvailableSlots(
 
   // Load tenant timezone + resource schedule + service duration in parallel
   const [tenant, schedule, service] = await Promise.all([
-    db.tenant.findUnique({ where: { id: tenantId }, select: { timezone: true } }),
+    db.tenant.findUnique({ where: { id: tenantId }, select: { timezone: true, bookingWindowDays: true } }),
     db.schedule.findFirst({
       where: {
         resourceId,
@@ -145,7 +153,17 @@ export async function getAvailableSlots(
   if (!schedule) throw new DayOffError()
 
   const timezone = tenant.timezone
+  const bookingWindowDays = tenant.bookingWindowDays ?? 14
   const durationMs = service.durationMin * 60 * 1000
+
+  // Check if the requested date exceeds booking window
+  const maxAllowedDate = new Date()
+  maxAllowedDate.setDate(maxAllowedDate.getDate() + bookingWindowDays)
+  maxAllowedDate.setHours(23, 59, 59, 999)
+  const requestedDate = new Date(date + "T23:59:59")
+  if (requestedDate > maxAllowedDate) {
+    return [] // Date is beyond the booking window — no slots available
+  }
 
   // Build window [dayStart, dayEnd) in UTC
   const dayStart = zonedDatetime(date, schedule.startTime, timezone)
@@ -219,6 +237,19 @@ export async function createBooking(params: CreateBookingParams) {
 
   if (startsAtDate.getTime() < Date.now()) {
     throw new PastDateError()
+  }
+
+  // Validate booking window
+  const tenantForWindow = await basePrisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { bookingWindowDays: true },
+  })
+  const bookingWindowDays = tenantForWindow?.bookingWindowDays ?? 14
+  const maxAllowedDate = new Date()
+  maxAllowedDate.setDate(maxAllowedDate.getDate() + bookingWindowDays)
+  maxAllowedDate.setHours(23, 59, 59, 999)
+  if (startsAtDate > maxAllowedDate) {
+    throw new BookingWindowError(bookingWindowDays)
   }
 
   const normalizedPhone = normalizePhone(guestPhone)
