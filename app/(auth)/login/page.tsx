@@ -229,7 +229,7 @@ function LoginForm() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {serverError && (
+          {serverError && !requiresForceLogin && (
             <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {serverError}
             </div>
