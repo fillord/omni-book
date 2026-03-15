@@ -23,11 +23,13 @@ export function FeaturesGrid() {
   ]
 
   return (
-    <section id="features" className="py-20 bg-zinc-50">
+    <section id="features" className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('landing', 'features')}</h2>
-          <p className="text-zinc-500 max-w-xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+            {t('landing', 'features')}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
             {t('landing', 'featuresSubtitle')}
           </p>
         </div>
@@ -36,14 +38,18 @@ export function FeaturesGrid() {
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="bg-white rounded-2xl border border-zinc-200 p-6 flex gap-4 hover-lift"
+              className="bg-card text-card-foreground rounded-2xl border border-border p-6 flex gap-4 hover-lift"
             >
               <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
                 <Icon size={20} />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 mb-1 text-sm">{title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
+                <h3 className="font-semibold text-zinc-900 dark:text-slate-50 mb-1 text-sm">
+                  {title}
+                </h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {description}
+                </p>
               </div>
             </div>
           ))}

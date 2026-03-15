@@ -54,24 +54,17 @@ const PLANS = [
   },
 ]
 
-function FeatureItem({ text }: { text: string }) {
-  return (
-    <li className="flex items-center gap-2 text-sm text-zinc-600">
-      <Check size={14} className="text-indigo-500 shrink-0" />
-      {text}
-    </li>
-  )
-}
-
 export function PricingCards() {
   const { t } = useI18n()
 
   return (
-    <section id="pricing" className="py-20 bg-zinc-50">
+    <section id="pricing" className="py-20 bg-background">
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('landing', 'pricing')}</h2>
-          <p className="text-zinc-500 max-w-xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+            {t('landing', 'pricing')}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
             {t('landing', 'pricingDesc')}
           </p>
         </div>
@@ -82,14 +75,16 @@ export function PricingCards() {
               key={name}
               className={`rounded-2xl p-6 flex flex-col gap-5 border-2 ${
                 highlight
-                  ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200"
-                  : "bg-white border-zinc-200"
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200 dark:shadow-indigo-900/40"
+                  : "bg-card text-card-foreground border-border"
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span
-                    className={`text-sm font-semibold ${highlight ? "text-indigo-100" : "text-zinc-500"}`}
+                    className={`text-sm font-semibold ${
+                      highlight ? "text-indigo-100" : "text-zinc-500 dark:text-zinc-400"
+                    }`}
                   >
                     {name}
                   </span>
@@ -101,17 +96,25 @@ export function PricingCards() {
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span
-                    className={`text-3xl font-bold ${highlight ? "text-white" : "text-zinc-900"}`}
+                    className={`text-3xl font-bold ${
+                      highlight ? "text-white" : "text-zinc-900 dark:text-slate-50"
+                    }`}
                   >
                     {t('landing', priceKey)}
                   </span>
                   {period && (
-                    <span className={`text-sm ${highlight ? "text-indigo-200" : "text-zinc-400"}`}>
+                    <span
+                      className={`text-sm ${highlight ? "text-indigo-200" : "text-zinc-400 dark:text-zinc-500"}`}
+                    >
                       {t('landing', period)}
                     </span>
                   )}
                 </div>
-                <p className={`text-sm mt-1 ${highlight ? "text-indigo-100" : "text-zinc-500"}`}>
+                <p
+                  className={`text-sm mt-1 ${
+                    highlight ? "text-indigo-100" : "text-zinc-500 dark:text-zinc-400"
+                  }`}
+                >
                   {name === "Free" ? t('landing', 'freeDesc') : name === "Pro" ? t('landing', 'proDesc') : t('landing', 'entDesc')}
                 </p>
               </div>
@@ -123,7 +126,11 @@ export function PricingCards() {
                       size={14}
                       className={`shrink-0 ${highlight ? "text-indigo-200" : "text-indigo-500"}`}
                     />
-                    <span className={highlight ? "text-indigo-50" : "text-zinc-600"}>{t('landing', f)}</span>
+                    <span
+                      className={highlight ? "text-indigo-50" : "text-zinc-600 dark:text-zinc-300"}
+                    >
+                      {t('landing', f)}
+                    </span>
                   </li>
                 ))}
               </ul>

@@ -60,10 +60,10 @@ const TESTIMONIALS_EN: Testimonial[] = [
 ]
 
 const NICHE_COLORS: Record<string, string> = {
-  medicine: "bg-blue-100 text-blue-700",
-  beauty: "bg-pink-100 text-pink-700",
-  horeca: "bg-orange-100 text-orange-700",
-  sports: "bg-green-100 text-green-700",
+  medicine: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200",
+  beauty: "bg-pink-100 text-pink-700 dark:bg-pink-900/60 dark:text-pink-200",
+  horeca: "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200",
+  sports: "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200",
 }
 
 export function Testimonials() {
@@ -86,11 +86,13 @@ export function Testimonials() {
   const sectionSub = locale === 'en' ? 'Real businesses using OmniBook' : locale === 'kz' ? 'OmniBook қолданатын нақты бизнестер' : 'Реальные бизнесы используют OmniBook'
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{sectionTitle}</h2>
-          <p className="text-zinc-500">{sectionSub}</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+            {sectionTitle}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400">{sectionSub}</p>
         </div>
 
         <div
@@ -99,9 +101,9 @@ export function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           {/* Testimonial card */}
-          <div className="bg-zinc-50 rounded-2xl border border-zinc-200 p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
+          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
             <div key={active} className="animate-fade-in">
-              <p className="text-lg md:text-xl text-zinc-700 leading-relaxed mb-6 italic">
+              <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-200 leading-relaxed mb-6 italic">
                 &ldquo;{testimonials[active].text}&rdquo;
               </p>
               <div className="flex items-center justify-center gap-3">
@@ -109,8 +111,12 @@ export function Testimonials() {
                   {testimonials[active].avatar}
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-zinc-900 text-sm">{testimonials[active].name}</p>
-                  <p className="text-xs text-zinc-500">{testimonials[active].role}</p>
+                  <p className="font-semibold text-zinc-900 dark:text-slate-50 text-sm">
+                    {testimonials[active].name}
+                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {testimonials[active].role}
+                  </p>
                 </div>
               </div>
             </div>

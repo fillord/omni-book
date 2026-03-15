@@ -5,24 +5,24 @@ import { useI18n } from "@/lib/i18n/context"
 
 const COLOR_MAP = {
   blue: {
-    bg: "bg-blue-50",
-    icon: "bg-blue-100 text-blue-600",
-    border: "border-blue-100",
+    bg: "bg-blue-50 dark:bg-blue-900/20",
+    icon: "bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-200",
+    border: "border-blue-100 dark:border-blue-800",
   },
   pink: {
-    bg: "bg-pink-50",
-    icon: "bg-pink-100 text-pink-600",
-    border: "border-pink-100",
+    bg: "bg-pink-50 dark:bg-pink-900/20",
+    icon: "bg-pink-100 text-pink-600 dark:bg-pink-900/60 dark:text-pink-200",
+    border: "border-pink-100 dark:border-pink-800",
   },
   orange: {
-    bg: "bg-orange-50",
-    icon: "bg-orange-100 text-orange-600",
-    border: "border-orange-100",
+    bg: "bg-orange-50 dark:bg-orange-900/20",
+    icon: "bg-orange-100 text-orange-600 dark:bg-orange-900/60 dark:text-orange-200",
+    border: "border-orange-100 dark:border-orange-800",
   },
   green: {
-    bg: "bg-green-50",
-    icon: "bg-green-100 text-green-600",
-    border: "border-green-100",
+    bg: "bg-green-50 dark:bg-green-900/20",
+    icon: "bg-green-100 text-green-600 dark:bg-green-900/60 dark:text-green-200",
+    border: "border-green-100 dark:border-green-800",
   },
 }
 
@@ -37,11 +37,13 @@ export function NicheCards() {
   ]
 
   return (
-    <section id="niches" className="py-20 bg-white">
+    <section id="niches" className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">{t('landing', 'forWhomTitle')}</h2>
-          <p className="text-zinc-500 max-w-xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+            {t('landing', 'forWhomTitle')}
+          </h2>
+          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
             {t('landing', 'nichesSubtitle')}
           </p>
         </div>
@@ -58,8 +60,12 @@ export function NicheCards() {
                   <Icon size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-zinc-900 mb-2">{title}</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
+                  <h3 className="font-semibold text-zinc-900 dark:text-slate-50 mb-2">
+                    {title}
+                  </h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    {description}
+                  </p>
                 </div>
               </div>
             )

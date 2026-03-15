@@ -69,7 +69,7 @@ export function StatsCounter() {
       ]
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, idx) => (
@@ -77,7 +77,7 @@ export function StatsCounter() {
               <p className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
                 <AnimatedNumber end={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="text-sm text-zinc-500 font-medium">{stat.label}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
