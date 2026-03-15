@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useI18n } from "@/lib/i18n/context"
 import { checkLoginIp, verifyLoginOtp } from "@/lib/actions/otp"
+import { maskEmail } from "@/lib/auth/utils"
 
 // ---- Types -----------------------------------------------------------------
 
@@ -158,7 +159,13 @@ function LoginForm() {
           </CardTitle>
           <CardDescription>
             {requiresOtp 
-              ? "Мы отправили 6-значный код на ваш email для подтверждения входа с нового IP-адреса."
+              ? (
+                <>
+                  Мы отправили 6-значный код на ваш email{" "}
+                  <strong>{maskEmail(form.getValues('email'))}</strong>{" "}
+                  для подтверждения входа с нового IP-адреса.
+                </>
+              )
               : t('auth', 'loginSubtitle')}
           </CardDescription>
         </CardHeader>
@@ -223,14 +230,15 @@ function LoginForm() {
             </form>
           ) : (
             // Form 2: OTP
-            <form onSubmit={onSubmitOtp} className="space-y-4">
+            <form onSubmit={onSubmitOtp} className="space-y-4" autoComplete="off">
               <div className="space-y-1.5">
                 <Label htmlFor="otp">Код из письма</Label>
                 <Input
                   id="otp"
+                  name="otp"
                   type="text"
                   autoComplete="one-time-code"
-                  placeholder="123456"
+                  placeholder="000000"
                   maxLength={6}
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
