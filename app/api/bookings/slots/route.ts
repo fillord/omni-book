@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { resolveTenant, isTenantError } from "@/lib/tenant"
+import { basePrisma } from "@/lib/db"
 import {
   getAvailableSlots,
   DayOffError,
@@ -8,76 +8,75 @@ import {
 } from "@/lib/booking/engine"
 
 /**
- * GET /api/bookings/slots?resourceId=&serviceId=&date=YYYY-MM-DD
- * Returns available time slots for the given resource+service on the given date.
+ * GET /api/bookings/slots?tenantSlug=xxx&resourceId=xxx&serviceId=xxx&date=YYYY-MM-DD
  *
+ * Returns available time-slots for the given resource+service on a given date.
  * Response 200: { slots: SlotResult[] }
- * Response 200: { slots: [], dayOff: true } — resource has no schedule on that day
+ * Response 200: { slots: [], dayOff: true }
  */
-export async function GET(req: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    let tenant: Awaited<ReturnType<typeof resolveTenant>>
-    try {
-      tenant = await resolveTenant(req)
-    } catch (err) {
-      if (isTenantError(err)) {
-        return NextResponse.json(
-          { error: (err as Error).message },
-          { status: (err as { statusCode: number }).statusCode }
-        )
-      }
-      throw err
-    }
+    const { searchParams } = request.nextUrl
 
-    const { searchParams } = req.nextUrl
-    const resourceId = searchParams.get("resourceId")
-    const serviceId  = searchParams.get("serviceId")
-    let date         = searchParams.get("date") ?? ""
+    // ---- extract & validate params ----------------------------------------
+    const tenantSlug = searchParams.get("tenantSlug")?.trim() ?? ""
+    const resourceId = searchParams.get("resourceId")?.trim() ?? ""
+    const serviceId  = searchParams.get("serviceId")?.trim()  ?? ""
+    let   date       = searchParams.get("date")?.trim()       ?? ""
 
-    // Sanitize date — extract YYYY-MM-DD, discard any trailing garbage (e.g. ":1")
+    // Sanitize date — keep only YYYY-MM-DD portion
     const dateMatch = date.match(/^(\d{4}-\d{2}-\d{2})/)
     date = dateMatch ? dateMatch[1] : ""
 
-    // Validate year is within a reasonable range (prevents "0020-03-16" style bugs)
-    const year = date ? parseInt(date.split("-")[0]) : 0
+    // Validate year range (prevent "0020-03-16" style bugs)
+    const year = date ? parseInt(date.split("-")[0], 10) : 0
     if (year < 2000 || year > 2099) {
       date = ""
     }
 
-    if (!resourceId || !serviceId || !date) {
+    if (!tenantSlug || !resourceId || !serviceId || !date) {
       return NextResponse.json(
-        { error: "Missing required query params: resourceId, serviceId, date (YYYY-MM-DD)" },
-        { status: 400 }
+        { error: "Missing required query params: tenantSlug, resourceId, serviceId, date (YYYY-MM-DD)" },
+        { status: 400 },
       )
     }
 
-    try {
-      const slots = await getAvailableSlots({
-        tenantId: tenant.id,
-        resourceId,
-        serviceId,
-        date,
-      })
-      return NextResponse.json({ slots })
-    } catch (err) {
-      if (err instanceof DayOffError) {
-        const { getServerT } = await import("@/lib/i18n/server")
-        const t = await getServerT()
-        return NextResponse.json({ slots: [], dayOff: true, message: t('booking', 'dayOff') })
-      }
-      if (err instanceof ResourceNotFoundError || err instanceof ServiceNotFoundError) {
-        return NextResponse.json({ error: (err as Error).message }, { status: 404 })
-      }
-      throw err
+    // ---- resolve tenant ---------------------------------------------------
+    const tenant = await basePrisma.tenant.findUnique({
+      where: { slug: tenantSlug },
+      select: { id: true, isActive: true },
+    })
+
+    if (!tenant) {
+      return NextResponse.json({ error: `Tenant not found: "${tenantSlug}"` }, { status: 404 })
     }
-  } catch (error) {
-    console.error("GET /api/bookings/slots error:", error)
+    if (!tenant.isActive) {
+      return NextResponse.json({ error: "Tenant is suspended" }, { status: 403 })
+    }
+
+    // ---- get slots --------------------------------------------------------
+    const slots = await getAvailableSlots({
+      tenantId: tenant.id,
+      resourceId,
+      serviceId,
+      date,
+    })
+
+    return NextResponse.json({ slots })
+  } catch (err) {
+    if (err instanceof DayOffError) {
+      return NextResponse.json({ slots: [], dayOff: true, message: "Выходной день" })
+    }
+    if (err instanceof ResourceNotFoundError || err instanceof ServiceNotFoundError) {
+      return NextResponse.json({ error: (err as Error).message }, { status: 404 })
+    }
+    console.error("GET /api/bookings/slots error:", err)
     return NextResponse.json(
       {
         error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown",
+        details: err instanceof Error ? err.message : "Unknown",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
