@@ -8,7 +8,7 @@ import {
 } from "@/lib/booking/engine"
 
 /**
- * GET /api/bookings/slots?tenantSlug=xxx&resourceId=xxx&serviceId=xxx&date=YYYY-MM-DD
+ * GET /api/bookings/slots?tenantSlug=xxx&resourceId=xxx&serviceId=xxx&date=YYYY-MM-Dd
  *
  * Returns available time-slots for the given resource+service on a given date.
  * Response 200: { slots: SlotResult[] }
