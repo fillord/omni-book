@@ -143,7 +143,7 @@ export async function getAvailableSlots(
     db.tenant.findUnique({ where: { id: tenantId } }),
     db.resource.findUnique({
       where: { id: resourceId },
-      select: { id: true, lunchStart: true, lunchEnd: true },
+      select: { id: true, tenantId: true, lunchStart: true, lunchEnd: true },
     }),
     db.schedule.findFirst({
       where: {
