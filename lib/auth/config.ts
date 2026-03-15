@@ -177,7 +177,7 @@ export const authConfig: NextAuthOptions = {
       session.user.role            = token.role
       session.user.tenantId        = token.tenantId
       session.user.tenantSlug      = token.tenantSlug
-      session.user.activeSessionId = token.activeSessionId ?? null
+      session.user.activeSessionId = token.activeSessionId ?? null // ts-ignore
       return session
     },
   },
