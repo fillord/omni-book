@@ -149,10 +149,11 @@ export const authConfig: NextAuthOptions = {
           include: { tenant: { select: { slug: true } } },
         })
         if (dbUser) {
-          token.id         = dbUser.id
-          token.role       = dbUser.role
-          token.tenantId   = dbUser.tenantId
-          token.tenantSlug = dbUser.tenant?.slug ?? null
+          token.id              = dbUser.id
+          token.role            = dbUser.role
+          token.tenantId        = dbUser.tenantId
+          token.tenantSlug      = dbUser.tenant?.slug ?? null
+          token.activeSessionId = dbUser.activeSessionId 
         }
       }
 
@@ -172,10 +173,11 @@ export const authConfig: NextAuthOptions = {
     // Session — expose custom fields to client-side session
     // ------------------------------------------------------------------
     async session({ session, token }) {
-      session.user.id         = token.id
-      session.user.role       = token.role
-      session.user.tenantId   = token.tenantId
-      session.user.tenantSlug = token.tenantSlug
+      session.user.id              = token.id
+      session.user.role            = token.role
+      session.user.tenantId        = token.tenantId
+      session.user.tenantSlug      = token.tenantSlug
+      session.user.activeSessionId = token.activeSessionId
       return session
     },
   },

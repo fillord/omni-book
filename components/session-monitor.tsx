@@ -18,7 +18,9 @@ export function SessionMonitor() {
 
     const checkSession = async () => {
       try {
-        const res = await fetch('/api/auth/check-session')
+        const res = await fetch(`/api/auth/check-session?t=${Date.now()}`, {
+          cache: 'no-store'
+        })
         
         if (!res.ok) {
            // We might get 401 if the cookie naturally expired

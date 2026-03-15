@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth'
 import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authConfig)
