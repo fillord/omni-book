@@ -82,39 +82,41 @@ export async function checkLoginIp(email: string, password: string) {
   const reqHeaders = await headers()
   const currentIp = getIpAddress(reqHeaders)
 
-  // Check concurrent sessions (activeSessionId)
+  // 1. IP check first: if IP changed, we must verify identity before worrying about concurrent sessions
+  if (user.lastIpAddress && user.lastIpAddress !== currentIp) {
+    // Generate OTP
+    const code = generateOtp()
+    const expiresAt = new Date()
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10)
+
+    // Clear previous codes for this email and create new
+    await basePrisma.otpCode.deleteMany({ where: { email: cleanEmail } })
+    await basePrisma.otpCode.create({
+      data: { email: cleanEmail, code, expiresAt },
+    })
+
+    await sendOtpEmail(cleanEmail, code)
+    return { requiresOtp: true, requiresForceLogin: false }
+  }
+
+  // 2. IP matched (or no IP history). Now check concurrent sessions.
   if (user.activeSessionId) {
     return {
+      requiresOtp: false,
       requiresForceLogin: true,
       message: 'В этот аккаунт уже выполнен вход с другого устройства.'
     }
   }
 
-  // If IP matches, or user has no last IP (legacy user), allow login
-  if (!user.lastIpAddress || user.lastIpAddress === currentIp) {
-    if (!user.lastIpAddress) {
-      // Opportunistically save IP for legacy users
-      await basePrisma.user.update({
-        where: { id: user.id },
-        data: { lastIpAddress: currentIp },
-      })
-    }
-    return { requiresOtp: false, requiresForceLogin: false }
+  // 3. No active sessions, proceed. Opportunistically save IP for legacy users
+  if (!user.lastIpAddress) {
+    await basePrisma.user.update({
+      where: { id: user.id },
+      data: { lastIpAddress: currentIp },
+    })
   }
-
-  // IP mismatch -> Generate OTP
-  const code = generateOtp()
-  const expiresAt = new Date()
-  expiresAt.setMinutes(expiresAt.getMinutes() + 10)
-
-  // Clear previous codes for this email and create new
-  await basePrisma.otpCode.deleteMany({ where: { email: cleanEmail } })
-  await basePrisma.otpCode.create({
-    data: { email: cleanEmail, code, expiresAt },
-  })
-
-  await sendOtpEmail(cleanEmail, code)
-  return { requiresOtp: true, requiresForceLogin: false }
+  
+  return { requiresOtp: false, requiresForceLogin: false }
 }
 
 export async function verifyLoginOtp(email: string, code: string) {
@@ -133,6 +135,8 @@ export async function verifyLoginOtp(email: string, code: string) {
     return { error: 'Код истёк. Авторизуйтесь заново.' }
   }
 
+  const user = await basePrisma.user.findUnique({ where: { email: cleanEmail } })
+
   const reqHeaders = await headers()
   const currentIp = getIpAddress(reqHeaders)
 
@@ -144,6 +148,14 @@ export async function verifyLoginOtp(email: string, code: string) {
     }),
     basePrisma.otpCode.delete({ where: { id: record.id } })
   ])
+
+  // Identity is now verified. Check if there's an active session on another device.
+  if (user?.activeSessionId) {
+    return { 
+      requiresForceLogin: true, 
+      message: 'В этот аккаунт уже выполнен вход с другого устройства.' 
+    }
+  }
 
   return { success: true }
 }

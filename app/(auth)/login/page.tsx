@@ -74,16 +74,17 @@ function LoginForm() {
         return
       }
 
-      // Check if another session is active
-      if (res.requiresForceLogin) {
-        setRequiresForceLogin(true)
-        setServerError(res.message || "Аккаунт используется на другом устройстве.")
+      // 1. Identity verification takes precedence
+      if (res.requiresOtp) {
+        setRequiresOtp(true)
         setLoading(false)
         return
       }
 
-      if (res.requiresOtp) {
-        setRequiresOtp(true)
+      // 2. Check if another session is active
+      if (res.requiresForceLogin) {
+        setRequiresForceLogin(true)
+        setServerError(res.message || "Аккаунт используется на другом устройстве.")
         setLoading(false)
         return
       }
@@ -125,7 +126,7 @@ function LoginForm() {
       // Otherwise, just sign in (backend config.ts will regenerate session ID and invalidate the other device)
       await performSignIn(email, password)
     } catch {
-       setServerError("ПроОшибка при принудительном входе")
+       setServerError("Ошибка при принудительном входе")
        setLoading(false)
     }
   }
@@ -152,7 +153,16 @@ function LoginForm() {
         return
       }
 
-      // OTP valid, IP updated, proceed to normal signIn
+      // After verifying OTP, check if there's an active session
+      if (res.requiresForceLogin) {
+        setRequiresOtp(false)
+        setRequiresForceLogin(true)
+        setServerError(res.message || "Аккаунт используется на другом устройстве.")
+        setLoading(false)
+        return
+      }
+
+      // OTP valid, IP updated, no concurrent sessions, proceed to normal signIn
       await performSignIn(email, password)
     } catch {
       setServerError("Ошибка проверки кода")
