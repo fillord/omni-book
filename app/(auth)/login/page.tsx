@@ -231,11 +231,14 @@ function LoginForm() {
           ) : (
             // Form 2: OTP
             <form onSubmit={onSubmitOtp} className="space-y-4" autoComplete="off">
+              {/* Fake hidden input to trap Chrome's email autofill */}
+              <input type="email" name="fake_email" style={{display: 'none'}} aria-hidden="true" />
+              
               <div className="space-y-1.5">
-                <Label htmlFor="otp">Код из письма</Label>
+                <Label htmlFor="verification_code">Код из письма</Label>
                 <Input
-                  id="otp"
-                  name="otp"
+                  id="verification_code"
+                  name="verification_code"
                   type="text"
                   autoComplete="one-time-code"
                   placeholder="000000"
@@ -248,7 +251,7 @@ function LoginForm() {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading || otpCode.length < 6}>
-                {loading ? "Вход..." : "Подтвердить пароль"}
+                {loading ? "Вход..." : "Подтвердить код"}
               </Button>
 
               <div className="mt-4 text-center">

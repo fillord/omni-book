@@ -108,10 +108,15 @@ function VerifyOtpForm() {
         </div>
       )}
 
-      <form onSubmit={handleVerify} className="space-y-4">
+      <form onSubmit={handleVerify} className="space-y-4" autoComplete="off">
+        {/* Fake hidden input to trap Chrome's email autofill */}
+        <input type="email" name="fake_email" style={{display: 'none'}} aria-hidden="true" />
+
         <div className="space-y-1.5">
-          <Label>Код из письма</Label>
+          <Label htmlFor="verification_code">Код из письма</Label>
           <Input
+            id="verification_code"
+            name="verification_code"
             placeholder="123456"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -123,8 +128,10 @@ function VerifyOtpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label>Ваш пароль</Label>
+          <Label htmlFor="password">Ваш пароль</Label>
           <Input
+            id="password"
+            name="password"
             type="password"
             placeholder="••••••••"
             value={password}
