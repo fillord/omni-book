@@ -115,8 +115,11 @@ function VerifyOtpForm() {
         <div className="space-y-1.5">
           <Label htmlFor="verification_code">Код из письма</Label>
           <Input
-            id="verification_code"
-            name="verification_code"
+            id="otp-code"
+            name="otp-code"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="123456"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}

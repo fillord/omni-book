@@ -237,9 +237,11 @@ function LoginForm() {
               <div className="space-y-1.5">
                 <Label htmlFor="verification_code">Код из письма</Label>
                 <Input
-                  id="verification_code"
-                  name="verification_code"
+                  id="otp-code"
+                  name="otp-code"
                   type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   autoComplete="one-time-code"
                   placeholder="000000"
                   maxLength={6}
