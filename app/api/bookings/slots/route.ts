@@ -38,6 +38,12 @@ export async function GET(req: NextRequest) {
     const dateMatch = date.match(/^(\d{4}-\d{2}-\d{2})/)
     date = dateMatch ? dateMatch[1] : ""
 
+    // Validate year is within a reasonable range (prevents "0020-03-16" style bugs)
+    const year = date ? parseInt(date.split("-")[0]) : 0
+    if (year < 2000 || year > 2099) {
+      date = ""
+    }
+
     if (!resourceId || !serviceId || !date) {
       return NextResponse.json(
         { error: "Missing required query params: resourceId, serviceId, date (YYYY-MM-DD)" },

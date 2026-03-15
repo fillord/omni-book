@@ -379,11 +379,13 @@ export function BookingForm({
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const minDateStr = today.toISOString().split('T')[0]
+  const pad2 = (n: number) => String(n).padStart(2, '0')
+  const toDateStr = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
+  const minDateStr = toDateStr(today)
 
   const maxDate = new Date()
   maxDate.setDate(maxDate.getDate() + bookingWindowDays)
-  const maxDateStr = maxDate.toISOString().split('T')[0]
+  const maxDateStr = toDateStr(maxDate)
 
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'kz' ? 'kk-KZ' : 'ru-RU'
 
@@ -606,7 +608,14 @@ export function BookingForm({
               min={minDateStr}
               max={maxDateStr}
               value={selectedDate}
-              onChange={(e) => { setSelectedDate(e.target.value); setSelectedTime('') }}
+              onChange={(e) => {
+                const val = e.target.value
+                // Guard against malformed years (e.g. "0020" instead of "2026")
+                const yearMatch = val.match(/^(\d{4})/)
+                if (yearMatch && (parseInt(yearMatch[1]) < 2000 || parseInt(yearMatch[1]) > 2099)) return
+                setSelectedDate(val)
+                setSelectedTime('')
+              }}
               className="block w-full sm:max-w-xs rounded-xl border-2 border-zinc-200 px-3 py-2.5 text-sm focus:outline-none focus:border-zinc-400 transition-colors bg-white"
             />
           </div>
