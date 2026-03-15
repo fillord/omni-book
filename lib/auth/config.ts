@@ -2,6 +2,7 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { basePrisma } from '@/lib/db'
 
 // Ensure type augmentations are loaded
@@ -54,13 +55,22 @@ export const authConfig: NextAuthOptions = {
           if (!user.tenant?.isActive) return null
         }
 
+        // --- Concurrent Session Control ---
+        // Generate new session ID and overwrite it in the DB
+        const newSessionId = crypto.randomUUID()
+        await basePrisma.user.update({
+          where: { id: user.id },
+          data: { activeSessionId: newSessionId }
+        })
+
         return {
-          id:          user.id,
-          email:       user.email,
-          name:        user.name,
-          role:        user.role,
-          tenantId:    user.tenantId,
-          tenantSlug:  user.tenant?.slug ?? null,
+          id:              user.id,
+          email:           user.email,
+          name:            user.name,
+          role:            user.role,
+          tenantId:        user.tenantId,
+          tenantSlug:      user.tenant?.slug ?? null,
+          activeSessionId: newSessionId,
         }
       },
     }),
@@ -90,18 +100,30 @@ export const authConfig: NextAuthOptions = {
 
       const existing = await basePrisma.user.findUnique({ where: { email } })
 
+      const newSessionId = crypto.randomUUID()
+
       if (!existing) {
         // New Google user — create as CUSTOMER without tenant
         // A tenant OWNER can invite them via the admin panel later
         await basePrisma.user.create({
           data: {
             email,
-            name:          user.name,
-            role:          'CUSTOMER',
-            emailVerified: new Date(),
+            name:            user.name,
+            role:            'CUSTOMER',
+            emailVerified:   new Date(),
+            activeSessionId: newSessionId,
           },
         })
+      } else {
+        // Existing user, just update their activeSessionId
+        await basePrisma.user.update({
+          where: { id: existing.id },
+          data: { activeSessionId: newSessionId }
+        })
       }
+
+      // We attach it to the user object so the JWT callback picks it up
+      user.activeSessionId = newSessionId
 
       return true
     },
@@ -112,10 +134,11 @@ export const authConfig: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // `user` is only defined on the first sign-in event
       if (user) {
-        token.id        = user.id
-        token.role      = user.role
-        token.tenantId  = user.tenantId
-        token.tenantSlug = user.tenantSlug
+        token.id              = user.id
+        token.role            = user.role
+        token.tenantId        = user.tenantId
+        token.tenantSlug      = user.tenantSlug
+        token.activeSessionId = user.activeSessionId
       }
 
       // For Google OAuth: user object from signIn callback doesn't carry our

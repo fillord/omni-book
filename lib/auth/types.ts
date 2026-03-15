@@ -12,6 +12,7 @@ declare module 'next-auth' {
       role: Role
       tenantId: string | null
       tenantSlug: string | null
+      activeSessionId: string | null
     }
   }
 
@@ -20,6 +21,7 @@ declare module 'next-auth' {
     role: Role
     tenantId: string | null
     tenantSlug: string | null
+    activeSessionId?: string | null
   }
 }
 
@@ -29,5 +31,6 @@ declare module 'next-auth/jwt' {
     role: Role
     tenantId: string | null
     tenantSlug: string | null
+    activeSessionId?: string | null
   }
 }

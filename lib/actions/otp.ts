@@ -82,6 +82,14 @@ export async function checkLoginIp(email: string, password: string) {
   const reqHeaders = await headers()
   const currentIp = getIpAddress(reqHeaders)
 
+  // Check concurrent sessions (activeSessionId)
+  if (user.activeSessionId) {
+    return {
+      requiresForceLogin: true,
+      message: 'В этот аккаунт уже выполнен вход с другого устройства.'
+    }
+  }
+
   // If IP matches, or user has no last IP (legacy user), allow login
   if (!user.lastIpAddress || user.lastIpAddress === currentIp) {
     if (!user.lastIpAddress) {
@@ -91,7 +99,7 @@ export async function checkLoginIp(email: string, password: string) {
         data: { lastIpAddress: currentIp },
       })
     }
-    return { requiresOtp: false }
+    return { requiresOtp: false, requiresForceLogin: false }
   }
 
   // IP mismatch -> Generate OTP
@@ -106,7 +114,7 @@ export async function checkLoginIp(email: string, password: string) {
   })
 
   await sendOtpEmail(cleanEmail, code)
-  return { requiresOtp: true }
+  return { requiresOtp: true, requiresForceLogin: false }
 }
 
 export async function verifyLoginOtp(email: string, code: string) {

@@ -49,6 +49,7 @@ model User {
   lastIpAddress String?
   role          Role      @default(CUSTOMER)
   emailVerified DateTime?
+  activeSessionId String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   bookings      Booking[]

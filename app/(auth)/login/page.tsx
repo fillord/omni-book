@@ -46,15 +46,21 @@ function LoginForm() {
     authError ? (t('auth', NEXTAUTH_ERROR_KEYS[authError] ?? NEXTAUTH_ERROR_KEYS.default)) : null
   )
   const [loading, setLoading] = useState(false)
+  
+  // States for OTP / 2FA flow
   const [requiresOtp, setRequiresOtp] = useState(false)
   const [otpCode, setOtpCode] = useState("")
+
+  // States for Concurrent Sessions (Force Login)
+  const [requiresForceLogin, setRequiresForceLogin] = useState(false)
+  const isKicked = searchParams.get("kicked") === "true"
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   })
 
-  // 1. Submit Credentials -> Check IP -> maybe require OTP
+  // 1. Submit Credentials -> Check IP & Session -> maybe require OTP or ForceLogin
   async function onSubmitCredentials(values: LoginFormValues) {
     setLoading(true)
     setServerError(null)
@@ -68,17 +74,59 @@ function LoginForm() {
         return
       }
 
+      // Check if another session is active
+      if (res.requiresForceLogin) {
+        setRequiresForceLogin(true)
+        setServerError(res.message || "Аккаунт используется на другом устройстве.")
+        setLoading(false)
+        return
+      }
+
       if (res.requiresOtp) {
         setRequiresOtp(true)
         setLoading(false)
         return
       }
 
-      // No OTP required, proceed to normal signIn
+      // No OTP required, no active sessions, proceed to normal signIn
       await performSignIn(values.email, values.password)
     } catch {
       setServerError("Произошла ошибка при входе")
       setLoading(false)
+    }
+  }
+
+  // 1b. Force Login confirmation
+  async function handleForceLogin() {
+    setLoading(true)
+    setServerError(null)
+    
+    // They approved kicking out the other session, but we still need to check IP
+    const email = form.getValues('email')
+    const password = form.getValues('password')
+
+    try {
+      const res = await checkLoginIp(email, password)
+      
+      if (res.error) {
+         setServerError(res.error)
+         setLoading(false)
+         return
+      }
+
+      // If IP has changed, we still need OTP, even after force login approval
+      if (res.requiresOtp) {
+        setRequiresForceLogin(false)
+        setRequiresOtp(true)
+        setLoading(false)
+        return
+      }
+
+      // Otherwise, just sign in (backend config.ts will regenerate session ID and invalidate the other device)
+      await performSignIn(email, password)
+    } catch {
+       setServerError("ПроОшибка при принудительном входе")
+       setLoading(false)
     }
   }
 
@@ -177,7 +225,25 @@ function LoginForm() {
             </div>
           )}
 
-          {!requiresOtp ? (
+          {isKicked && (
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive font-medium">
+              Кто-то другой зашел в ваш аккаунт. Вы были отключены для безопасности.
+            </div>
+          )}
+
+          {requiresForceLogin ? (
+            <div className="space-y-4">
+              <div className="rounded-md border border-orange-500/40 bg-orange-500/5 px-4 py-3 text-sm text-orange-600 font-medium">
+                {serverError || "В этот аккаунт уже выполнен вход с другого устройства."}
+              </div>
+              <Button type="button" onClick={handleForceLogin} className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={loading}>
+                {loading ? "Загрузка..." : "Завершить другие сеансы и войти"}
+              </Button>
+              <Button type="button" variant="ghost" className="w-full text-muted-foreground" onClick={() => window.location.reload()}>
+                Отмена
+              </Button>
+            </div>
+          ) : !requiresOtp ? (
             // Form 1: Credentials
             <form onSubmit={form.handleSubmit(onSubmitCredentials)} className="space-y-4" noValidate>
               <div className="space-y-1.5">
