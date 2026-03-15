@@ -192,3 +192,30 @@ export async function sendNoShowEmail(data: BookingEmailData): Promise<void> {
     `,
   })
 }
+
+// ---- OTP Email -------------------------------------------------------------
+
+export async function sendOtpEmail(toEmail: string, code: string): Promise<void> {
+  if (!resend || !toEmail) {
+    console.log('[Resend] Dev mock OTP email:', { toEmail, code })
+    return
+  }
+
+  await resend.emails.send({
+    from: 'Omni-Book <noreply@omni-book.site>',
+    to: toEmail,
+    subject: `Ваш код подтверждения: ${code}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;text-align:center;">
+        <h2 style="color:#111">Код подтверждения</h2>
+        <p style="color:#444;">Ваш одноразовый код для входа или регистрации:</p>
+        <h1 style="font-size:32px;letter-spacing:6px;padding:16px;background:#f4f4f5;border-radius:12px;color:#09090b;display:inline-block;">
+          ${code}
+        </h1>
+        <p style="color:#71717a;font-size:14px;margin-top:24px;">(Код действителен 10 минут)</p>
+        <hr style="border:none;border-top:1px solid #e4e4e7;margin:24px 0" />
+        <p style="color:#a1a1aa;font-size:12px;">Если вы не запрашивали этот код, просто проигнорируйте письмо.</p>
+      </div>
+    `,
+  })
+}
