@@ -281,6 +281,8 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
 
   const [attrs, setAttrs] = useState<Attrs>(initialAttrs)
   const [submitting, setSubmitting] = useState(false)
+  const [lunchStart, setLunchStart] = useState(resource?.lunchStart ?? '')
+  const [lunchEnd, setLunchEnd]     = useState(resource?.lunchEnd ?? '')
 
   // Schedule state: pre-fill from existing schedules on edit, or niche defaults on create
   const [schedule, setSchedule] = useState<ScheduleState>(() =>
@@ -321,7 +323,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
         en: { name: values.name_en || '', description: values.desc_en || '' },
         kz: { name: values.name_kz || '', description: values.desc_kz || '' },
       }
-      await onSubmit({ ...values, attributes: attrs, translations }, scheduleEntries)
+      await onSubmit({ ...values, attributes: attrs, translations, lunchStart: lunchStart || undefined, lunchEnd: lunchEnd || undefined }, scheduleEntries)
     } finally {
       setSubmitting(false)
     }
@@ -486,6 +488,41 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
             </FormItem>
           )}
         />
+
+        {/* Lunch break */}
+        <div className="space-y-3 rounded-lg border bg-muted/30 p-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Обеденный перерыв
+          </p>
+          <p className="text-xs text-muted-foreground -mt-1">
+            Слоты в это время не будут предлагаться клиентам. Оставьте пустым, если перерыва нет.
+          </p>
+          <div className="flex items-center gap-3">
+            <div className="space-y-1 flex-1">
+              <label htmlFor="lunchStart" className="text-sm font-medium">Начало</label>
+              <Input
+                id="lunchStart"
+                type="time"
+                value={lunchStart}
+                onChange={(e) => setLunchStart(e.target.value)}
+                disabled={isDisabled}
+                className="h-8"
+              />
+            </div>
+            <span className="text-muted-foreground text-sm mt-5">—</span>
+            <div className="space-y-1 flex-1">
+              <label htmlFor="lunchEnd" className="text-sm font-medium">Конец</label>
+              <Input
+                id="lunchEnd"
+                type="time"
+                value={lunchEnd}
+                onChange={(e) => setLunchEnd(e.target.value)}
+                disabled={isDisabled}
+                className="h-8"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Dynamic attribute fields */}
         {visibleAttrFields.length > 0 && (

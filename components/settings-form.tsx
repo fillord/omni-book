@@ -49,11 +49,12 @@ type TenantData = {
   website:     string | null
   logoUrl:     string | null
   coverUrl:    string | null
-  workingHours:   string | null
-  timezone:       string
-  socialLinks:    unknown
-  translations?:  unknown
-  telegramChatId: string | null
+  workingHours:      string | null
+  timezone:          string
+  socialLinks:       unknown
+  translations?:     unknown
+  telegramChatId:    string | null
+  bookingWindowDays: number
 }
 
 type FormValues = {
@@ -76,6 +77,7 @@ type FormValues = {
   whatsapp:       string
   telegram:       string
   telegramChatId: string
+  bookingWindowDays: number
 }
 
 type Props = {
@@ -198,8 +200,9 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       timezone:     tenant.timezone     || "Asia/Almaty",
       instagram:      social.instagram        ?? "",
       whatsapp:       social.whatsapp         ?? "",
-      telegram:       social.telegram         ?? "",
-      telegramChatId: tenant.telegramChatId   ?? "",
+      telegram:          social.telegram         ?? "",
+      telegramChatId:    tenant.telegramChatId   ?? "",
+      bookingWindowDays: tenant.bookingWindowDays ?? 14,
     },
   })
 
@@ -258,6 +261,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
         telegram:  values.telegram,
       },
       telegramChatId: values.telegramChatId,
+      bookingWindowDays: values.bookingWindowDays,
       translations: {
         en: {
           name: values.name_en,
@@ -519,6 +523,33 @@ export function SettingsForm({ tenant, readOnly }: Props) {
               disabled={readOnly}
               placeholder={t('settings', 'schedulePlaceholder')}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Правила бронирования */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Правила бронирования</CardTitle>
+          <CardDescription>
+            Ограничьте, на сколько дней вперед клиенты могут записаться.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            <Label htmlFor="bookingWindowDays">Окно записи (дней вперёд)</Label>
+            <Input
+              id="bookingWindowDays"
+              type="number"
+              min={1}
+              max={90}
+              {...register("bookingWindowDays", { valueAsNumber: true })}
+              disabled={readOnly}
+              placeholder="14"
+            />
+            <p className="text-xs text-muted-foreground">
+              Клиенты смогут записаться только на ближайшие N дней. По умолчанию — 14.
+            </p>
           </div>
         </CardContent>
       </Card>

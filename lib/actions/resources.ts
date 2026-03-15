@@ -125,8 +125,10 @@ export async function createResource(
       type:        parsed.type,
       description: parsed.description,
       capacity:    parsed.capacity,
-      attributes:  (parsed.attributes ?? {}) as Prisma.InputJsonValue,
-      translations: (parsed.translations ?? {}) as Prisma.InputJsonValue,
+      attributes:   (parsed.attributes ?? {}) as Prisma.InputJsonValue,
+      translations:  (parsed.translations ?? {}) as Prisma.InputJsonValue,
+      lunchStart:    parsed.lunchStart || null,
+      lunchEnd:      parsed.lunchEnd   || null,
     },
   })
 
@@ -163,6 +165,8 @@ export async function updateResource(
   if ('description' in parsed)         updateData.description = parsed.description ?? null
   if ('capacity' in parsed)            updateData.capacity    = parsed.capacity ?? null
   if (parsed.attributes !== undefined) updateData.attributes  = parsed.attributes as Prisma.InputJsonValue
+  if ('lunchStart' in parsed)          updateData.lunchStart  = parsed.lunchStart || null
+  if ('lunchEnd' in parsed)            updateData.lunchEnd    = parsed.lunchEnd   || null
 
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)

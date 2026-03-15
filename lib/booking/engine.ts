@@ -112,6 +112,12 @@ function parseTime(t: string): { h: number; m: number } {
   return { h, m }
 }
 
+/** Convert "HH:MM" to minutes from midnight */
+function timeToMinutes(t: string): number {
+  const { h, m } = parseTime(t)
+  return h * 60 + m
+}
+
 /** Build a Date in the given timezone for a specific date + "HH:MM" */
 function zonedDatetime(dateStr: string, timeStr: string, timezone: string): Date {
   const { h, m } = parseTime(timeStr)
@@ -132,9 +138,13 @@ export async function getAvailableSlots(
 
   const db = getTenantDB(tenantId)
 
-  // Load tenant timezone + resource schedule + service duration in parallel
-  const [tenant, schedule, service] = await Promise.all([
+  // Load tenant timezone + resource (with lunch) + schedule + service in parallel
+  const [tenant, resource, schedule, service] = await Promise.all([
     db.tenant.findUnique({ where: { id: tenantId } }),
+    db.resource.findUnique({
+      where: { id: resourceId },
+      select: { id: true, lunchStart: true, lunchEnd: true },
+    }),
     db.schedule.findFirst({
       where: {
         resourceId,
@@ -149,12 +159,18 @@ export async function getAvailableSlots(
   ])
 
   if (!tenant) throw new ResourceNotFoundError()
+  if (!resource) throw new ResourceNotFoundError()
   if (!service || service.tenantId !== tenantId) throw new ServiceNotFoundError()
   if (!schedule) throw new DayOffError()
 
   const timezone = tenant.timezone
-  const bookingWindowDays = (tenant as unknown as { bookingWindowDays?: number }).bookingWindowDays ?? 14
+  const bookingWindowDays = tenant.bookingWindowDays ?? 14
   const durationMs = service.durationMin * 60 * 1000
+
+  // Lunch break boundaries in minutes from midnight (if configured)
+  const hasLunch = !!(resource.lunchStart && resource.lunchEnd)
+  const lunchStartMin = hasLunch ? timeToMinutes(resource.lunchStart!) : 0
+  const lunchEndMin   = hasLunch ? timeToMinutes(resource.lunchEnd!)   : 0
 
   // Check if the requested date exceeds booking window
   const maxAllowedDate = new Date()
@@ -198,13 +214,23 @@ export async function getAvailableSlots(
       continue
     }
 
+    // Format time label in tenant timezone
+    const zonedStart = toZonedTime(slotStart, timezone)
+
+    // Skip slots that fall within the lunch break
+    if (hasLunch) {
+      const slotMinutes = zonedStart.getHours() * 60 + zonedStart.getMinutes()
+      if (slotMinutes >= lunchStartMin && slotMinutes < lunchEndMin) {
+        cursor += durationMs
+        continue
+      }
+    }
+
     // Check overlap with any existing booking
     const busy = existingBookings.some(
       (b) => slotStart < b.endsAt && slotEnd > b.startsAt
     )
 
-    // Format time label in tenant timezone
-    const zonedStart = toZonedTime(slotStart, timezone)
     const hh = String(zonedStart.getHours()).padStart(2, "0")
     const mm = String(zonedStart.getMinutes()).padStart(2, "0")
 
@@ -243,7 +269,7 @@ export async function createBooking(params: CreateBookingParams) {
   const tenantForWindow = await basePrisma.tenant.findUnique({
     where: { id: tenantId },
   })
-  const bookingWindowDays = (tenantForWindow as unknown as { bookingWindowDays?: number })?.bookingWindowDays ?? 14
+  const bookingWindowDays = tenantForWindow?.bookingWindowDays ?? 14
   const maxAllowedDate = new Date()
   maxAllowedDate.setDate(maxAllowedDate.getDate() + bookingWindowDays)
   maxAllowedDate.setHours(23, 59, 59, 999)

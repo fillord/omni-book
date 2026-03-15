@@ -66,6 +66,8 @@ model Resource {
   capacity    Int?
   attributes  Json              @default("{}")
   translations Json             @default("{}")
+  lunchStart  String?
+  lunchEnd    String?
   isActive    Boolean           @default(true)
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt

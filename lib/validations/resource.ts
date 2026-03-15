@@ -18,6 +18,8 @@ export const createResourceSchema = z.object({
   capacity: z.number().int().min(1, 'Минимум 1').optional(),
   attributes: z.record(z.string(), z.unknown()).optional(),
   translations: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  lunchStart: z.string().regex(/^\d{2}:\d{2}$/, 'Формат HH:mm').optional().or(z.literal('')),
+  lunchEnd:   z.string().regex(/^\d{2}:\d{2}$/, 'Формат HH:mm').optional().or(z.literal('')),
 })
 
 export const updateResourceSchema = createResourceSchema.partial()

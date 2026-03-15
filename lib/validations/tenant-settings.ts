@@ -17,8 +17,9 @@ export const tenantSettingsSchema = z.object({
     whatsapp:  z.string().optional().or(z.literal("")),
     telegram:  z.string().optional().or(z.literal("")),
   }).optional(),
-  translations:    z.record(z.string(), z.record(z.string(), z.string())).optional(),
-  telegramChatId:  z.string().max(50).optional().or(z.literal("")),
+  translations:      z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  telegramChatId:    z.string().max(50).optional().or(z.literal("")),
+  bookingWindowDays: z.number().int().min(1, "Минимум 1 день").max(90, "Максимум 90 дней").optional(),
 })
 
 export type TenantSettingsInput = z.infer<typeof tenantSettingsSchema>
