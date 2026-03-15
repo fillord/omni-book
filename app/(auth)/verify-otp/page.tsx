@@ -109,14 +109,15 @@ function VerifyOtpForm() {
       )}
 
       <form onSubmit={handleVerify} className="space-y-4" autoComplete="off">
-        {/* Fake hidden input to trap Chrome's email autofill */}
-        <input type="email" name="fake_email" style={{display: 'none'}} aria-hidden="true" />
+        {/* Autofill Honeypot - Stops browsers from autofilling the OTP field */}
+        <input type="email" name="fake-email" style={{ display: 'none' }} aria-hidden="true" tabIndex={-1} />
+        <input type="password" name="fake-password" style={{ display: 'none' }} aria-hidden="true" tabIndex={-1} />
 
         <div className="space-y-1.5">
-          <Label htmlFor="verification_code">Код из письма</Label>
+          <Label htmlFor="verification-digits">Код из письма</Label>
           <Input
-            id="otp-code"
-            name="otp-code"
+            id="verification-digits"
+            name="verification-digits"
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -125,7 +126,7 @@ function VerifyOtpForm() {
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             disabled={loading}
             maxLength={6}
-            autoComplete="one-time-code"
+            autoComplete="new-password"
             className="text-center text-2xl tracking-widest placeholder:text-muted/30"
           />
         </div>
