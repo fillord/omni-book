@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useI18n } from "@/lib/i18n/context"
+import { checkLoginIp, verifyLoginOtp } from "@/lib/actions/otp"
 
 // ---- Types -----------------------------------------------------------------
 
@@ -44,26 +45,84 @@ function LoginForm() {
     authError ? (t('auth', NEXTAUTH_ERROR_KEYS[authError] ?? NEXTAUTH_ERROR_KEYS.default)) : null
   )
   const [loading, setLoading] = useState(false)
+  const [requiresOtp, setRequiresOtp] = useState(false)
+  const [otpCode, setOtpCode] = useState("")
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   })
 
-  async function onSubmit(values: LoginFormValues) {
+  // 1. Submit Credentials -> Check IP -> maybe require OTP
+  async function onSubmitCredentials(values: LoginFormValues) {
     setLoading(true)
     setServerError(null)
 
+    try {
+      // Pre-flight check
+      const res = await checkLoginIp(values.email, values.password)
+      if (res.error) {
+        setServerError(res.error)
+        setLoading(false)
+        return
+      }
+
+      if (res.requiresOtp) {
+        setRequiresOtp(true)
+        setLoading(false)
+        return
+      }
+
+      // No OTP required, proceed to normal signIn
+      await performSignIn(values.email, values.password)
+    } catch {
+      setServerError("Произошла ошибка при входе")
+      setLoading(false)
+    }
+  }
+
+  // 2. Submit OTP -> Verify code -> then signIn
+  async function onSubmitOtp(e: React.FormEvent) {
+    e.preventDefault()
+    if (otpCode.length < 6) {
+      setServerError("Введите 6-значный код")
+      return
+    }
+
+    setLoading(true)
+    setServerError(null)
+
+    try {
+      const email = form.getValues('email')
+      const password = form.getValues('password')
+      
+      const res = await verifyLoginOtp(email, otpCode)
+      if (res.error) {
+        setServerError(res.error)
+        setLoading(false)
+        return
+      }
+
+      // OTP valid, IP updated, proceed to normal signIn
+      await performSignIn(email, password)
+    } catch {
+      setServerError("Ошибка проверки кода")
+      setLoading(false)
+    }
+  }
+
+  // 3. Standard NextAuth signIn
+  async function performSignIn(email: string, password: string) {
     const result = await signIn("credentials", {
-      email:    values.email,
-      password: values.password,
+      email,
+      password,
       redirect: false,
     })
 
     setLoading(false)
 
     if (!result?.ok) {
-      setServerError(t('auth', NEXTAUTH_ERROR_KEYS[result?.error ?? ""] ?? NEXTAUTH_ERROR_KEYS.default))
+      setServerError(result?.error || t('auth', NEXTAUTH_ERROR_KEYS.default))
       return
     }
 
@@ -73,6 +132,13 @@ function LoginForm() {
 
   async function handleGoogle() {
     await signIn("google", { callbackUrl })
+  }
+
+  // OTP Fallback Cancel
+  function cancelOtp() {
+    setRequiresOtp(false)
+    setOtpCode("")
+    setServerError(null)
   }
 
   return (
@@ -87,70 +153,112 @@ function LoginForm() {
       
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl font-bold tracking-tight">{t('auth', 'loginTitle')}</CardTitle>
-          <CardDescription>{t('auth', 'loginSubtitle')}</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            {requiresOtp ? "Подтверждение" : t('auth', 'loginTitle')}
+          </CardTitle>
+          <CardDescription>
+            {requiresOtp 
+              ? "Мы отправили 6-значный код на ваш email для подтверждения входа с нового IP-адреса."
+              : t('auth', 'loginSubtitle')}
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Server / NextAuth error */}
           {serverError && (
             <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {serverError}
             </div>
           )}
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                disabled={loading}
-                {...form.register("email")}
-                aria-invalid={!!form.formState.errors.email}
-              />
-              {form.formState.errors.email && (
-                <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">{t('auth', 'password')}</Label>
+          {!requiresOtp ? (
+            // Form 1: Credentials
+            <form onSubmit={form.handleSubmit(onSubmitCredentials)} className="space-y-4" noValidate>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  disabled={loading}
+                  {...form.register("email")}
+                  aria-invalid={!!form.formState.errors.email}
+                />
+                {form.formState.errors.email && (
+                  <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+                )}
               </div>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                placeholder="••••••••"
-                disabled={loading}
-                {...form.register("password")}
-                aria-invalid={!!form.formState.errors.password}
-              />
-              {form.formState.errors.password && (
-                <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
-              )}
-            </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
-                  </svg>
-                  {t('auth', 'signingIn')}
-                </span>
-              ) : (
-                t('common', 'login')
-              )}
-            </Button>
-          </form>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">{t('auth', 'password')}</Label>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  disabled={loading}
+                  {...form.register("password")}
+                  aria-invalid={!!form.formState.errors.password}
+                />
+                {form.formState.errors.password && (
+                  <p className="text-xs text-destructive">{form.formState.errors.password.message}</p>
+                )}
+              </div>
 
-          {/* Google OAuth — only rendered if GOOGLE_CLIENT_ID is configured */}
-          {process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true" && (
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                    </svg>
+                    {t('auth', 'signingIn')}
+                  </span>
+                ) : (
+                  t('common', 'login')
+                )}
+              </Button>
+            </form>
+          ) : (
+            // Form 2: OTP
+            <form onSubmit={onSubmitOtp} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="otp">Код из письма</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  autoComplete="one-time-code"
+                  placeholder="123456"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  disabled={loading}
+                  className="text-center text-2xl tracking-widest placeholder:text-muted/30"
+                />
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading || otpCode.length < 6}>
+                {loading ? "Вход..." : "Подтвердить пароль"}
+              </Button>
+
+              <div className="mt-4 text-center">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-xs text-muted-foreground p-0 h-auto"
+                  onClick={cancelOtp}
+                  disabled={loading}
+                >
+                  Вернуться
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {/* Google OAuth */}
+          {!requiresOtp && process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true" && (
             <>
               <div className="relative">
                 <Separator />
@@ -176,12 +284,14 @@ function LoginForm() {
             </>
           )}
 
-          <p className="text-center text-sm text-muted-foreground">
-            {t('auth', 'noAccount')}{" "}
-            <Link href="/register" className="font-medium underline underline-offset-4 hover:text-foreground">
-              {t('common', 'register')}
-            </Link>
-          </p>
+          {!requiresOtp && (
+            <p className="text-center text-sm text-muted-foreground">
+              {t('auth', 'noAccount')}{" "}
+              <Link href="/register" className="font-medium underline underline-offset-4 hover:text-foreground">
+                {t('common', 'register')}
+              </Link>
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -190,7 +300,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Загрузка...</div>}>
       <LoginForm />
     </Suspense>
   )

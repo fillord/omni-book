@@ -39,6 +39,16 @@ export const authConfig: NextAuthOptions = {
         const passwordOk = await bcrypt.compare(credentials.password, user.passwordHash)
         if (!passwordOk) return null
 
+        // Enforce IP verification
+        const { headers } = await import('next/headers')
+        const { getIpAddress } = await import('@/lib/auth/otp')
+        const reqHeaders = await headers()
+        const currentIp = getIpAddress(reqHeaders)
+
+        if (user.lastIpAddress && user.lastIpAddress !== currentIp) {
+          throw new Error('Упс, ваш IP изменился. Требуется OTP подтверждение.')
+        }
+
         // SUPERADMIN (tenantId = null) is always allowed through
         if (user.tenantId !== null) {
           if (!user.tenant?.isActive) return null

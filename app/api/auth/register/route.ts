@@ -71,8 +71,26 @@ export async function POST(req: NextRequest) {
       return { tenant, user }
     })
 
+    // Generate and send OTP instead of auto-login
+    const { generateOtp } = await import('@/lib/auth/otp')
+    const { sendOtpEmail } = await import('@/lib/email/resend')
+    
+    const code = generateOtp()
+    const expiresAt = new Date()
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10)
+
+    await basePrisma.otpCode.create({
+      data: {
+        email: result.user.email,
+        code,
+        expiresAt,
+      }
+    })
+
+    await sendOtpEmail(result.user.email, code)
+
     return NextResponse.json(
-      { tenantSlug: result.tenant.slug, userId: result.user.id },
+      { tenantSlug: result.tenant.slug, userId: result.user.id, requiresOtp: true },
       { status: 201 }
     )
   } catch (err) {

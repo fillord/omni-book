@@ -157,7 +157,13 @@ export default function RegisterPage() {
         return
       }
 
-      // Auto sign-in after successful registration
+      if (data.requiresOtp) {
+        // Redirect to OTP verification page
+        router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`)
+        return
+      }
+
+      // Fallback: auto sign-in if no OTP was required
       const signInResult = await signIn("credentials", {
         email:    values.email,
         password: values.password,
@@ -168,7 +174,6 @@ export default function RegisterPage() {
         router.push("/dashboard")
         router.refresh()
       } else {
-        // Registration succeeded but auto-login failed — send to login
         router.push("/login?registered=1")
       }
     } catch {

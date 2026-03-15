@@ -46,6 +46,7 @@ model User {
   name          String?
   phone         String?
   passwordHash  String?
+  lastIpAddress String?
   role          Role      @default(CUSTOMER)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
@@ -55,6 +56,16 @@ model User {
 
   @@index([tenantId])
   @@index([email])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@unique([email, code])
 }
 
 model Resource {
