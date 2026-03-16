@@ -32,6 +32,8 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   const isFree = tenant.plan === "FREE"
   const isPending = tenant.planStatus === "PENDING"
   const isPro = tenant.plan === "PRO" || tenant.plan === "ENTERPRISE"
+  const isExpiredOrCanceled = tenant.planStatus === "EXPIRED" || tenant.planStatus === "CANCELED"
+  const showUpgradeCard = (isFree && !isPending) || (isPro && isExpiredOrCanceled)
 
   async function handlePaymentConfirm() {
     setLoading(true)
@@ -94,24 +96,28 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
         </CardContent>
       </Card>
 
-      {/* Upgrade Banner for FREE users */}
-      {isFree && !isPending && (
-        <Card className="border-zinc-200 shadow-md overflow-hidden relative">
+      {/* Upgrade / Renewal Banner */}
+      {showUpgradeCard && (
+        <Card className="border-zinc-200 dark:border-zinc-800 shadow-md overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-10 -mt-20 pointer-events-none" />
           
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="text-amber-500 fill-amber-500" size={20} />
-              <CardTitle className="text-xl">Upgrade to PRO</CardTitle>
+              <CardTitle className="text-xl">
+                {isFree ? 'Переход на PRO' : 'Продление PRO'}
+              </CardTitle>
             </div>
-            <CardDescription className="text-base text-zinc-600">
-              Снимите ограничения и получите доступ ко всем функциям платформы для уверенного роста вашего бизнеса.
+            <CardDescription className="text-base text-muted-foreground">
+              {isFree
+                ? 'Снимите ограничения и получите доступ ко всем функциям платформы для уверенного роста вашего бизнеса.'
+                : 'Продлите подписку, чтобы восстановить доступ ко всем функциям и избежать блокировки онлайн-записи.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-zinc-50 rounded-xl p-5 mb-6 border border-zinc-100">
+            <div className="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl p-5 mb-6 border border-zinc-100 dark:border-zinc-800">
               <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-extrabold text-zinc-900">10 000 ₸</span>
+                <span className="text-4xl font-extrabold text-foreground">10 000 ₸</span>
                 <span className="text-zinc-500 font-medium">/ месяц</span>
               </div>
               
@@ -124,7 +130,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   "Приоритетная поддержка",
                   "Увеличенная конверсия",
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm text-zinc-700 font-medium">
+                  <li key={i} className="flex items-center gap-2.5 text-sm text-foreground/80 font-medium">
                     <div className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center">
                       <Check size={12} className="text-indigo-600" />
                     </div>
@@ -138,7 +144,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
               <DialogTrigger>
                 <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-indigo-600 text-white hover:bg-indigo-700">
                   <ShieldCheck size={18} />
-                  Выбрать PRO
+                  {isFree ? 'Выбрать PRO' : 'Продлить подписку'}
                 </div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
