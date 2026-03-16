@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Check, CreditCard, Clock, CheckCircle2, ShieldCheck, Zap } from "lucide-react"
+import { Check, CreditCard, Clock, CheckCircle2, ShieldCheck, Zap, XCircle, AlertTriangle } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -70,10 +70,22 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                     Ожидает активации
                   </span>
                 )}
-                {isPro && !isPending && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-medium">
+                {isPro && !isPending && tenant.planStatus === 'ACTIVE' && (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400 text-xs font-medium">
                     <CheckCircle2 size={14} />
                     Активен
+                  </span>
+                )}
+                {tenant.planStatus === 'EXPIRED' && (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 text-xs font-medium">
+                    <AlertTriangle size={14} />
+                    Истек
+                  </span>
+                )}
+                {tenant.planStatus === 'CANCELED' && (
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 text-xs font-medium">
+                    <XCircle size={14} />
+                    Отменен
                   </span>
                 )}
               </div>
