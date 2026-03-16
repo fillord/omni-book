@@ -9,8 +9,8 @@ const DEMOS = [
     nameKey: "demoNamePolyclinic",
     descriptionKey: "demoPolyclinicDesc",
     nicheKey: "medicine",
-    color: "bg-blue-50 border-blue-200 hover:border-blue-400 dark:bg-blue-900/20 dark:border-blue-800 dark:hover:border-blue-600",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200",
+    color: "bg-blue-50 border-blue-200 hover:border-blue-400 dark:bg-zinc-900 dark:border-blue-900/60 dark:hover:border-blue-500/80",
+    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
     dot: "bg-blue-500 dark:bg-blue-400",
   },
   {
@@ -18,8 +18,8 @@ const DEMOS = [
     nameKey: "demoNameBeauty",
     descriptionKey: "demoBeautyDesc",
     nicheKey: "beauty",
-    color: "bg-pink-50 border-pink-200 hover:border-pink-400 dark:bg-pink-900/20 dark:border-pink-800 dark:hover:border-pink-600",
-    badge: "bg-pink-100 text-pink-700 dark:bg-pink-900/60 dark:text-pink-200",
+    color: "bg-pink-50 border-pink-200 hover:border-pink-400 dark:bg-zinc-900 dark:border-pink-900/60 dark:hover:border-pink-500/80",
+    badge: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-400",
     dot: "bg-pink-500 dark:bg-pink-400",
   },
   {
@@ -27,8 +27,8 @@ const DEMOS = [
     nameKey: "demoNameBistro",
     descriptionKey: "demoBistroDesc",
     nicheKey: "horeca",
-    color: "bg-orange-50 border-orange-200 hover:border-orange-400 dark:bg-orange-900/20 dark:border-orange-800 dark:hover:border-orange-600",
-    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200",
+    color: "bg-orange-50 border-orange-200 hover:border-orange-400 dark:bg-zinc-900 dark:border-orange-900/60 dark:hover:border-orange-500/80",
+    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
     dot: "bg-orange-500 dark:bg-orange-400",
   },
   {
@@ -36,8 +36,8 @@ const DEMOS = [
     nameKey: "demoNameSport",
     descriptionKey: "demoSportDesc",
     nicheKey: "sport",
-    color: "bg-green-50 border-green-200 hover:border-green-400 dark:bg-green-900/20 dark:border-green-800 dark:hover:border-green-600",
-    badge: "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200",
+    color: "bg-green-50 border-green-200 hover:border-green-400 dark:bg-zinc-900 dark:border-green-900/60 dark:hover:border-green-500/80",
+    badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
     dot: "bg-green-500 dark:bg-green-400",
   },
 ]
@@ -46,10 +46,10 @@ export function DemoSection() {
   const { t } = useI18n()
 
   return (
-    <section id="demo" className="py-20 bg-background">
+    <section id="demo" className="py-20 bg-background dark:bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
             {t('landing', 'liveDemos')}
           </h2>
           <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
@@ -72,20 +72,20 @@ export function DemoSection() {
                 </span>
                 <ArrowUpRight
                   size={16}
-                  className="text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-zinc-200 transition-colors"
+                  className="text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-white transition-colors"
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 dark:text-slate-50 mb-1">
+                <h3 className="font-semibold text-zinc-900 dark:text-white mb-1">
                   {t('landing', nameKey)}
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
                   {t('landing', descriptionKey)}
                 </p>
               </div>
               <div className="flex items-center gap-1.5 mt-auto">
                 <span className={`w-2 h-2 rounded-full ${dot}`} />
-                <span className="text-xs text-zinc-400 dark:text-zinc-500">/{slug}</span>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">/{slug}</span>
               </div>
             </a>
           ))}

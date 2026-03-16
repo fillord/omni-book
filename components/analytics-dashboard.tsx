@@ -49,13 +49,13 @@ function BookingTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white shadow-lg px-4 py-3 text-sm">
-      <p className="font-semibold text-zinc-700 mb-2">{label}</p>
+    <div className="rounded-xl border border-border bg-card shadow-lg px-4 py-3 text-sm">
+      <p className="font-semibold text-foreground mb-2">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
-          <span className="text-zinc-500">{p.name}:</span>
-          <span className="font-medium">{p.value}</span>
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-medium text-foreground">{p.value}</span>
         </div>
       ))}
     </div>
@@ -69,13 +69,13 @@ function RevenueTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white shadow-lg px-4 py-3 text-sm">
-      <p className="font-semibold text-zinc-700 mb-2">{label}</p>
+    <div className="rounded-xl border border-border bg-card shadow-lg px-4 py-3 text-sm">
+      <p className="font-semibold text-foreground mb-2">{label}</p>
       {payload.map((p) => (
         <div key={p.name} className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
-          <span className="text-zinc-500">{p.name}:</span>
-          <span className="font-medium">{fmtRevenue(p.value)}</span>
+          <span className="text-muted-foreground">{p.name}:</span>
+          <span className="font-medium text-foreground">{fmtRevenue(p.value)}</span>
         </div>
       ))}
     </div>
@@ -159,10 +159,10 @@ export function AnalyticsDashboard({ initial, color }: Props) {
       {/* Header + period switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">{t('dashboard', 'analytics')}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('dashboard', 'analytics')}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{t('analytics', 'subtitle')}</p>
         </div>
-        <div className={`flex rounded-xl border border-zinc-200 overflow-hidden text-sm transition-opacity ${pending ? 'opacity-60 pointer-events-none' : ''}`}>
+        <div className={`flex rounded-xl border border-border overflow-hidden text-sm transition-opacity ${pending ? 'opacity-60 pointer-events-none' : ''}`}>
           {PERIODS.map((p) => (
             <button
               key={p.value}
@@ -170,8 +170,8 @@ export function AnalyticsDashboard({ initial, color }: Props) {
               className={[
                 'flex-1 sm:flex-none px-4 py-2 font-medium transition-colors',
                 period === p.value
-                  ? 'bg-zinc-900 text-white'
-                  : 'bg-white text-zinc-600 hover:bg-zinc-50',
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground hover:bg-muted',
               ].join(' ')}
             >
               {p.label}
@@ -384,15 +384,15 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                 </ResponsiveContainer>
 
                 {/* Table */}
-                <div className="divide-y divide-zinc-100 text-sm">
+                <div className="divide-y divide-border text-sm">
                   {servicesChart.slice(0, 5).map((s, i) => (
                     <div key={s.name} className="flex items-center gap-3 py-2">
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
                       />
-                      <span className="flex-1 text-zinc-700 truncate">{s.name}</span>
-                      <span className="font-semibold text-zinc-900 tabular-nums">{s.bookings}</span>
+                      <span className="flex-1 text-foreground truncate">{s.name}</span>
+                      <span className="font-semibold text-card-foreground tabular-nums">{s.bookings}</span>
                       {s.revenue > 0 && (
                         <span className="text-xs text-muted-foreground tabular-nums w-24 text-right">
                           {fmtRevenue(s.revenue)}

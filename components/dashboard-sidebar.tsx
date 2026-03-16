@@ -109,7 +109,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
           <span className={`inline-flex items-center justify-center rounded border px-1.5 py-0.5 text-[10px] font-medium leading-none ${badge} min-w-[50px] uppercase`}>
             {mounted ? t('niche', nicheConfig.label) : <span className="h-2.5 w-8 bg-current/20 rounded-sm animate-pulse" />}
           </span>
-          <span className="inline-flex items-center justify-center rounded border border-zinc-200 bg-zinc-100 text-zinc-700 px-1.5 py-0.5 text-[10px] font-bold leading-none uppercase">
+          <span className="inline-flex items-center justify-center rounded border border-border bg-muted text-foreground px-1.5 py-0.5 text-[10px] font-bold leading-none uppercase">
             {tenantPlan}
           </span>
         </div>
@@ -210,6 +210,10 @@ export function DashboardSidebar(props: Props) {
 
       {/* Mobile burger → Sheet */}
       <div className="md:hidden">
+        {/* Quick access theme toggle (avoid opening sidebar) */}
+        <div className="fixed top-3 right-3 z-40">
+          <ThemeToggle iconOnly />
+        </div>
         <Sheet>
           <SheetTrigger
             className="fixed top-3 left-3 z-40 flex h-9 w-9 items-center justify-center rounded-md border bg-background/90 backdrop-blur shadow-sm hover:bg-muted transition-colors"
