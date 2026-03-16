@@ -20,7 +20,7 @@ interface Tenant {
     name: string | null
     email: string
     phone: string | null
-  }
+  }[]
 }
 
 export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
