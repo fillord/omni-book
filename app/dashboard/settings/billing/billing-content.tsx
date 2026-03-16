@@ -115,10 +115,10 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-zinc-50 dark:bg-zinc-950/50 rounded-xl p-5 mb-6 border border-zinc-100 dark:border-zinc-800">
+            <div className="bg-zinc-50 dark:bg-zinc-900/80 rounded-xl p-6 my-6 border border-zinc-200 dark:border-zinc-800">
               <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-extrabold text-foreground">10 000 ₸</span>
-                <span className="text-zinc-500 dark:text-zinc-400 font-medium">/ месяц</span>
+                <span className="text-4xl font-bold text-zinc-900 dark:text-white">10 000 ₸</span>
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">/ месяц</span>
               </div>
               
               <ul className="grid sm:grid-cols-2 gap-3">
@@ -130,10 +130,8 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   "Приоритетная поддержка",
                   "Увеличенная конверсия",
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-300 font-medium">
-                    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
-                      <Check size={12} className="text-indigo-600 dark:text-indigo-400" />
-                    </div>
+                  <li key={i} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
+                    <Check className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
