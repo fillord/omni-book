@@ -48,7 +48,7 @@ const PLANS = [
       "entFeature5",
     ],
     cta: "contactUs",
-    href: "mailto:hello@omnibook.com",
+    href: "mailto:qz.nursultan@gmail.com",
     highlight: false,
     priceKey: "onDemand",
   },

@@ -80,18 +80,23 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
   const isPending = tenant.planStatus === 'PENDING'
 
   return (
-    <tr className={`border-b border-zinc-100 hover:bg-zinc-50 transition-colors ${isBanned ? 'bg-red-50/50' : isPending ? 'bg-amber-50/50' : ''}`}>
+    <tr
+      className={[
+        'border-b border-border transition-colors hover:bg-muted/40',
+        isBanned ? 'bg-destructive/10' : isPending ? 'bg-amber-500/10' : '',
+      ].join(' ')}
+    >
       <td className="p-4 align-top">
-        <div className="font-medium text-zinc-900">{tenant.name}</div>
-        <div className="text-xs text-zinc-500 mt-0.5">{tenant.email} • {tenant.slug}.omnibook.com</div>
-        {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
+        <div className="font-medium text-foreground">{tenant.name}</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{tenant.email} • {tenant.slug}.omnibook.com</div>
+        {error && <div className="text-xs text-destructive mt-1">{error}</div>}
       </td>
       <td className="p-4 align-top">
-        <div className="text-sm text-zinc-600">{new Date(tenant.createdAt).toLocaleDateString('ru-RU')}</div>
+        <div className="text-sm text-muted-foreground">{new Date(tenant.createdAt).toLocaleDateString('ru-RU')}</div>
       </td>
       <td className="p-4 align-top text-sm">
         <select
-          className="border border-zinc-200 rounded px-2 py-1 bg-white disabled:opacity-50 w-full mb-2"
+          className="border border-border rounded px-2 py-1 bg-background text-foreground disabled:opacity-50 w-full mb-2"
           value={tenant.plan}
           disabled={loading}
           onChange={(e) => handlePlanChange(e.target.value as Plan)}
@@ -102,12 +107,14 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
         </select>
 
         <select
-          className={`border rounded px-2 py-1 disabled:opacity-50 w-full text-xs font-semibold ${
-            isBanned ? 'bg-red-100 border-red-200 text-red-700' :
-            isPending ? 'bg-amber-100 border-amber-200 text-amber-800' :
-            tenant.planStatus === 'ACTIVE' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-            'bg-zinc-100 border-zinc-200 text-zinc-600'
-          }`}
+          className={[
+            'border rounded px-2 py-1 disabled:opacity-50 w-full text-xs font-semibold',
+            'bg-background text-foreground border-border',
+            isBanned ? 'bg-destructive/15 text-destructive border-destructive/40' :
+            isPending ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40' :
+            tenant.planStatus === 'ACTIVE' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40' :
+            'bg-muted text-foreground border-border',
+          ].join(' ')}
           value={tenant.planStatus}
           disabled={loading}
           onChange={(e) => handleStatusChange(e.target.value as PlanStatus)}
@@ -125,10 +132,10 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
           defaultValue={tenant.maxResources}
           onBlur={handleMaxResourcesChange}
           disabled={loading}
-          className="w-20 border border-zinc-200 rounded px-2 py-1 bg-white disabled:opacity-50 text-sm"
+          className="w-20 border border-border rounded px-2 py-1 bg-background text-foreground disabled:opacity-50 text-sm"
         />
       </td>
-      <td className="p-4 align-top text-sm">
+      <td className="p-4 align-top text-sm text-foreground">
         {tenant._count.resources}
       </td>
       <td className="p-4 align-top">
@@ -137,7 +144,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
             <button
               onClick={handleBan}
               disabled={loading}
-              className="text-xs px-3 py-1.5 rounded-md bg-amber-100 text-amber-800 hover:bg-amber-200 disabled:opacity-50 transition-colors font-medium"
+              className="text-xs px-3 py-1.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 disabled:opacity-50 transition-colors font-medium border border-amber-500/30"
             >
               Забанить
             </button>
@@ -145,7 +152,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="text-xs px-3 py-1.5 rounded-md bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 transition-colors font-medium"
+            className="text-xs px-3 py-1.5 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 disabled:opacity-50 transition-colors font-medium border border-destructive/30"
           >
             Удалить
           </button>
