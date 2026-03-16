@@ -6,6 +6,8 @@ import { getNicheConfig } from '@/lib/niche/config'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { AdminThemeProvider } from '@/components/theme-providers'
+import Link from 'next/link'
+import { Mail } from 'lucide-react'
 
 interface TenantInfo {
   id: string
@@ -57,9 +59,28 @@ export default async function DashboardLayout({ children }: { children: React.Re
       />
       <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         {tenantPlanStatus === 'EXPIRED' && (
-          <div className="mx-4 mt-4 mb-2 rounded-lg border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-700 dark:text-orange-200">
-            Ваш тариф истек или отменен. Пожалуйста, свяжитесь с поддержкой для продления подписки,
-            чтобы избежать блокировки онлайн-записи.
+          <div className="mx-4 mt-4 mb-2 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/40 px-4 py-4 text-sm">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <p className="text-orange-700 dark:text-orange-200 font-medium">
+                Ваш тариф истек или отменен. Продлите подписку, чтобы избежать блокировки онлайн-записи.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center shrink-0">
+                {/* TODO: Replace with your actual payment link, e.g., Kaspi Pay */}
+                <Link
+                  href="/dashboard/settings/billing"
+                  className="inline-flex items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
+                >
+                  Продлить подписку / PRO
+                </Link>
+                <a
+                  href="mailto:qz.nursultan@gmail.com"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-md border border-orange-300 dark:border-orange-700 px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors"
+                >
+                  <Mail className="h-4 w-4" />
+                  Написать в поддержку
+                </a>
+              </div>
+            </div>
           </div>
         )}
         {children}
