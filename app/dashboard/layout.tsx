@@ -56,6 +56,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userRole={session.user.role ?? ''}
       />
       <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
+        {tenantPlanStatus === 'EXPIRED' && (
+          <div className="mx-4 mt-4 mb-2 rounded-lg border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-700 dark:text-orange-200">
+            Ваш тариф истек или отменен. Пожалуйста, свяжитесь с поддержкой для продления подписки,
+            чтобы избежать блокировки онлайн-записи.
+          </div>
+        )}
         {children}
       </main>
       <Toaster richColors />

@@ -1,15 +1,21 @@
-import { PrismaClient } from '@prisma/client'
+import { basePrisma } from '@/lib/db'
 import { AdminTenantRow } from './admin-tenant-row'
 
-const prisma = new PrismaClient()
-
 export default async function AdminTenantsPage() {
-  const tenants = await prisma.tenant.findMany({
+  const tenants = await basePrisma.tenant.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
       _count: {
         select: { resources: true }
-      }
+      },
+      users: {
+        where: { role: 'OWNER' },
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+        },
+      },
     }
   })
 
@@ -30,6 +36,7 @@ export default async function AdminTenantsPage() {
             <thead>
               <tr className="bg-muted/30 border-b border-border">
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Компания</th>
+                <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Владелец</th>
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Регистрация</th>
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-48">Тариф и Статус</th>
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Лимит ресурсов</th>
@@ -44,7 +51,7 @@ export default async function AdminTenantsPage() {
               
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground text-sm">
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground text-sm">
                     Нет зарегистрированных компаний
                   </td>
                 </tr>

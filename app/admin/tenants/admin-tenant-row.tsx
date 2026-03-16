@@ -16,6 +16,11 @@ interface Tenant {
   _count: {
     resources: number
   }
+  users: {
+    name: string | null
+    email: string
+    phone: string | null
+  }
 }
 
 export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
@@ -78,6 +83,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
 
   const isBanned = tenant.planStatus === 'BANNED'
   const isPending = tenant.planStatus === 'PENDING'
+  const owner = tenant.users[0]
 
   return (
     <tr
@@ -90,6 +96,27 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
         <div className="font-medium text-foreground">{tenant.name}</div>
         <div className="text-xs text-muted-foreground mt-0.5">{tenant.email} • {tenant.slug}.omnibook.com</div>
         {error && <div className="text-xs text-destructive mt-1">{error}</div>}
+      </td>
+      <td className="p-4 align-top">
+        {owner ? (
+          <div className="space-y-0.5 text-sm">
+            <p className="font-medium text-foreground truncate">
+              {owner.name || '—'}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {owner.email}
+            </p>
+            {owner.phone && (
+              <p className="text-xs text-muted-foreground truncate">
+                {owner.phone}
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Владелец не назначен
+          </p>
+        )}
       </td>
       <td className="p-4 align-top">
         <div className="text-sm text-muted-foreground">{new Date(tenant.createdAt).toLocaleDateString('ru-RU')}</div>

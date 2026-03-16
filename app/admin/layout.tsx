@@ -36,6 +36,13 @@ export default async function AdminLayout({
         
         <nav className="flex-1 px-4 py-4 flex flex-col gap-2">
           <Link 
+            href="/admin" 
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <LayoutDashboard size={18} />
+            Обзор
+          </Link>
+          <Link 
             href="/admin/tenants" 
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary font-medium transition-colors"
           >
