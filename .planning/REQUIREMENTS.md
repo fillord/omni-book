@@ -7,9 +7,9 @@
 
 ### Foundation
 
-- [ ] **FOUND-01**: `app/globals.css` body rule applies `bg-background text-foreground` as the page canvas baseline
-- [ ] **FOUND-02**: `@theme inline` block correctly bridges CSS custom properties to Tailwind utility classes
-- [ ] **FOUND-03**: Both `AdminThemeProvider` and `BookingThemeProvider` use `attribute="class"` to set `.dark` on `<html>`
+- [x] **FOUND-01**: `app/globals.css` body rule applies `bg-background text-foreground` as the page canvas baseline
+- [x] **FOUND-02**: `@theme inline` block correctly bridges CSS custom properties to Tailwind utility classes
+- [x] **FOUND-03**: Both `AdminThemeProvider` and `BookingThemeProvider` use `attribute="class"` to set `.dark` on `<html>`
 
 ### Landing / Marketing Surface
 
@@ -75,9 +75,9 @@ Phase mappings confirmed during roadmap creation (2026-03-17).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 0 | Pending |
-| FOUND-02 | Phase 0 | Pending |
-| FOUND-03 | Phase 0 | Pending |
+| FOUND-01 | Phase 0 | Complete |
+| FOUND-02 | Phase 0 | Complete |
+| FOUND-03 | Phase 0 | Complete |
 | LAND-01 | Phase 1 | Pending |
 | LAND-02 | Phase 1 | Pending |
 | LAND-03 | Phase 1 | Pending |

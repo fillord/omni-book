@@ -10,7 +10,7 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
 - Integer phases (0, 1, 2, 3, 4): Planned milestone work
 - Decimal phases: Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 0: Infrastructure Validation** - Verify globals.css token foundation before touching any component
+- [x] **Phase 0: Infrastructure Validation** - Verify globals.css token foundation before touching any component (completed 2026-03-17)
 - [ ] **Phase 1: Landing / Marketing Surface** - Remediate all 7+ components in `components/landing/`
 - [ ] **Phase 2: Tenant Public Booking Surface** - Remediate tenant-public-page, booking-form, booking-calendar
 - [ ] **Phase 3: Dashboard + Auth Surface** - Remediate sidebar, billing, analytics, staff/services/resources, and auth pages
@@ -26,7 +26,7 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
   1. `app/globals.css` body rule applies `bg-background text-foreground` as the page canvas baseline — verified by inspection
   2. The `@theme inline` block bridges CSS custom properties to Tailwind utility classes — verified by confirming `bg-background` resolves to `var(--background)`
   3. Both `AdminThemeProvider` and `BookingThemeProvider` use `attribute="class"` to inject `.dark` on `<html>` — verified in `theme-providers.tsx`
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 00-01-PLAN.md — Create automated validation tests for FOUND-01, FOUND-02, FOUND-03
 
@@ -80,7 +80,7 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Infrastructure Validation | 0/1 | Planning complete | - |
+| 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
 | 1. Landing / Marketing Surface | 0/TBD | Not started | - |
 | 2. Tenant Public Booking Surface | 0/TBD | Not started | - |
 | 3. Dashboard + Auth Surface | 0/TBD | Not started | - |

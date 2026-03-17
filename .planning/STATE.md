@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: planning
+stopped_at: Completed 00-infrastructure-validation-01-PLAN.md
+last_updated: "2026-03-17T16:25:53.266Z"
+last_activity: 2026-03-17 — Roadmap created
+progress:
+  total_phases: 5
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
+---
+
 # Project State
 
 ## Project Reference
@@ -14,7 +30,7 @@ Plan: 0 of TBD in current phase
 Status: Ready to plan
 Last activity: 2026-03-17 — Roadmap created
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -34,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 00-infrastructure-validation P01 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -45,6 +62,8 @@ Recent decisions affecting current work:
 - [Init]: Use semantic shadcn/ui tokens (not custom `dark:` variants) — tokens auto-adapt; `dark:` would duplicate effort
 - [Init]: Prioritize dashboard + landing first — highest-traffic areas with most custom color usage
 - [Init]: Include hover/focus/ring variants in scope — invisible hover states are jarring UX failure
+- [Phase 00-infrastructure-validation]: Use fs.readFileSync static-file assertions rather than PostCSS/AST parsing — simpler, zero extra deps, sufficient for content assertions
+- [Phase 00-infrastructure-validation]: Assert @layer base block extraction via regex to distinguish the scoped body rule from the raw body rule at line 11
 
 ### Pending Todos
 
@@ -57,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17
-Stopped at: Roadmap and state files created; ready to plan Phase 0
+Last session: 2026-03-17T16:25:53.264Z
+Stopped at: Completed 00-infrastructure-validation-01-PLAN.md
 Resume file: None
