@@ -56,18 +56,18 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
   return (
     <div className="space-y-8">
-      {/* Current Plan Card */}
-      <Card className="border-indigo-100 shadow-sm bg-indigo-50/30">
+      {/* Current Plan Card - ИСПРАВЛЕНА ДЛЯ ТЕМНОЙ ТЕМЫ */}
+      <Card className="border-indigo-100 dark:border-indigo-900/50 shadow-sm bg-indigo-50/30 dark:bg-indigo-950/20">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
             <div>
-              <p className="text-sm font-medium text-indigo-600/80 mb-1">Ваш текущий план</p>
+              <p className="text-sm font-medium text-indigo-600/80 dark:text-indigo-400 mb-1">Ваш текущий план</p>
               <div className="flex items-center gap-3">
-                <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
+                <h2 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   {tenant.plan}
                 </h2>
                 {isPending && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 text-xs font-medium">
                     <Clock size={14} />
                     Ожидает активации
                   </span>
@@ -98,13 +98,13 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
       {/* Upgrade / Renewal Banner */}
       {showUpgradeCard && (
-        <Card className="border-zinc-200 dark:border-zinc-800 shadow-md overflow-hidden relative">
+        <Card className="border-zinc-200 dark:border-zinc-800 shadow-md overflow-hidden relative bg-card">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-10 -mt-20 pointer-events-none" />
           
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="text-amber-500 fill-amber-500" size={20} />
-              <CardTitle className="text-xl">
+              <CardTitle className="text-xl dark:text-white">
                 {isFree ? 'Переход на PRO' : 'Продление PRO'}
               </CardTitle>
             </div>
@@ -115,10 +115,10 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-zinc-50 dark:bg-zinc-900/80 rounded-xl p-6 my-6 border border-zinc-200 dark:border-zinc-800">
+            <div className="bg-zinc-50 dark:!bg-zinc-900 rounded-xl p-6 my-6 border border-zinc-200 dark:!border-zinc-700">
               <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-bold text-zinc-900 dark:text-white">10 000 ₸</span>
-                <span className="text-sm text-zinc-500 dark:text-zinc-400">/ месяц</span>
+                <span className="text-4xl font-bold text-zinc-900 dark:!text-white">10 000 ₸</span>
+                <span className="text-sm text-zinc-500 dark:!text-zinc-400">/ месяц</span>
               </div>
               
               <ul className="grid sm:grid-cols-2 gap-3">
@@ -130,8 +130,8 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   "Приоритетная поддержка",
                   "Увеличенная конверсия",
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-300">
-                    <Check className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                  <li key={i} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:!text-zinc-300">
+                    <Check className="h-5 w-5 text-indigo-600 dark:!text-indigo-400 flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
@@ -140,41 +140,51 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger>
-                <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-indigo-600 text-white hover:bg-indigo-700">
+                <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer">
                   <ShieldCheck size={18} />
                   {isFree ? 'Выбрать PRO' : 'Продлить подписку'}
                 </div>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className="sm:max-w-md dark:bg-zinc-950 dark:border-zinc-800">
                 <DialogHeader>
-                  <DialogTitle className="text-xl">Оплата подписки PRO</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-xl dark:text-white">Оплата подписки PRO</DialogTitle>
+                  <DialogDescription className="dark:text-zinc-400">
                     Активация тарифа происходит после подтверждения платежа.
                   </DialogDescription>
                 </DialogHeader>
                 
                 <div className="py-6 space-y-6">
-                  <div className="bg-zinc-50 p-4 rounded-lg border border-zinc-200 text-center space-y-2">
-                    <p className="text-sm text-zinc-500">Сумма к оплате:</p>
-                    <p className="text-3xl font-bold text-zinc-900">10 000 ₸</p>
+                  {/* ИСПРАВЛЕН БЛОК С ЦЕНОЙ ВНУТРИ ПОПАПА (С !IMPORTANT) */}
+                  <div className="bg-zinc-50 dark:!bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:!border-zinc-800 text-center space-y-2">
+                    <p className="text-sm text-zinc-500 dark:!text-zinc-400">Сумма к оплате:</p>
+                    <p className="text-3xl font-bold text-zinc-900 dark:!text-white">10 000 ₸</p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex gap-4 items-start">
-                      <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                        <CreditCard className="text-red-600" size={20} />
+                      <div className="w-10 h-10 rounded-full bg-red-100 dark:!bg-red-900/40 flex items-center justify-center shrink-0">
+                        <CreditCard className="text-red-600 dark:!text-red-400" size={20} />
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-zinc-900">Перевод Kaspi Bank</h4>
-                        <p className="text-sm text-zinc-600 mt-1">Отправьте перевод на номер:</p>
-                        <p className="text-lg font-mono font-medium text-indigo-600 mt-1">+7 (707) 343-64-23</p>
-                        <p className="text-xs text-zinc-500 mt-1">Получатель: Нұрсұлтан Г.</p>
+                      <div className="flex flex-col gap-1">
+                        <h4 className="font-semibold text-zinc-900 dark:!text-white">
+                          Перевод Kaspi Bank
+                        </h4>
+                        <p className="text-sm text-zinc-600 dark:!text-zinc-300">
+                          Отправьте перевод на номер:
+                        </p>
+                        <p className="text-lg font-mono font-medium text-indigo-600 dark:!text-indigo-400">
+                          +7 (707) 343-64-23
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:!text-zinc-400">
+                          Получатель: Нұрсұлтан Г.
+                        </p>
                       </div>
                     </div>
                   </div>
   
-                  <div className="bg-indigo-50 border border-indigo-100 rounded p-3 text-indigo-800 text-sm">
-                    <strong>Внимание:</strong> После перевода обязательно нажмите кнопку ниже, чтобы мы проверили платеж.
+                  {/* ИСПРАВЛЕН БЛОК "ВНИМАНИЕ" (С !IMPORTANT) */}
+                  <div className="bg-indigo-50 dark:!bg-indigo-950/80 border border-indigo-100 dark:!border-indigo-800 rounded p-3 text-indigo-800 dark:!text-indigo-200 text-sm">
+                    <strong className="dark:!text-indigo-400">Внимание:</strong> После перевода обязательно нажмите кнопку ниже, чтобы мы проверили платеж.
                   </div>
                 </div>
 
@@ -184,7 +194,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                     variant="ghost"
                     onClick={() => setIsOpen(false)}
                     disabled={loading}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
                   >
                     Отмена
                   </Button>
