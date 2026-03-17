@@ -26,7 +26,9 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
   1. `app/globals.css` body rule applies `bg-background text-foreground` as the page canvas baseline — verified by inspection
   2. The `@theme inline` block bridges CSS custom properties to Tailwind utility classes — verified by confirming `bg-background` resolves to `var(--background)`
   3. Both `AdminThemeProvider` and `BookingThemeProvider` use `attribute="class"` to inject `.dark` on `<html>` — verified in `theme-providers.tsx`
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 00-01-PLAN.md — Create automated validation tests for FOUND-01, FOUND-02, FOUND-03
 
 ### Phase 1: Landing / Marketing Surface
 **Goal**: Every marketing and landing page renders correctly in both light and dark mode
@@ -74,11 +76,11 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
+Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Infrastructure Validation | 0/TBD | Not started | - |
+| 0. Infrastructure Validation | 0/1 | Planning complete | - |
 | 1. Landing / Marketing Surface | 0/TBD | Not started | - |
 | 2. Tenant Public Booking Surface | 0/TBD | Not started | - |
 | 3. Dashboard + Auth Surface | 0/TBD | Not started | - |
