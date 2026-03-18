@@ -39,7 +39,7 @@ Plans:
   2. `PricingCards.tsx` renders with correct contrast in both modes — no invisible text or washed-out borders
   3. Gradient sections either adapt to dark mode with `dark:from-*/to-*` variants or are explicitly documented as intentional fixed brand colors
   4. All hover states in landing components produce a visible, non-jarring feedback color in both modes
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 01-01-PLAN.md — Create test scaffold + remediate HeroSection, PricingCards, FeaturesGrid, Footer
 - [ ] 01-02-PLAN.md — Remediate Testimonials, NicheCards, DemoSection, StatsCounter
@@ -84,7 +84,7 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
-| 1. Landing / Marketing Surface | 0/2 | Planning complete | - |
+| 1. Landing / Marketing Surface | 1/2 | In Progress|  |
 | 2. Tenant Public Booking Surface | 0/TBD | Not started | - |
 | 3. Dashboard + Auth Surface | 0/TBD | Not started | - |
 | 4. Cleanup Sweep | 0/TBD | Not started | - |

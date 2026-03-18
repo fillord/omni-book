@@ -13,13 +13,13 @@
 
 ### Landing / Marketing Surface
 
-- [ ] **LAND-01**: All `bg-white`, `bg-zinc-*`, `bg-slate-*` background classes in `components/landing/` replaced with `bg-background` or `bg-card` as appropriate
-- [ ] **LAND-02**: All `text-gray-900`, `text-zinc-900`, `text-slate-900` classes in `components/landing/` replaced with `text-foreground`
-- [ ] **LAND-03**: All `text-gray-500`, `text-zinc-400`, `text-slate-500` classes in `components/landing/` replaced with `text-muted-foreground`
-- [ ] **LAND-04**: All `border-gray-*`, `border-zinc-*` classes in `components/landing/` replaced with `border-border`
-- [ ] **LAND-05**: Hover/focus/ring state variants in `components/landing/` use semantic tokens (`hover:bg-muted`, `focus:border-input`, `ring-border`)
-- [ ] **LAND-06**: `PricingCards.tsx` fully semantic — no hardcoded color utilities except intentional brand accents
-- [ ] **LAND-07**: Gradient sections in landing have correct dark mode behavior (either theme-adaptive with `dark:from-*/to-*` or intentionally fixed brand colors, clearly distinguished)
+- [x] **LAND-01**: All `bg-white`, `bg-zinc-*`, `bg-slate-*` background classes in `components/landing/` replaced with `bg-background` or `bg-card` as appropriate
+- [x] **LAND-02**: All `text-gray-900`, `text-zinc-900`, `text-slate-900` classes in `components/landing/` replaced with `text-foreground`
+- [x] **LAND-03**: All `text-gray-500`, `text-zinc-400`, `text-slate-500` classes in `components/landing/` replaced with `text-muted-foreground`
+- [x] **LAND-04**: All `border-gray-*`, `border-zinc-*` classes in `components/landing/` replaced with `border-border`
+- [x] **LAND-05**: Hover/focus/ring state variants in `components/landing/` use semantic tokens (`hover:bg-muted`, `focus:border-input`, `ring-border`)
+- [x] **LAND-06**: `PricingCards.tsx` fully semantic — no hardcoded color utilities except intentional brand accents
+- [x] **LAND-07**: Gradient sections in landing have correct dark mode behavior (either theme-adaptive with `dark:from-*/to-*` or intentionally fixed brand colors, clearly distinguished)
 
 ### Tenant Public Booking Surface
 
@@ -78,13 +78,13 @@ Phase mappings confirmed during roadmap creation (2026-03-17).
 | FOUND-01 | Phase 0 | Complete |
 | FOUND-02 | Phase 0 | Complete |
 | FOUND-03 | Phase 0 | Complete |
-| LAND-01 | Phase 1 | Pending |
-| LAND-02 | Phase 1 | Pending |
-| LAND-03 | Phase 1 | Pending |
-| LAND-04 | Phase 1 | Pending |
-| LAND-05 | Phase 1 | Pending |
-| LAND-06 | Phase 1 | Pending |
-| LAND-07 | Phase 1 | Pending |
+| LAND-01 | Phase 1 | Complete |
+| LAND-02 | Phase 1 | Complete |
+| LAND-03 | Phase 1 | Complete |
+| LAND-04 | Phase 1 | Complete |
+| LAND-05 | Phase 1 | Complete |
+| LAND-06 | Phase 1 | Complete |
+| LAND-07 | Phase 1 | Complete |
 | BOOK-01 | Phase 2 | Pending |
 | BOOK-02 | Phase 2 | Pending |
 | BOOK-03 | Phase 2 | Pending |
