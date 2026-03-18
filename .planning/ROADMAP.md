@@ -39,10 +39,12 @@ Plans:
   2. `PricingCards.tsx` renders with correct contrast in both modes — no invisible text or washed-out borders
   3. Gradient sections either adapt to dark mode with `dark:from-*/to-*` variants or are explicitly documented as intentional fixed brand colors
   4. All hover states in landing components produce a visible, non-jarring feedback color in both modes
-**Plans:** 1/2 plans executed
+**Plans:** 4 plans (2 executed, 2 gap closure)
 Plans:
-- [ ] 01-01-PLAN.md — Create test scaffold + remediate HeroSection, PricingCards, FeaturesGrid, Footer
-- [ ] 01-02-PLAN.md — Remediate Testimonials, NicheCards, DemoSection, StatsCounter
+- [x] 01-01-PLAN.md — Create test scaffold + remediate HeroSection, PricingCards, FeaturesGrid, Footer
+- [x] 01-02-PLAN.md — Remediate Testimonials, NicheCards, DemoSection, StatsCounter
+- [ ] 01-03-PLAN.md — Fix Footer.tsx build-blocking JSX syntax error (gap closure)
+- [ ] 01-04-PLAN.md — Replace dark:bg-zinc-900 with dark:bg-card + add test coverage (gap closure)
 
 ### Phase 2: Tenant Public Booking Surface
 **Goal**: Every tenant public page and booking flow renders correctly in both light and dark mode
@@ -84,7 +86,7 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
-| 1. Landing / Marketing Surface | 1/2 | In Progress|  |
+| 1. Landing / Marketing Surface | 2/4 | In Progress|  |
 | 2. Tenant Public Booking Surface | 0/TBD | Not started | - |
 | 3. Dashboard + Auth Surface | 0/TBD | Not started | - |
 | 4. Cleanup Sweep | 0/TBD | Not started | - |
