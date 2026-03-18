@@ -84,7 +84,7 @@ function RevenueTooltip({ active, payload, label }: {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
       <Calendar className="w-10 h-10 mb-3 opacity-40" />
       <p className="text-sm font-medium">{label}</p>
     </div>
@@ -223,22 +223,22 @@ export function AnalyticsDashboard({ initial, color }: Props) {
               <div className="min-w-[340px] px-2">
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={bookingsChart} barCategoryGap="30%" barGap={2}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                       tickLine={false}
                       axisLine={false}
                       interval={period === '7d' ? 0 : period === '30d' ? 4 : 8}
                     />
                     <YAxis
-                      tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                       tickLine={false}
                       axisLine={false}
                       allowDecimals={false}
                       width={28}
                     />
-                    <Tooltip content={<BookingTooltip />} cursor={{ fill: '#f4f4f5' }} />
+                    <Tooltip content={<BookingTooltip />} cursor={{ fill: 'var(--color-muted)' }} />
                     <Bar dataKey="confirmed" fill="#22c55e"  name={t('analytics', 'confirmed')} radius={[3, 3, 0, 0]} />
                     <Bar dataKey="cancelled" fill="#ef4444"  name={t('analytics', 'cancelled')} radius={[3, 3, 0, 0]} />
                   </BarChart>
@@ -266,22 +266,22 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                         <stop offset="95%" stopColor={nicheColor} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                       tickLine={false}
                       axisLine={false}
                       interval={period === '7d' ? 0 : period === '30d' ? 4 : 8}
                     />
                     <YAxis
-                      tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                      tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                       tickLine={false}
                       axisLine={false}
                       tickFormatter={(v: number) => v === 0 ? '0' : `${Math.round(v / 100)}₸`}
                       width={44}
                     />
-                    <Tooltip content={<RevenueTooltip />} cursor={{ stroke: '#e4e4e7', strokeWidth: 1 }} />
+                    <Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'var(--color-border)', strokeWidth: 1 }} />
                     <Area
                       type="monotone"
                       dataKey="revenue"
@@ -317,10 +317,10 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                   margin={{ left: 0, right: 16, top: 0, bottom: 0 }}
                   barCategoryGap="25%"
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" horizontal={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false} />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                    tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                     tickLine={false}
                     axisLine={false}
                     allowDecimals={false}
@@ -328,15 +328,15 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                   <YAxis
                     type="category"
                     dataKey="name"
-                    tick={{ fontSize: 12, fill: '#52525b' }}
+                    tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }}
                     tickLine={false}
                     axisLine={false}
                     width={90}
                   />
                   <Tooltip
-                    cursor={{ fill: '#f4f4f5' }}
+                    cursor={{ fill: 'var(--color-muted)' }}
                     formatter={(v) => [v, t('analytics', 'bookingsLabel')]}
-                    contentStyle={{ borderRadius: 12, border: '1px solid #e4e4e7', fontSize: 13 }}
+                    contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', fontSize: 13 }}
                   />
                   <Bar dataKey="bookings" fill={nicheColor} radius={[0, 4, 4, 0]} name={t('analytics', 'bookingsLabel')} />
                 </BarChart>
@@ -371,13 +371,13 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                     </Pie>
                     <Tooltip
                       formatter={(v, name) => [v, name]}
-                      contentStyle={{ borderRadius: 12, border: '1px solid #e4e4e7', fontSize: 13 }}
+                      contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', fontSize: 13 }}
                     />
                     <Legend
                       iconType="circle"
                       iconSize={8}
                       formatter={(value: string) =>
-                        <span style={{ fontSize: 12, color: '#52525b' }}>{value}</span>
+                        <span style={{ fontSize: 12, color: 'var(--color-muted-foreground)' }}>{value}</span>
                       }
                     />
                   </PieChart>
