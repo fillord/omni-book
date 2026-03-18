@@ -27,6 +27,8 @@ const HOURS = Array.from(
   (_, i) => HOURS_START + i
 )
 
+// intentional: RESOURCE_PALETTE uses fixed pastel tints for resource color-coding
+// (functional visual differentiation, not neutral backgrounds -- preserve in both modes)
 const RESOURCE_PALETTE = [
   { bg: 'bg-blue-100 border-blue-300 text-blue-900', dot: 'bg-blue-500' },
   { bg: 'bg-purple-100 border-purple-300 text-purple-900', dot: 'bg-purple-500' },
@@ -431,7 +433,7 @@ export function BookingCalendar({
                   ].join(' ')}
                 >
                   <span
-                    className={`h-2.5 w-2.5 rounded-full ${color?.dot ?? 'bg-gray-400'}`}
+                    className={`h-2.5 w-2.5 rounded-full ${color?.dot ?? 'bg-muted-foreground'}`}
                   />
                   {r.name}
                 </button>
