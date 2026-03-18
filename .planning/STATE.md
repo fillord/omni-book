@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-landing-marketing-surface-01-PLAN.md
-last_updated: "2026-03-18T07:31:57.750Z"
+stopped_at: Completed 01-landing-marketing-surface-02-PLAN.md
+last_updated: "2026-03-18T07:35:36.852Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 100
 ---
 
@@ -52,6 +52,7 @@ Progress: [██████████] 100%
 *Updated after each plan completion*
 | Phase 00-infrastructure-validation P01 | 5 | 1 tasks | 1 files |
 | Phase 01-landing-marketing-surface P01 | 4 | 3 tasks | 5 files |
+| Phase 01-landing-marketing-surface P02 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Recent decisions affecting current work:
 - [Phase 01-landing-marketing-surface]: Exclude bg-white from LAND-01 regex: bg-white is brand treatment on Pro card CTA, not neutral background violation
 - [Phase 01-landing-marketing-surface]: Footer.tsx preserved as intentional fixed-dark surface with code comment, no class changes — deliberate visual weight
 - [Phase 01-landing-marketing-surface]: FeaturesGrid icon container gets dark:bg-indigo-950/40 for LAND-07 dark mode tint while staying within brand palette
+- [Phase 01-landing-marketing-surface]: Arrow icon hover reduced from 4-class dual pair to 2 semantic classes (text-muted-foreground group-hover:text-foreground)
+- [Phase 01-landing-marketing-surface]: Dot navigation uses opacity-based bg-muted-foreground/40 (not border token) for visibility in both light and dark modes
 
 ### Pending Todos
 
@@ -80,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T07:31:57.747Z
-Stopped at: Completed 01-landing-marketing-surface-01-PLAN.md
+Last session: 2026-03-18T07:35:36.850Z
+Stopped at: Completed 01-landing-marketing-surface-02-PLAN.md
 Resume file: None
