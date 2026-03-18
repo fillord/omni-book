@@ -55,7 +55,11 @@ Plans:
   2. The booking form (date/time inputs, submit button) is legible and correctly bordered in dark mode
   3. The booking calendar renders with visible day cells, borders, and selected-state highlights in dark mode
   4. Niche brand accent colors (`bg-blue-600`, `bg-pink-600`, `bg-orange-600`, `bg-green-600`) are unchanged and visually intact in both modes
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md — Create test scaffold for BOOK-01 through BOOK-05
+- [ ] 02-02-PLAN.md — Remediate tenant-public-page.tsx (BOOK-01, BOOK-04, BOOK-05)
+- [ ] 02-03-PLAN.md — Remediate booking-form.tsx and booking-calendar.tsx (BOOK-02, BOOK-03, BOOK-04)
 
 ### Phase 3: Dashboard + Auth Surface
 **Goal**: All authenticated dashboard views and auth pages render correctly in both light and dark mode
@@ -87,6 +91,6 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
 | 1. Landing / Marketing Surface | 2/4 | In Progress|  |
-| 2. Tenant Public Booking Surface | 0/TBD | Not started | - |
+| 2. Tenant Public Booking Surface | 0/3 | Not started | - |
 | 3. Dashboard + Auth Surface | 0/TBD | Not started | - |
 | 4. Cleanup Sweep | 0/TBD | Not started | - |
