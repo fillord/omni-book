@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-landing-marketing-surface-03-PLAN.md
-last_updated: "2026-03-18T07:49:55.703Z"
+stopped_at: Completed 01-landing-marketing-surface-04-PLAN.md
+last_updated: "2026-03-18T07:52:54.341Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 100
 ---
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100%
 | Phase 01-landing-marketing-surface P01 | 4 | 3 tasks | 5 files |
 | Phase 01-landing-marketing-surface P02 | 2 | 2 tasks | 4 files |
 | Phase 01-landing-marketing-surface P03 | 3 | 1 tasks | 1 files |
+| Phase 01-landing-marketing-surface P04 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - [Phase 01-landing-marketing-surface]: Arrow icon hover reduced from 4-class dual pair to 2 semantic classes (text-muted-foreground group-hover:text-foreground)
 - [Phase 01-landing-marketing-surface]: Dot navigation uses opacity-based bg-muted-foreground/40 (not border token) for visibility in both light and dark modes
 - [Phase 01-landing-marketing-surface]: JSX comment in Footer.tsx converted to JS comment above return — syntactically valid position that preserves design intent documentation
+- [Phase 01-landing-marketing-surface]: dark:bg-card used instead of dark:bg-zinc-900 to align niche/demo card backgrounds with theme system
 
 ### Pending Todos
 
@@ -85,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T07:49:55.701Z
-Stopped at: Completed 01-landing-marketing-surface-03-PLAN.md
+Last session: 2026-03-18T07:52:54.338Z
+Stopped at: Completed 01-landing-marketing-surface-04-PLAN.md
 Resume file: None
