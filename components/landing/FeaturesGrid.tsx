@@ -26,10 +26,10 @@ export function FeaturesGrid() {
     <section id="features" className="py-20 bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {t('landing', 'features')}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
+          <p className="text-muted-foreground max-w-xl mx-auto">
             {t('landing', 'featuresSubtitle')}
           </p>
         </div>
@@ -40,14 +40,14 @@ export function FeaturesGrid() {
               key={title}
               className="bg-card text-card-foreground rounded-2xl border border-border p-6 flex gap-4 hover-lift"
             >
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 shrink-0">
                 <Icon size={20} />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 dark:text-slate-50 mb-1 text-sm">
+                <h3 className="font-semibold text-foreground mb-1 text-sm">
                   {title}
                 </h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {description}
                 </p>
               </div>

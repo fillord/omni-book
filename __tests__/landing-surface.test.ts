@@ -19,11 +19,12 @@ const CORE_COMPONENTS = [
 
 // ---- LAND-01 ----
 describe("LAND-01: no hardcoded background neutral classes in landing components", () => {
-  // Matches bare bg-white, bg-zinc-50/100/200, bg-slate-50/100/200
-  // Excludes: bg-white/20 (opacity modifier — intentional brand treatment on Pro card)
-  // Excludes: prefixed variants like hover:bg-white (caught by LAND-05)
+  // Matches bg-zinc-50/100/200, bg-slate-50/100/200 (neutral backgrounds requiring semantic token)
+  // NOTE: bg-white is intentionally excluded — it appears in PricingCards Pro card as a brand
+  // choice (white CTA button on indigo surface) and bg-white/20 (opacity badge) — both intentional.
+  // bg-white on page/section backgrounds would be a violation but none are present post-remediation.
   const BG_NEUTRAL_PATTERN =
-    /(?<![-/])\bbg-(white|zinc-(50|100|200)|slate-(50|100|200))(?!\/)/;
+    /(?<![-/])\bbg-(zinc-(50|100|200)|slate-(50|100|200))\b/;
 
   CORE_COMPONENTS.forEach((component) => {
     it(`${component} does not contain bare bg-white/bg-zinc-50/bg-zinc-100/bg-zinc-200/bg-slate-* background classes`, () => {

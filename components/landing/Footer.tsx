@@ -13,6 +13,7 @@ export function Footer() {
     { label: t('landing', 'support'), href: "#" },
   ]
   return (
+    {/* intentional: fixed dark footer surface — brand design choice, dark in both modes */}
     <footer className="bg-zinc-900 text-zinc-400 py-12">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
