@@ -77,7 +77,7 @@ export function StatsCounter() {
               <p className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
                 <AnimatedNumber end={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{stat.label}</p>
+              <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
