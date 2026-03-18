@@ -2,8 +2,8 @@
 phase: 3
 slug: dashboard-auth-surface
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-03-18
 ---
 
@@ -17,18 +17,18 @@ created: 2026-03-18
 
 | Property | Value |
 |----------|-------|
-| **Framework** | vitest |
-| **Config file** | vitest.config.ts |
-| **Quick run command** | `npx vitest run --reporter=verbose` |
-| **Full suite command** | `npx vitest run` |
+| **Framework** | jest (ts-jest) |
+| **Config file** | jest.config.ts |
+| **Quick run command** | `npx jest __tests__/dashboard-auth-surface.test.ts --no-coverage` |
+| **Full suite command** | `npx jest --no-coverage` |
 | **Estimated runtime** | ~15 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npx vitest run --reporter=verbose`
-- **After every plan wave:** Run `npx vitest run`
+- **After every task commit:** Run `npx jest __tests__/dashboard-auth-surface.test.ts --no-coverage`
+- **After every plan wave:** Run `npx jest --no-coverage`
 - **Before `/gsd:verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
 
@@ -38,14 +38,13 @@ created: 2026-03-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 3-01-01 | 01 | 1 | DASH-01 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-01-02 | 01 | 1 | DASH-02 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-01-03 | 01 | 1 | DASH-03 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-01-04 | 01 | 1 | DASH-04 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-01-05 | 01 | 1 | DASH-05 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-02-01 | 02 | 2 | AUTH-01 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-02-02 | 02 | 2 | AUTH-02 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
-| 3-02-03 | 02 | 2 | AUTH-03 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-01-T1 | 01 | 1 | DASH-01–05, AUTH-01–03 | unit/scaffold | `npx jest __tests__/dashboard-auth-surface.test.ts --no-coverage` | ✅ created by task | ⬜ pending |
+| 3-02-T1 | 02 | 2 | DASH-01, DASH-05 | unit | `npx jest __tests__/dashboard-auth-surface.test.ts --testNamePattern="DASH-01\|DASH-05" --no-coverage` | ✅ | ⬜ pending |
+| 3-02-T2 | 02 | 2 | DASH-02 | unit | `npx jest __tests__/dashboard-auth-surface.test.ts --testNamePattern="DASH-02" --no-coverage` | ✅ | ⬜ pending |
+| 3-03-T1 | 03 | 2 | DASH-03 | unit | `npx jest __tests__/dashboard-auth-surface.test.ts --testNamePattern="DASH-03" --no-coverage` | ✅ | ⬜ pending |
+| 3-03-T2 | 03 | 2 | DASH-04 | unit | `npx jest __tests__/dashboard-auth-surface.test.ts --testNamePattern="DASH-04" --no-coverage` | ✅ | ⬜ pending |
+| 3-04-T1 | 04 | 2 | AUTH-01–03 | unit | `npx jest __tests__/dashboard-auth-surface.test.ts --testNamePattern="AUTH" --no-coverage` | ✅ | ⬜ pending |
+| 3-04-T2 | 04 | 2 | AUTH-01–03 | visual/manual | `npx jest --no-coverage 2>&1 \| tail -5` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -70,11 +69,11 @@ created: 2026-03-18
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references (Plan 01 creates scaffold in Wave 1)
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-03-18
