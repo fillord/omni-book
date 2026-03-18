@@ -17,18 +17,18 @@ created: 2026-03-18
 
 | Property | Value |
 |----------|-------|
-| **Framework** | vitest |
-| **Config file** | vitest.config.ts |
-| **Quick run command** | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` |
-| **Full suite command** | `npx vitest run 2>/dev/null \| tail -30` |
+| **Framework** | jest |
+| **Config file** | jest.config.ts |
+| **Quick run command** | `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 \| tail -20` |
+| **Full suite command** | `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 \| tail -30` |
 | **Estimated runtime** | ~15 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `npx vitest run --reporter=verbose 2>/dev/null | tail -20`
-- **After every plan wave:** Run `npx vitest run 2>/dev/null | tail -30`
+- **After every task commit:** Run `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 | tail -20`
+- **After every plan wave:** Run `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 | tail -30`
 - **Before `/gsd:verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
 
@@ -38,11 +38,10 @@ created: 2026-03-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 2-01-01 | 01 | 1 | BOOK-05 | unit | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` | ✅ | ⬜ pending |
-| 2-01-02 | 01 | 1 | BOOK-01 | unit | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` | ✅ | ⬜ pending |
-| 2-02-01 | 02 | 1 | BOOK-02 | unit | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` | ✅ | ⬜ pending |
-| 2-02-02 | 02 | 1 | BOOK-03 | unit | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` | ✅ | ⬜ pending |
-| 2-03-01 | 03 | 2 | BOOK-04 | unit | `npx vitest run --reporter=verbose 2>/dev/null \| tail -20` | ✅ | ⬜ pending |
+| 2-01-01 | 01 | 1 | BOOK-01–05 | unit | `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 \| tail -20` | ❌ W0 | ⬜ pending |
+| 2-02-01 | 02 | 2 | BOOK-01, BOOK-04, BOOK-05 | unit | `npx jest __tests__/booking-surface.test.ts --no-coverage -t "BOOK-01\|BOOK-04\|BOOK-05" 2>&1 \| tail -20` | ✅ | ⬜ pending |
+| 2-03-01 | 03 | 2 | BOOK-02, BOOK-04 | unit | `npx jest __tests__/booking-surface.test.ts --no-coverage -t "BOOK-02\|BOOK-04" 2>&1 \| tail -20` | ✅ | ⬜ pending |
+| 2-03-02 | 03 | 2 | BOOK-03 | unit | `npx jest __tests__/booking-surface.test.ts --no-coverage 2>&1 \| tail -20` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -50,9 +49,9 @@ created: 2026-03-18
 
 ## Wave 0 Requirements
 
-- [ ] `src/tests/phase-02-dark-mode.test.ts` — stubs for BOOK-01 through BOOK-05 dark mode class assertions
+- [ ] `__tests__/booking-surface.test.ts` — stubs for BOOK-01 through BOOK-05 dark mode class assertions (created by Plan 02-01)
 
-*Existing vitest infrastructure detected — only phase-specific test file needed.*
+*Existing jest infrastructure detected — only phase-specific test file needed.*
 
 ---
 
