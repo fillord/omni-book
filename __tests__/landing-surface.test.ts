@@ -39,6 +39,33 @@ describe("LAND-01: no hardcoded background neutral classes in landing components
   });
 });
 
+// ---- LAND-01 supplemental: dark:bg-zinc-900 absence in niche brand color maps ----
+describe("LAND-01 supplemental: no hardcoded dark:bg-zinc-900 in niche brand color maps", () => {
+  // dark:bg-zinc-900 was previously used in NicheCards COLOR_MAP and DemoSection DEMOS
+  // as the dark-mode card background. Replaced with dark:bg-card (semantic token) so
+  // dark backgrounds adapt via the theme system rather than being hardcoded to zinc-900.
+
+  it("NicheCards.tsx COLOR_MAP does not contain dark:bg-zinc-900", () => {
+    const source = readComponent("NicheCards.tsx");
+    expect(source).not.toContain("dark:bg-zinc-900");
+  });
+
+  it("DemoSection.tsx DEMOS does not contain dark:bg-zinc-900", () => {
+    const source = readComponent("DemoSection.tsx");
+    expect(source).not.toContain("dark:bg-zinc-900");
+  });
+
+  it("NicheCards.tsx uses dark:bg-card for niche card dark backgrounds", () => {
+    const source = readComponent("NicheCards.tsx");
+    expect(source).toContain("dark:bg-card");
+  });
+
+  it("DemoSection.tsx uses dark:bg-card for demo card dark backgrounds", () => {
+    const source = readComponent("DemoSection.tsx");
+    expect(source).toContain("dark:bg-card");
+  });
+});
+
 // ---- LAND-02 ----
 describe("LAND-02: no hardcoded dark heading classes (text-zinc-900/slate-900/gray-900) in landing components", () => {
   // Negative lookbehind ensures we don't match dark:text-zinc-900
