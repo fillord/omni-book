@@ -40,10 +40,10 @@ export function NicheCards() {
     <section id="niches" className="py-20 bg-background dark:bg-background">
       <div className="max-w-6xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {t('landing', 'forWhomTitle')}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
+          <p className="text-muted-foreground max-w-xl mx-auto">
             {t('landing', 'nichesSubtitle')}
           </p>
         </div>
@@ -60,10 +60,10 @@ export function NicheCards() {
                   <Icon size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-zinc-900 dark:text-white mb-2">
+                  <h3 className="font-semibold text-foreground mb-2">
                     {title}
                   </h3>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {description}
                   </p>
                 </div>

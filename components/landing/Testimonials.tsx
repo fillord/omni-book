@@ -89,10 +89,10 @@ export function Testimonials() {
     <section className="py-20 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {sectionTitle}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400">{sectionSub}</p>
+          <p className="text-muted-foreground">{sectionSub}</p>
         </div>
 
         <div
@@ -101,20 +101,20 @@ export function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           {/* Testimonial card */}
-          <div className="bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
+          <div className="bg-card rounded-2xl border border-border p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
             <div key={active} className="animate-fade-in">
-              <p className="text-lg md:text-xl text-zinc-700 dark:text-zinc-200 leading-relaxed mb-6 italic">
+              <p className="text-lg md:text-xl text-foreground leading-relaxed mb-6 italic">
                 &ldquo;{testimonials[active].text}&rdquo;
               </p>
               <div className="flex items-center justify-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${NICHE_COLORS[testimonials[active].niche] ?? 'bg-zinc-100 text-zinc-600'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${NICHE_COLORS[testimonials[active].niche] ?? 'bg-muted text-muted-foreground'}`}>
                   {testimonials[active].avatar}
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-zinc-900 dark:text-slate-50 text-sm">
+                  <p className="font-semibold text-foreground text-sm">
                     {testimonials[active].name}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-muted-foreground">
                     {testimonials[active].role}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export function Testimonials() {
                 className={`w-2.5 h-2.5 rounded-full transition-all ${
                   idx === active
                     ? 'bg-indigo-600 w-6'
-                    : 'bg-zinc-300 hover:bg-zinc-400'
+                    : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
                 }`}
                 aria-label={`Testimonial ${idx + 1}`}
               />
