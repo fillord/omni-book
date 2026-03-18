@@ -33,8 +33,8 @@ const COLORS: Record<string, ColorClasses> = {
     accent:       'text-blue-600',
     light:        'bg-blue-50',
     border:       'border-blue-200',
-    avatarBg:     'bg-blue-100 text-blue-700',
-    badge:        'bg-blue-100 text-blue-700',
+    avatarBg:     'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+    badge:        'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
     heroGradient: 'bg-gradient-to-br from-blue-600 to-blue-800',
     heroBtn:      'bg-white text-blue-700 hover:bg-blue-50',
     heroHint:     'text-blue-100',
@@ -45,8 +45,8 @@ const COLORS: Record<string, ColorClasses> = {
     accent:       'text-pink-600',
     light:        'bg-pink-50',
     border:       'border-pink-200',
-    avatarBg:     'bg-pink-100 text-pink-700',
-    badge:        'bg-pink-100 text-pink-700',
+    avatarBg:     'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+    badge:        'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
     heroGradient: 'bg-gradient-to-br from-pink-500 to-pink-700',
     heroBtn:      'bg-white text-pink-700 hover:bg-pink-50',
     heroHint:     'text-pink-100',
@@ -57,8 +57,8 @@ const COLORS: Record<string, ColorClasses> = {
     accent:       'text-orange-600',
     light:        'bg-orange-50',
     border:       'border-orange-200',
-    avatarBg:     'bg-orange-100 text-orange-700',
-    badge:        'bg-orange-100 text-orange-700',
+    avatarBg:     'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+    badge:        'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
     heroGradient: 'bg-gradient-to-br from-orange-500 to-orange-700',
     heroBtn:      'bg-white text-orange-700 hover:bg-orange-50',
     heroHint:     'text-orange-100',
@@ -69,8 +69,8 @@ const COLORS: Record<string, ColorClasses> = {
     accent:       'text-green-600',
     light:        'bg-green-50',
     border:       'border-green-200',
-    avatarBg:     'bg-green-100 text-green-700',
-    badge:        'bg-green-100 text-green-700',
+    avatarBg:     'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+    badge:        'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
     heroGradient: 'bg-gradient-to-br from-green-600 to-green-800',
     heroBtn:      'bg-white text-green-700 hover:bg-green-50',
     heroHint:     'text-green-100',
@@ -610,7 +610,7 @@ function ResourceCard({
     <div className="group rounded-2xl border-2 border-border bg-card p-5 flex flex-col gap-4 hover:border-border/80 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       {/* Avatar / Icon */}
       {isTable ? (
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${colors.light}`}>
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${colors.light} dark:bg-muted`}>
           🍽️
         </div>
       ) : (
