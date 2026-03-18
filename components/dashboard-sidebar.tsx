@@ -83,7 +83,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
   ]
 
   return (
-    <div className="flex flex-col h-full bg-background border-r border-border">
+    <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
 
       {/* Owner avatar */}
       <div className="px-4 py-4 border-b flex items-center gap-3">
@@ -138,7 +138,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
       </nav>
 
       {/* Upgrade Banner & Footer links (pinned to bottom) */}
-      <div className="mt-auto px-4 py-4 bg-background border-t border-border space-y-1 z-10">
+      <div className="mt-auto px-4 py-4 bg-sidebar border-t border-sidebar-border space-y-1 z-10">
         {tenantPlan === 'FREE' && tenantPlanStatus !== 'PENDING' && (
           <Link
             href="/dashboard/settings/billing"
@@ -161,7 +161,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
         {userRole === 'SUPERADMIN' && (
           <Link
             href="/admin"
-            className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-white bg-zinc-900 hover:bg-zinc-800 transition-colors mb-2"
+            className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-semibold text-sidebar-accent-foreground bg-sidebar-accent hover:bg-sidebar-accent/80 transition-colors mb-2"
           >
             <ShieldCheck className="h-4 w-4 shrink-0 text-indigo-400" />
             Панель администратора
