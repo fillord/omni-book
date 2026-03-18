@@ -310,7 +310,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
       {/* ── Contact info bar ──────────────────────────────────────────────── */}
       {hasContacts && (
-        <section className={`border-b ${colors.border} ${colors.light} dark:border-border dark:bg-card/50`}>
+        <section className="border-b border-border bg-card/50">
           <div className="max-w-5xl mx-auto px-4 py-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               {tenant.workingHours && (
@@ -392,7 +392,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               {tenant.services.map((s) => (
                 <div
                   key={s.id}
-                  className={`snap-start shrink-0 w-56 rounded-2xl border-2 ${colors.border} ${colors.light} dark:bg-card dark:border-border p-4 flex flex-col gap-2`}
+                  className={`snap-start shrink-0 w-56 rounded-2xl border-2 border-border bg-card p-4 flex flex-col gap-2`}
                 >
                   <p className="font-semibold text-foreground text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                   {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
@@ -421,7 +421,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'portfolio')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} dark:border-border dark:bg-card/50 p-12 text-center`}>
+            <div className={`rounded-2xl border-2 border-dashed border-border bg-card/50 p-12 text-center`}>
               <p className="text-muted-foreground text-sm">{t('public', 'galleryPlaceholder')}</p>
             </div>
           </section>
@@ -434,7 +434,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'menu')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed ${colors.border} ${colors.light} dark:border-border dark:bg-card/50 p-12 text-center`}>
+            <div className={`rounded-2xl border-2 border-dashed border-border bg-card/50 p-12 text-center`}>
               <p className="text-muted-foreground text-sm">{t('public', 'menuPlaceholder')}</p>
             </div>
           </section>
@@ -468,7 +468,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         )}
 
         {/* ── Booking form ────────────────────────────────────────────────── */}
-        <section id="booking" className={`rounded-2xl ${colors.light} ${colors.border} dark:bg-card dark:border-border border-2 p-6 md:p-8`}>
+        <section id="booking" className="rounded-2xl bg-card border-border border-2 p-6 md:p-8">
           <h2 className="text-2xl font-bold text-foreground mb-1">{t('niche', nicheConfig.bookingLabel)}</h2>
           <p className="text-muted-foreground text-sm mb-8">
             {t('public', 'bookingHint').replace('{resource}', t('niche', nicheConfig.resourceLabel).toLowerCase())}
@@ -610,7 +610,7 @@ function ResourceCard({
     <div className="group rounded-2xl border-2 border-border bg-card p-5 flex flex-col gap-4 hover:border-border/80 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       {/* Avatar / Icon */}
       {isTable ? (
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${colors.light} dark:bg-muted`}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-muted">
           🍽️
         </div>
       ) : (
@@ -696,5 +696,7 @@ function formatAttrForCard(field: AttributeField, value: unknown, t: Translator)
   if (field.type === 'multitext') return null
   if (field.key === 'experience_years') return t('public', 'experienceYears').replace('{n}', String(value))
   if (field.key === 'capacity')         return t('public', 'capacity').replace('{n}', String(value))
-  return String(value)
+  const strVal = String(value)
+  if (strVal.startsWith('opt_')) return t('niche', strVal)
+  return strVal
 }

@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: planning
-stopped_at: Completed 04-cleanup-sweep-03-PLAN.md
-last_updated: "2026-03-18T17:18:39.638Z"
-last_activity: 2026-03-17 — Roadmap created
+milestone_name: Dark Mode
+status: complete
+stopped_at: Milestone v1.0 shipped
+last_updated: "2026-03-19T00:00:00.000Z"
+last_activity: 2026-03-19 — v1.0 milestone archived
 progress:
   total_phases: 5
   completed_phases: 5
@@ -18,17 +18,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-17)
+See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** Every page and component renders correctly in both light and dark mode — no white backgrounds trapped in dark mode, no invisible text, no hardcoded color escapes.
-**Current focus:** Phase 0 — Infrastructure Validation
+**Current focus:** v1.0 shipped — planning next milestone
 
 ## Current Position
 
-Phase: 0 of 4 (Infrastructure Validation)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-17 — Roadmap created
+v1.0 milestone complete. All 5 phases, 15 plans shipped.
+Status: Ready for next milestone (`/gsd:new-milestone`)
+Last activity: 2026-03-19 — v1.0 archived
 
 Progress: [██████████] 100%
 
