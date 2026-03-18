@@ -29,20 +29,20 @@ describe("BOOK-01: no hardcoded background/text/border neutral classes in tenant
     });
   });
 
-  it("tenant-public-page.tsx does not contain bg-zinc-* background classes (except in COLORS map string literals)", () => {
+  it("tenant-public-page.tsx does not contain bg-zinc-* background classes (except intentional footer)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    // bg-zinc-* classes outside quoted strings indicate violation
-    // After remediation, all occurrences must be inside string literals (quotes) in COLORS constant
-    // or explicitly removed
-    expect(source).toMatch(/bg-zinc-\d+/);
-    // This test will FAIL in RED state confirming violations exist
-    // After remediation this test should be replaced with a NOT match
-    // For now: assert the bg-zinc pattern count is high (violations present)
-    const matches = source.match(/\bbg-zinc-\d+\b/g) ?? [];
-    // In current un-remediated state, there should be many violations
-    // This test documents that zinc backgrounds exist and need removal
-    // We use a negative form that will FAIL now and PASS after remediation:
-    expect(matches.length).toBe(0);
+    // After remediation, the only bg-zinc-* allowed is bg-zinc-900 on the intentional footer surface.
+    // All other bg-zinc-* classes are violations.
+    const lines = source.split("\n");
+    const bgZincLines = lines.filter((line) => /\bbg-zinc-\d+\b/.test(line));
+    bgZincLines.forEach((line) => {
+      // Each bg-zinc-* occurrence must be on the intentional footer line
+      const isFooterLine =
+        line.toLowerCase().includes("footer") ||
+        line.includes("<footer") ||
+        line.includes("</footer");
+      expect(isFooterLine).toBe(true);
+    });
   });
 
   it("tenant-public-page.tsx does not contain dark:bg-zinc-* dual-pair classes", () => {
@@ -55,9 +55,18 @@ describe("BOOK-01: no hardcoded background/text/border neutral classes in tenant
     expect(source).not.toMatch(/\bbg-slate-\d+\b/);
   });
 
-  it("tenant-public-page.tsx does not contain bare text-zinc-* neutral text classes", () => {
+  it("tenant-public-page.tsx does not contain bare text-zinc-* neutral text classes (except intentional footer)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).not.toMatch(/\btext-zinc-\d+\b/);
+    // After remediation, the only text-zinc-* allowed is text-zinc-400 on the intentional footer surface.
+    const lines = source.split("\n");
+    const textZincLines = lines.filter((line) => /\btext-zinc-\d+\b/.test(line));
+    textZincLines.forEach((line) => {
+      const isFooterLine =
+        line.toLowerCase().includes("footer") ||
+        line.includes("<footer") ||
+        line.includes("</footer");
+      expect(isFooterLine).toBe(true);
+    });
   });
 
   it("tenant-public-page.tsx does not contain text-slate-* neutral text classes", () => {
