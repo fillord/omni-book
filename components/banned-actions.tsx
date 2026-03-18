@@ -17,7 +17,7 @@ export function BannedActions() {
     <div className="flex flex-col gap-3">
       <a
         href="mailto:support@omnibook.com"
-        className="w-full px-4 py-2.5 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors"
+        className="w-full px-4 py-2.5 rounded-lg bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
       >
         Написать в поддержку
       </a>
@@ -25,12 +25,12 @@ export function BannedActions() {
         type="button"
         onClick={handleSignOut}
         disabled={isPending}
-        className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 text-zinc-700 text-sm font-medium hover:bg-zinc-50 transition-colors text-center disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full px-4 py-2.5 rounded-lg border border-border text-foreground text-sm font-medium hover:bg-muted transition-colors text-center disabled:opacity-60 disabled:cursor-not-allowed"
       >
         Войти под другим аккаунтом
       </button>
-      <div className="mt-2 pt-2 border-t border-zinc-100">
-        <Link href="/" className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors">
+      <div className="mt-2 pt-2 border-t border-border">
+        <Link href="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
           Вернуться на главную
         </Link>
       </div>

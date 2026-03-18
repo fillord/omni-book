@@ -29,7 +29,7 @@ const STATUS_CONFIG: Record<
     icon: CheckCheck,
   },
   CANCELLED: {
-    className: 'bg-zinc-100 text-zinc-600 border-zinc-300 dark:bg-zinc-800 dark:text-zinc-400',
+    className: 'bg-muted text-muted-foreground border-border',
     icon: XCircle,
   },
   NO_SHOW: {
