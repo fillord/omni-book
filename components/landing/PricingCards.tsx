@@ -61,10 +61,10 @@ export function PricingCards() {
     <section id="pricing" className="py-20 bg-background">
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 dark:text-slate-50 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             {t('landing', 'pricing')}
           </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto">
+          <p className="text-muted-foreground max-w-xl mx-auto">
             {t('landing', 'pricingDesc')}
           </p>
         </div>
@@ -83,7 +83,7 @@ export function PricingCards() {
                 <div className="flex items-center justify-between mb-1">
                   <span
                     className={`text-sm font-semibold ${
-                      highlight ? "text-indigo-100" : "text-zinc-500 dark:text-zinc-400"
+                      highlight ? "text-indigo-100" : "text-muted-foreground"
                     }`}
                   >
                     {name}
@@ -97,14 +97,14 @@ export function PricingCards() {
                 <div className="flex items-baseline gap-1">
                   <span
                     className={`text-3xl font-bold ${
-                      highlight ? "text-white" : "text-zinc-900 dark:text-slate-50"
+                      highlight ? "text-white" : "text-foreground"
                     }`}
                   >
                     {t('landing', priceKey)}
                   </span>
                   {period && (
                     <span
-                      className={`text-sm ${highlight ? "text-indigo-200" : "text-zinc-400 dark:text-zinc-500"}`}
+                      className={`text-sm ${highlight ? "text-indigo-200" : "text-muted-foreground"}`}
                     >
                       {t('landing', period)}
                     </span>
@@ -112,7 +112,7 @@ export function PricingCards() {
                 </div>
                 <p
                   className={`text-sm mt-1 ${
-                    highlight ? "text-indigo-100" : "text-zinc-500 dark:text-zinc-400"
+                    highlight ? "text-indigo-100" : "text-muted-foreground"
                   }`}
                 >
                   {name === "Free" ? t('landing', 'freeDesc') : name === "Pro" ? t('landing', 'proDesc') : t('landing', 'entDesc')}
@@ -127,7 +127,7 @@ export function PricingCards() {
                       className={`shrink-0 ${highlight ? "text-indigo-200" : "text-indigo-500"}`}
                     />
                     <span
-                      className={highlight ? "text-indigo-50" : "text-zinc-600 dark:text-zinc-300"}
+                      className={highlight ? "text-indigo-50" : "text-foreground"}
                     >
                       {t('landing', f)}
                     </span>
@@ -149,7 +149,7 @@ export function PricingCards() {
               ) : (
                 <a
                   href={href}
-                  className="mt-auto text-center text-sm font-semibold py-2.5 rounded-xl border-2 border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+                  className="mt-auto text-center text-sm font-semibold py-2.5 rounded-xl border-2 border-border text-foreground hover:border-border hover:bg-muted transition-colors"
                 >
                   {t('landing', cta)}
                 </a>

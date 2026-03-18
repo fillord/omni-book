@@ -39,14 +39,14 @@ export function HeroSection() {
           {t('landing', 'heroBadge')}
         </span>
 
-        <h1 className="text-4xl md:text-6xl font-bold text-zinc-900 dark:text-white leading-tight mb-6 animate-slide-up">
+        <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight mb-6 animate-slide-up">
           {t('landing', 'heroTitleMain')}{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
             {t('landing', 'heroTitleAccent')}
           </span>
         </h1>
 
-        <p className="text-lg md:text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up stagger-2">
           {t('landing', 'heroDesc')}
         </p>
 
@@ -59,13 +59,13 @@ export function HeroSection() {
           </Link>
           <a
             href="#demo"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 font-semibold text-base hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-border text-foreground font-semibold text-base hover:bg-muted transition-colors"
           >
             {t('landing', 'heroCtaSecondary')}
           </a>
         </div>
 
-        <p className="mt-6 text-xs text-zinc-400 animate-fade-in stagger-4">
+        <p className="mt-6 text-xs text-muted-foreground animate-fade-in stagger-4">
           {t('landing', 'heroNoCard')}
         </p>
       </div>
