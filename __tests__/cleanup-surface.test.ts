@@ -122,7 +122,7 @@ describe("Regression: booking-form.tsx selection states have dark mode overrides
     const source = readComponent("booking-form.tsx");
     const serviceSelectedLines = source
       .split("\n")
-      .filter((line) => line.includes("serviceSelected:"));
+      .filter((line) => line.includes("serviceSelected:") && line.includes("'"));
     expect(serviceSelectedLines.length).toBeGreaterThan(0);
     serviceSelectedLines.forEach((line) => {
       expect(line).toMatch(/dark:/);
@@ -133,7 +133,7 @@ describe("Regression: booking-form.tsx selection states have dark mode overrides
     const source = readComponent("booking-form.tsx");
     const resourceSelectedLines = source
       .split("\n")
-      .filter((line) => line.includes("resourceSelected:"));
+      .filter((line) => line.includes("resourceSelected:") && line.includes("'"));
     expect(resourceSelectedLines.length).toBeGreaterThan(0);
     resourceSelectedLines.forEach((line) => {
       expect(line).toMatch(/dark:/);

@@ -65,8 +65,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-blue-600 text-white border-blue-600',
     slotHover:        'hover:border-blue-500 hover:text-blue-600',
     submitBtn:        'bg-blue-600 hover:bg-blue-700 text-white',
-    serviceSelected:  'border-blue-600 bg-blue-50',
-    resourceSelected: 'border-blue-600 bg-blue-50',
+    serviceSelected:  'border-blue-600 bg-blue-50 dark:bg-blue-950/40',
+    resourceSelected: 'border-blue-600 bg-blue-50 dark:bg-blue-950/40',
   },
   pink: {
     stepActive:       'border-pink-600 text-pink-600',
@@ -75,8 +75,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-pink-600 text-white border-pink-600',
     slotHover:        'hover:border-pink-500 hover:text-pink-600',
     submitBtn:        'bg-pink-600 hover:bg-pink-700 text-white',
-    serviceSelected:  'border-pink-600 bg-pink-50',
-    resourceSelected: 'border-pink-600 bg-pink-50',
+    serviceSelected:  'border-pink-600 bg-pink-50 dark:bg-pink-950/40',
+    resourceSelected: 'border-pink-600 bg-pink-50 dark:bg-pink-950/40',
   },
   orange: {
     stepActive:       'border-orange-600 text-orange-600',
@@ -85,8 +85,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-orange-600 text-white border-orange-600',
     slotHover:        'hover:border-orange-500 hover:text-orange-600',
     submitBtn:        'bg-orange-600 hover:bg-orange-700 text-white',
-    serviceSelected:  'border-orange-600 bg-orange-50',
-    resourceSelected: 'border-orange-600 bg-orange-50',
+    serviceSelected:  'border-orange-600 bg-orange-50 dark:bg-orange-950/40',
+    resourceSelected: 'border-orange-600 bg-orange-50 dark:bg-orange-950/40',
   },
   green: {
     stepActive:       'border-green-600 text-green-600',
@@ -95,8 +95,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-green-600 text-white border-green-600',
     slotHover:        'hover:border-green-500 hover:text-green-600',
     submitBtn:        'bg-green-600 hover:bg-green-700 text-white',
-    serviceSelected:  'border-green-600 bg-green-50',
-    resourceSelected: 'border-green-600 bg-green-50',
+    serviceSelected:  'border-green-600 bg-green-50 dark:bg-green-950/40',
+    resourceSelected: 'border-green-600 bg-green-50 dark:bg-green-950/40',
   },
 }
 
@@ -229,11 +229,11 @@ function SuccessScreen({
     <div className="flex flex-col items-center gap-6 py-8 text-center relative">
       <div
         className={[
-          'w-20 h-20 rounded-full bg-green-100 flex items-center justify-center transition-all duration-500',
+          'w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center transition-all duration-500',
           visible ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
         ].join(' ')}
       >
-        <svg viewBox="0 0 24 24" className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg viewBox="0 0 24 24" className="w-10 h-10 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path
             style={{ strokeDasharray: 30, strokeDashoffset: visible ? 0 : 30, transition: 'stroke-dashoffset 0.5s' }}
             d="M5 13l4 4L19 7"
@@ -738,7 +738,7 @@ export function BookingForm({
           </div>
 
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
