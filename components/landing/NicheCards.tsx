@@ -5,22 +5,22 @@ import { useI18n } from "@/lib/i18n/context"
 
 const COLOR_MAP = {
   blue: {
-    bg: "bg-blue-50 dark:bg-zinc-900",
+    bg: "bg-blue-50 dark:bg-card",
     icon: "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400",
     border: "border-blue-100 dark:border-blue-900/50",
   },
   pink: {
-    bg: "bg-pink-50 dark:bg-zinc-900",
+    bg: "bg-pink-50 dark:bg-card",
     icon: "bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400",
     border: "border-pink-100 dark:border-pink-900/50",
   },
   orange: {
-    bg: "bg-orange-50 dark:bg-zinc-900",
+    bg: "bg-orange-50 dark:bg-card",
     icon: "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400",
     border: "border-orange-100 dark:border-orange-900/50",
   },
   green: {
-    bg: "bg-green-50 dark:bg-zinc-900",
+    bg: "bg-green-50 dark:bg-card",
     icon: "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400",
     border: "border-green-100 dark:border-green-900/50",
   },
