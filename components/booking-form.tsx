@@ -155,13 +155,13 @@ function StepIndicator({
                 'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all',
                 done     ? colors.stepDone
                 : isActive ? colors.stepActive
-                : 'border-zinc-200 text-zinc-400',
+                : 'border-border text-muted-foreground',
               ].join(' ')}>
                 {done ? '✓' : idx + 1}
               </span>
               <span className={[
                 'text-xs whitespace-nowrap hidden sm:block',
-                isActive ? 'font-medium text-zinc-800' : 'text-zinc-400',
+                isActive ? 'font-medium text-foreground' : 'text-muted-foreground',
               ].join(' ')}>
                 {step.label}
               </span>
@@ -169,7 +169,7 @@ function StepIndicator({
             {idx < steps.length - 1 && (
               <div className={[
                 'flex-1 h-0.5 mx-1 mb-5 transition-colors',
-                done ? colors.stepLine : 'bg-zinc-200',
+                done ? colors.stepLine : 'bg-border',
               ].join(' ')} />
             )}
           </li>
@@ -260,11 +260,11 @@ function SuccessScreen({
       )}
 
       <div className="space-y-1">
-        <h3 className="text-2xl font-bold text-zinc-900 dark:text-slate-50">{t('booking', 'success')}</h3>
-        <p className="text-zinc-500 dark:text-zinc-400 text-sm">{guestName}, {t('booking', 'successSub')}</p>
+        <h3 className="text-2xl font-bold text-foreground">{t('booking', 'success')}</h3>
+        <p className="text-muted-foreground text-sm">{guestName}, {t('booking', 'successSub')}</p>
       </div>
 
-      <div className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-5 text-sm space-y-3 text-left max-w-sm">
+      <div className="w-full rounded-xl border border-border bg-card p-5 text-sm space-y-3 text-left max-w-sm">
         <SummaryRow label={t('booking', 'service')}    value={service.name} />
         <SummaryRow label={t('booking', 'specialist')} value={resource.name} />
         <Separator />
@@ -274,21 +274,21 @@ function SuccessScreen({
         />
         <SummaryRow label={t('booking', 'timeSlot')} value={time} />
         <Separator />
-        <p className="text-xs text-zinc-400 dark:text-zinc-500 pt-1">
-          {t('booking', 'bookingNumber')}: <span className="font-mono font-medium text-zinc-600 dark:text-zinc-200">{bookingId}</span>
+        <p className="text-xs text-muted-foreground pt-1">
+          {t('booking', 'bookingNumber')}: <span className="font-mono font-medium text-foreground">{bookingId}</span>
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
         <button
           onClick={onReset}
-          className="flex-1 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
+          className="flex-1 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors"
         >
           {t('booking', 'bookAgain')}
         </button>
         <button
           onClick={downloadICS}
-          className="flex-1 py-2.5 rounded-xl bg-zinc-900 text-sm font-semibold text-white hover:bg-zinc-700 transition-colors"
+          className="flex-1 py-2.5 rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90 transition-colors"
         >
           📅 {t('booking', 'addToCalendar')}
         </button>
@@ -465,7 +465,7 @@ export function BookingForm({
       {/* STEP 1 — Service */}
       {step === 'service' && (
         <div className={`space-y-4 animate-slide-${slideDir}`}>
-          <h3 className="font-semibold text-zinc-900 dark:text-slate-50">{t('booking', 'selectService')}</h3>
+          <h3 className="font-semibold text-foreground">{t('booking', 'selectService')}</h3>
           <RadioGroup
             value={selectedServiceId}
             onValueChange={(val) => { setSelectedServiceId(val); setSelectedResourceId('') }}
@@ -479,21 +479,21 @@ export function BookingForm({
                   'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
                   selectedServiceId === service.id
                     ? colors.serviceSelected
-                    : 'border-zinc-200 hover:border-zinc-300',
+                    : 'border-border hover:border-border/80',
                 ].join(' ')}
               >
                 <RadioGroupItem value={service.id} id={`service-${service.id}`} className="mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-zinc-900 dark:text-slate-50">{service.name}</span>
-                    <span className="text-sm font-bold text-zinc-700 dark:text-zinc-200 whitespace-nowrap">
+                    <span className="font-semibold text-foreground">{service.name}</span>
+                    <span className="text-sm font-bold text-foreground whitespace-nowrap">
                       {formatPrice(service.price, service.currency)}
                     </span>
                   </div>
                   {service.description && (
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{service.description}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{service.description}</p>
                   )}
-                  <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">
+                  <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                     {service.durationMin} {t('booking', 'minutes')}
                   </span>
                 </div>
@@ -516,10 +516,10 @@ export function BookingForm({
       {step === 'resource' && (
         <div className={`space-y-4 animate-slide-${slideDir}`}>
           <div className="flex items-center justify-between gap-2">
-            <h3 className="font-semibold text-zinc-900 dark:text-slate-50">
+            <h3 className="font-semibold text-foreground">
               {t('booking', 'selectResource').replace('{resource}', (resourceLabel ?? t('booking', 'specialist')).toLowerCase())}
             </h3>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200 truncate max-w-[120px]">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-muted text-muted-foreground truncate max-w-[120px]">
               {selectedService?.name}
             </span>
           </div>
@@ -536,20 +536,20 @@ export function BookingForm({
                   'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
                   selectedResourceId === resource.id
                     ? colors.resourceSelected
-                    : 'border-zinc-200 hover:border-zinc-300',
+                    : 'border-border hover:border-border/80',
                 ].join(' ')}
               >
                 <RadioGroupItem value={resource.id} id={`resource-${resource.id}`} className="mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-zinc-900 dark:text-slate-50">{resource.name}</span>
+                    <span className="font-semibold text-foreground">{resource.name}</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {resource.specialization && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">{resource.specialization}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{resource.specialization}</span>
                     )}
                     {resource.experienceYears != null && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {t('booking', 'experience').replace('{n}', String(resource.experienceYears))}
                       </span>
                     )}
@@ -559,15 +559,15 @@ export function BookingForm({
                         .slice(0, 2)
                         .map(([k, v]) => {
                           if (typeof v === 'boolean') return v
-                            ? <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">{k === 'indoor' ? t('booking', 'indoor') : k}</span>
+                            ? <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{k === 'indoor' ? t('booking', 'indoor') : k}</span>
                             : null
                           if (Array.isArray(v) || v == null) return null
                           if (k === 'capacity') return (
-                            <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">
+                            <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                               {t('booking', 'capacity').replace('{n}', String(v))}
                             </span>
                           )
-                          return <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">{String(v)}</span>
+                          return <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{String(v)}</span>
                         })
                     }
                   </div>
@@ -576,7 +576,7 @@ export function BookingForm({
             ))}
           </RadioGroup>
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
+            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
@@ -594,15 +594,15 @@ export function BookingForm({
       {step === 'datetime' && (
         <div className={`space-y-5 animate-slide-${slideDir}`}>
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-zinc-900 dark:text-slate-50">{t('booking', 'datetime')}</h3>
+            <h3 className="font-semibold text-foreground">{t('booking', 'datetime')}</h3>
             <div className="flex gap-1.5 ml-auto">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">{selectedService?.name}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200">{selectedResource?.name}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{selectedService?.name}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{selectedResource?.name}</span>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-100">{t('booking', 'date')}</label>
+            <label className="text-sm font-medium text-foreground">{t('booking', 'date')}</label>
             <input
               type="date"
               min={minDateStr}
@@ -616,16 +616,16 @@ export function BookingForm({
                 setSelectedDate(val)
                 setSelectedTime('')
               }}
-              className="block w-full sm:max-w-xs rounded-xl border-2 border-zinc-200 dark:border-zinc-700 px-3 py-2.5 text-sm focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors bg-white dark:bg-zinc-900 dark:text-slate-50"
+              className="block w-full sm:max-w-xs rounded-xl border-2 border-input px-3 py-2.5 text-sm focus:outline-none focus:border-ring transition-colors bg-background text-foreground"
             />
           </div>
 
           {selectedDate && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-100">{t('booking', 'timeSlot')}</label>
+                <label className="text-sm font-medium text-foreground">{t('booking', 'timeSlot')}</label>
                 {slotsLoading && (
-                  <span className="flex items-center gap-1 text-xs text-zinc-400 dark:text-zinc-500">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
@@ -638,13 +638,13 @@ export function BookingForm({
               {slotsLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                    <div key={i} className="h-10 rounded-xl bg-muted animate-pulse" />
                   ))}
                 </div>
               ) : dayOff ? (
-                <p className="text-sm text-zinc-400 dark:text-zinc-500 py-2">{t('booking', 'dayOff')}</p>
+                <p className="text-sm text-muted-foreground py-2">{t('booking', 'dayOff')}</p>
               ) : slots.length === 0 ? (
-                <p className="text-sm text-zinc-400 dark:text-zinc-500 py-2">{t('booking', 'noSlots')}</p>
+                <p className="text-sm text-muted-foreground py-2">{t('booking', 'noSlots')}</p>
               ) : (
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -657,24 +657,24 @@ export function BookingForm({
                         className={[
                           'py-2.5 rounded-xl text-sm font-medium border-2 transition-all',
                           !slot.available
-                            ? 'border-zinc-100 bg-zinc-50 text-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-600 cursor-not-allowed'
+                            ? 'border-border/50 bg-muted/50 text-muted-foreground/40 cursor-not-allowed'
                             : selectedTime === slot.time
                             ? colors.slotSelected
-                            : `border-zinc-200 text-zinc-700 ${colors.slotHover}`,
+                            : `border-border text-foreground ${colors.slotHover}`,
                         ].join(' ')}
                       >
                         {slot.time}
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{t('booking', 'slotsHint')}</p>
+                  <p className="text-xs text-muted-foreground">{t('booking', 'slotsHint')}</p>
                 </>
               )}
             </div>
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors">
+            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
@@ -691,9 +691,9 @@ export function BookingForm({
       {/* STEP 4 — Confirm */}
       {step === 'confirm' && (
         <div className={`space-y-5 animate-slide-${slideDir}`}>
-          <h3 className="font-semibold text-zinc-900 dark:text-slate-50">{t('booking', 'confirmBooking')}</h3>
+          <h3 className="font-semibold text-foreground">{t('booking', 'confirmBooking')}</h3>
 
-          <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 p-4 space-y-3 text-sm">
+          <div className="rounded-xl border border-border bg-card p-4 space-y-3 text-sm">
             <SummaryRow label={t('booking', 'service')}  value={selectedService?.name ?? '—'} />
             <SummaryRow label={t('booking', 'price')}    value={formatPrice(selectedService?.price ?? null, selectedService?.currency ?? 'KZT')} />
             <SummaryRow label={t('booking', 'duration')} value={`${selectedService?.durationMin} ${t('booking', 'minutes')}`} />
@@ -711,10 +711,10 @@ export function BookingForm({
           </div>
 
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-zinc-700 dark:text-zinc-100">{t('booking', 'yourDetails')}</h4>
+            <h4 className="text-sm font-semibold text-foreground">{t('booking', 'yourDetails')}</h4>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-100">
+                <label className="text-sm font-medium text-foreground">
                   {t('booking', 'guestName')} <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -725,13 +725,13 @@ export function BookingForm({
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-100">
+                <label className="text-sm font-medium text-foreground">
                   {t('booking', 'guestPhone')} <span className="text-red-500">*</span>
                 </label>
                 <PhoneInput value={guestPhone} onChange={(formatted) => setGuestPhone(formatted)} required disabled={loading} />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-100">{t('booking', 'guestEmail')}</label>
+                <label className="text-sm font-medium text-foreground">{t('booking', 'guestEmail')}</label>
                 <Input type="email" placeholder="example@mail.com" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} disabled={loading} />
               </div>
             </div>
@@ -744,7 +744,7 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-40">
+            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-40">
               ← {t('common', 'back')}
             </button>
             <button
@@ -776,8 +776,8 @@ export function BookingForm({
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-4">
-      <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
-      <span className="font-semibold text-zinc-800 dark:text-zinc-100 text-right">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground text-right">{value}</span>
     </div>
   )
 }
