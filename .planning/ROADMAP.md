@@ -14,7 +14,7 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
 - [ ] **Phase 1: Landing / Marketing Surface** - Remediate all 7+ components in `components/landing/`
 - [ ] **Phase 2: Tenant Public Booking Surface** - Remediate tenant-public-page, booking-form, booking-calendar
 - [x] **Phase 3: Dashboard + Auth Surface** - Remediate sidebar, billing, analytics, staff/services/resources, and auth pages (completed 2026-03-18)
-- [ ] **Phase 4: Cleanup Sweep** - Remediate remaining edge-case components and verify complete coverage
+- [x] **Phase 4: Cleanup Sweep** - Remediate remaining edge-case components and verify complete coverage (completed 2026-03-18)
 
 ## Phase Details
 
@@ -98,4 +98,4 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | 1. Landing / Marketing Surface | 2/4 | In Progress|  |
 | 2. Tenant Public Booking Surface | 2/3 | In Progress|  |
 | 3. Dashboard + Auth Surface | 4/4 | Complete   | 2026-03-18 |
-| 4. Cleanup Sweep | 2/3 | In Progress|  |
+| 4. Cleanup Sweep | 3/3 | Complete   | 2026-03-18 |

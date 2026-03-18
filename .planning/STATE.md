@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-cleanup-sweep-02-PLAN.md
-last_updated: "2026-03-18T17:11:25.187Z"
+stopped_at: Completed 04-cleanup-sweep-03-PLAN.md
+last_updated: "2026-03-18T17:14:16.881Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
   percent: 100
 ---
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 03-dashboard-auth-surface P04 | 10 | 2 tasks | 0 files |
 | Phase 04-cleanup-sweep P01 | 12 | 1 tasks | 1 files |
 | Phase 04-cleanup-sweep P02 | 8 | 2 tasks | 4 files |
+| Phase 04-cleanup-sweep P03 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -104,6 +105,8 @@ Recent decisions affecting current work:
 - [Phase 04-cleanup-sweep]: Regression test assertions use line-level find() pattern on COLORS map entries to avoid false positives from JSX usages of the same color classes
 - [Phase 04-cleanup-sweep]: bg-foreground text-background hover:bg-foreground/90 used for contact support CTA — semantic inverse pair, adapts in both modes
 - [Phase 04-cleanup-sweep]: Test filter narrowed with quote-check to exclude TypeScript type definition lines from serviceSelected/resourceSelected assertions
+- [Phase 04-cleanup-sweep]: dark:bg-{color}-950/40 dark:text-{color}-300 applied to COLORS map badge/avatarBg entries in tenant-public-page.tsx — consistent with Phase 2 booking-form.tsx niche selection state pattern
+- [Phase 04-cleanup-sweep]: Dashboard bg-white/10 overlays documented via expanded JSX comment — intentional semi-transparent white overlays on indigo gradient surface, no class changes
 
 ### Pending Todos
 
@@ -116,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:11:25.184Z
-Stopped at: Completed 04-cleanup-sweep-02-PLAN.md
+Last session: 2026-03-18T17:14:16.879Z
+Stopped at: Completed 04-cleanup-sweep-03-PLAN.md
 Resume file: None
