@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 01-landing-marketing-surface-04-PLAN.md
-last_updated: "2026-03-18T10:11:19.823Z"
+stopped_at: Completed 02-tenant-public-booking-surface-01-PLAN.md
+last_updated: "2026-03-18T10:33:10.794Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 100
 ---
 
@@ -55,6 +55,7 @@ Progress: [██████████] 100%
 | Phase 01-landing-marketing-surface P02 | 2 | 2 tasks | 4 files |
 | Phase 01-landing-marketing-surface P03 | 3 | 1 tasks | 1 files |
 | Phase 01-landing-marketing-surface P04 | 5 | 2 tasks | 3 files |
+| Phase 02-tenant-public-booking-surface P01 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 01-landing-marketing-surface]: Dot navigation uses opacity-based bg-muted-foreground/40 (not border token) for visibility in both light and dark modes
 - [Phase 01-landing-marketing-surface]: JSX comment in Footer.tsx converted to JS comment above return — syntactically valid position that preserves design intent documentation
 - [Phase 01-landing-marketing-surface]: dark:bg-card used instead of dark:bg-zinc-900 to align niche/demo card backgrounds with theme system
+- [Phase 02-tenant-public-booking-surface]: booking-form.tsx bg-white in date input is a violation, not a brand exception — must be replaced with bg-background
+- [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx RESOURCE_PALETTE functional accent palette is intentional for resource differentiation — must add intentional comment near palette declaration
 
 ### Pending Todos
 
@@ -87,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T07:52:54.338Z
-Stopped at: Completed 01-landing-marketing-surface-04-PLAN.md
+Last session: 2026-03-18T10:33:10.791Z
+Stopped at: Completed 02-tenant-public-booking-surface-01-PLAN.md
 Resume file: None

@@ -23,11 +23,11 @@
 
 ### Tenant Public Booking Surface
 
-- [ ] **BOOK-01**: `components/tenant-public-page.tsx` — all 34+ hardcoded zinc/slate `dark:` dual-class pairs replaced with single semantic tokens
-- [ ] **BOOK-02**: `components/booking-form.tsx` — `bg-white` on date/time inputs replaced with `bg-background`; border classes replaced with `border-input`
-- [ ] **BOOK-03**: `components/booking-calendar.tsx` — hardcoded color classes replaced with semantic tokens
-- [ ] **BOOK-04**: Niche brand accent colors (`bg-blue-600`, `bg-pink-600`, `bg-orange-600`, `bg-green-600`) in booking components explicitly preserved — these are intentional identity colors, not theme-adaptive
-- [ ] **BOOK-05**: Hero section container background uses `bg-background` (page canvas), not `bg-card` (raised surface)
+- [x] **BOOK-01**: `components/tenant-public-page.tsx` — all 34+ hardcoded zinc/slate `dark:` dual-class pairs replaced with single semantic tokens
+- [x] **BOOK-02**: `components/booking-form.tsx` — `bg-white` on date/time inputs replaced with `bg-background`; border classes replaced with `border-input`
+- [x] **BOOK-03**: `components/booking-calendar.tsx` — hardcoded color classes replaced with semantic tokens
+- [x] **BOOK-04**: Niche brand accent colors (`bg-blue-600`, `bg-pink-600`, `bg-orange-600`, `bg-green-600`) in booking components explicitly preserved — these are intentional identity colors, not theme-adaptive
+- [x] **BOOK-05**: Hero section container background uses `bg-background` (page canvas), not `bg-card` (raised surface)
 
 ### Dashboard Surface
 
@@ -85,11 +85,11 @@ Phase mappings confirmed during roadmap creation (2026-03-17).
 | LAND-05 | Phase 1 | Complete |
 | LAND-06 | Phase 1 | Complete |
 | LAND-07 | Phase 1 | Complete |
-| BOOK-01 | Phase 2 | Pending |
-| BOOK-02 | Phase 2 | Pending |
-| BOOK-03 | Phase 2 | Pending |
-| BOOK-04 | Phase 2 | Pending |
-| BOOK-05 | Phase 2 | Pending |
+| BOOK-01 | Phase 2 | Complete |
+| BOOK-02 | Phase 2 | Complete |
+| BOOK-03 | Phase 2 | Complete |
+| BOOK-04 | Phase 2 | Complete |
+| BOOK-05 | Phase 2 | Complete |
 | DASH-01 | Phase 3 | Pending |
 | DASH-02 | Phase 3 | Pending |
 | DASH-03 | Phase 3 | Pending |
