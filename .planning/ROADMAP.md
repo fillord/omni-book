@@ -13,7 +13,7 @@ A surface-by-surface replacement of hardcoded Tailwind color utilities with sema
 - [x] **Phase 0: Infrastructure Validation** - Verify globals.css token foundation before touching any component (completed 2026-03-17)
 - [ ] **Phase 1: Landing / Marketing Surface** - Remediate all 7+ components in `components/landing/`
 - [ ] **Phase 2: Tenant Public Booking Surface** - Remediate tenant-public-page, booking-form, booking-calendar
-- [ ] **Phase 3: Dashboard + Auth Surface** - Remediate sidebar, billing, analytics, staff/services/resources, and auth pages
+- [x] **Phase 3: Dashboard + Auth Surface** - Remediate sidebar, billing, analytics, staff/services/resources, and auth pages (completed 2026-03-18)
 - [ ] **Phase 4: Cleanup Sweep** - Remediate remaining edge-case components and verify complete coverage
 
 ## Phase Details
@@ -70,7 +70,7 @@ Plans:
   2. The billing page has no `dark:!` force-override classes — every element uses a single semantic token and renders correctly in both modes
   3. The analytics dashboard chart area (CartesianGrid, cursor tooltip) is visible and readable in dark mode
   4. Login, register, and OTP verification pages are readable and correctly themed in dark mode (brand SVG colors preserved)
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 - [ ] 03-01-PLAN.md — Create test scaffold covering DASH-01 through AUTH-03 (Wave 1)
 - [ ] 03-02-PLAN.md — Remediate dashboard-sidebar.tsx and billing-content.tsx (DASH-01, DASH-02, DASH-05)
@@ -97,5 +97,5 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
 | 1. Landing / Marketing Surface | 2/4 | In Progress|  |
 | 2. Tenant Public Booking Surface | 2/3 | In Progress|  |
-| 3. Dashboard + Auth Surface | 3/4 | In Progress|  |
+| 3. Dashboard + Auth Surface | 4/4 | Complete   | 2026-03-18 |
 | 4. Cleanup Sweep | 0/TBD | Not started | - |
