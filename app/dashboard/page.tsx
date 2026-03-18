@@ -143,7 +143,9 @@ export default async function DashboardPage() {
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto">
 
-      {/* Welcome Banner */}
+      {/* Welcome Banner — bg-white/10, bg-white/15, text-white/* values below are intentional:
+          semi-transparent white overlays on the indigo gradient surface.
+          The gradient has its own dark: variants — overlays remain white/10 in both modes. */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 dark:from-indigo-700 dark:via-indigo-600 dark:to-violet-700 p-6 text-white animate-gradient">
         {/* Decorative elements */}
         <div aria-hidden className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
