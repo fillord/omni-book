@@ -70,7 +70,7 @@ Plans:
   2. The billing page has no `dark:!` force-override classes — every element uses a single semantic token and renders correctly in both modes
   3. The analytics dashboard chart area (CartesianGrid, cursor tooltip) is visible and readable in dark mode
   4. Login, register, and OTP verification pages are readable and correctly themed in dark mode (brand SVG colors preserved)
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 Plans:
 - [ ] 03-01-PLAN.md — Create test scaffold covering DASH-01 through AUTH-03 (Wave 1)
 - [ ] 03-02-PLAN.md — Remediate dashboard-sidebar.tsx and billing-content.tsx (DASH-01, DASH-02, DASH-05)
@@ -97,5 +97,5 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | 0. Infrastructure Validation | 1/1 | Complete   | 2026-03-17 |
 | 1. Landing / Marketing Surface | 2/4 | In Progress|  |
 | 2. Tenant Public Booking Surface | 2/3 | In Progress|  |
-| 3. Dashboard + Auth Surface | 1/4 | In Progress|  |
+| 3. Dashboard + Auth Surface | 2/4 | In Progress|  |
 | 4. Cleanup Sweep | 0/TBD | Not started | - |
