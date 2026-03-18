@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-dashboard-auth-surface-02-PLAN.md
-last_updated: "2026-03-18T13:04:40.478Z"
+stopped_at: Completed 03-dashboard-auth-surface-03-PLAN.md
+last_updated: "2026-03-18T13:08:32.043Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 100
 ---
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 02-tenant-public-booking-surface P03 | 9 | 2 tasks | 2 files |
 | Phase 03-dashboard-auth-surface P01 | 1 | 1 tasks | 1 files |
 | Phase 03-dashboard-auth-surface P02 | 4 | 2 tasks | 2 files |
+| Phase 03-dashboard-auth-surface P03 | 2 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 03-dashboard-auth-surface]: Sidebar footer div uses bg-sidebar (not bg-background) for visual continuity with sidebar surface in dark mode
 - [Phase 03-dashboard-auth-surface]: DialogContent dark:bg-zinc-950/dark:border-zinc-800 overrides removed — shadcn DialogContent uses bg-background by default, overrides caused specificity conflicts
 - [Phase 03-dashboard-auth-surface]: billing-content.tsx cancel button dark: variants collapsed to text-muted-foreground hover:bg-muted — single token handles both modes
+- [Phase 03-dashboard-auth-surface]: analytics-dashboard.tsx Legend formatter color '#52525b' replaced with var(--color-muted-foreground) — same hex as axis tick fills, same semantic intent, caught during execution
+- [Phase 03-dashboard-auth-surface]: resources-manager.tsx amber warning block preserved as intentional functional status color (not neutral zinc/slate violation)
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T13:04:40.475Z
-Stopped at: Completed 03-dashboard-auth-surface-02-PLAN.md
+Last session: 2026-03-18T13:08:32.040Z
+Stopped at: Completed 03-dashboard-auth-surface-03-PLAN.md
 Resume file: None
