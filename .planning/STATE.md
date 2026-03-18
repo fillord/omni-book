@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-tenant-public-booking-surface-02-PLAN.md
-last_updated: "2026-03-18T10:39:22.937Z"
+stopped_at: Completed 02-tenant-public-booking-surface-03-PLAN.md
+last_updated: "2026-03-18T10:44:29.065Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
   percent: 100
 ---
 
@@ -57,6 +57,7 @@ Progress: [██████████] 100%
 | Phase 01-landing-marketing-surface P04 | 5 | 2 tasks | 3 files |
 | Phase 02-tenant-public-booking-surface P01 | 2 | 1 tasks | 1 files |
 | Phase 02-tenant-public-booking-surface P02 | 4 | 1 tasks | 2 files |
+| Phase 02-tenant-public-booking-surface P03 | 9 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx RESOURCE_PALETTE functional accent palette is intentional for resource differentiation — must add intentional comment near palette declaration
 - [Phase 02-tenant-public-booking-surface]: tenant-public-page.tsx footer bg-zinc-900 text-zinc-400 preserved as intentional fixed-dark surface with code comment — same pattern as Phase 1 Footer.tsx
 - [Phase 02-tenant-public-booking-surface]: booking-surface.test.ts RED-state contradiction tests updated to footer-exception line-by-line scan pattern matching existing test style
+- [Phase 02-tenant-public-booking-surface]: booking-form.tsx bg-white in date input replaced with bg-background border-input text-foreground (BOOK-02)
+- [Phase 02-tenant-public-booking-surface]: BOOKING_COLORS niche accents preserved untouched as functional brand palette (not neutral violations)
+- [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx fallback dot bg-gray-400 replaced with bg-muted-foreground; RESOURCE_PALETTE preserved with intentional comment
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T10:39:22.934Z
-Stopped at: Completed 02-tenant-public-booking-surface-02-PLAN.md
+Last session: 2026-03-18T10:44:22.216Z
+Stopped at: Completed 02-tenant-public-booking-surface-03-PLAN.md
 Resume file: None
