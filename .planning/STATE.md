@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 02-tenant-public-booking-surface-03-PLAN.md
-last_updated: "2026-03-18T10:47:30.558Z"
+stopped_at: Completed 03-dashboard-auth-surface-01-PLAN.md
+last_updated: "2026-03-18T12:58:03.849Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 12
+  completed_plans: 9
   percent: 100
 ---
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 02-tenant-public-booking-surface P01 | 2 | 1 tasks | 1 files |
 | Phase 02-tenant-public-booking-surface P02 | 4 | 1 tasks | 2 files |
 | Phase 02-tenant-public-booking-surface P03 | 9 | 2 tasks | 2 files |
+| Phase 03-dashboard-auth-surface P01 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 02-tenant-public-booking-surface]: booking-form.tsx bg-white in date input replaced with bg-background border-input text-foreground (BOOK-02)
 - [Phase 02-tenant-public-booking-surface]: BOOKING_COLORS niche accents preserved untouched as functional brand palette (not neutral violations)
 - [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx fallback dot bg-gray-400 replaced with bg-muted-foreground; RESOURCE_PALETTE preserved with intentional comment
+- [Phase 03-dashboard-auth-surface]: AUTH-01/02/03 and DASH-04 tests are GREEN from day 1 — auth pages and manager files already clean, no remediation needed
+- [Phase 03-dashboard-auth-surface]: readApp() helper introduced for app/(auth)/* paths outside components/ directory
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T10:44:22.216Z
-Stopped at: Completed 02-tenant-public-booking-surface-03-PLAN.md
+Last session: 2026-03-18T12:58:03.847Z
+Stopped at: Completed 03-dashboard-auth-surface-01-PLAN.md
 Resume file: None

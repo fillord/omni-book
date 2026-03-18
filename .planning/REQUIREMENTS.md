@@ -31,17 +31,17 @@
 
 ### Dashboard Surface
 
-- [ ] **DASH-01**: `components/dashboard-sidebar.tsx` — all background and text classes use the sidebar token family (`bg-sidebar`, `text-sidebar-foreground`, `border-sidebar-border`, etc.) not the general `bg-background`/`bg-card` tokens
-- [ ] **DASH-02**: `app/dashboard/settings/billing/billing-content.tsx` — all 15+ `dark:!` force-override classes removed; base hardcoded classes replaced with single semantic tokens
-- [ ] **DASH-03**: `components/analytics-dashboard.tsx` — `text-zinc-400` replaced with `text-muted-foreground`; Recharts cursor prop `fill: '#f4f4f5'` replaced with `fill: 'var(--color-muted)'`; CartesianGrid stroke replaced with CSS variable reference
-- [ ] **DASH-04**: `components/staff-manager.tsx`, `services-manager.tsx`, `resources-manager.tsx` audited and any hardcoded color utilities replaced with semantic tokens
-- [ ] **DASH-05**: `text-white` on semantic backgrounds that lighten in dark mode replaced with `text-primary-foreground` or appropriate foreground token
+- [x] **DASH-01**: `components/dashboard-sidebar.tsx` — all background and text classes use the sidebar token family (`bg-sidebar`, `text-sidebar-foreground`, `border-sidebar-border`, etc.) not the general `bg-background`/`bg-card` tokens
+- [x] **DASH-02**: `app/dashboard/settings/billing/billing-content.tsx` — all 15+ `dark:!` force-override classes removed; base hardcoded classes replaced with single semantic tokens
+- [x] **DASH-03**: `components/analytics-dashboard.tsx` — `text-zinc-400` replaced with `text-muted-foreground`; Recharts cursor prop `fill: '#f4f4f5'` replaced with `fill: 'var(--color-muted)'`; CartesianGrid stroke replaced with CSS variable reference
+- [x] **DASH-04**: `components/staff-manager.tsx`, `services-manager.tsx`, `resources-manager.tsx` audited and any hardcoded color utilities replaced with semantic tokens
+- [x] **DASH-05**: `text-white` on semantic backgrounds that lighten in dark mode replaced with `text-primary-foreground` or appropriate foreground token
 
 ### Auth Surface
 
-- [ ] **AUTH-01**: `app/(auth)/login/page.tsx` — any hardcoded color utilities replaced with semantic tokens (brand SVG colors preserved)
-- [ ] **AUTH-02**: `app/(auth)/register/page.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
-- [ ] **AUTH-03**: `app/(auth)/verify-otp/page.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
+- [x] **AUTH-01**: `app/(auth)/login/page.tsx` — any hardcoded color utilities replaced with semantic tokens (brand SVG colors preserved)
+- [x] **AUTH-02**: `app/(auth)/register/page.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
+- [x] **AUTH-03**: `app/(auth)/verify-otp/page.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
 
 ### Cleanup / Edge Cases
 
@@ -90,14 +90,14 @@ Phase mappings confirmed during roadmap creation (2026-03-17).
 | BOOK-03 | Phase 2 | Complete |
 | BOOK-04 | Phase 2 | Complete |
 | BOOK-05 | Phase 2 | Complete |
-| DASH-01 | Phase 3 | Pending |
-| DASH-02 | Phase 3 | Pending |
-| DASH-03 | Phase 3 | Pending |
-| DASH-04 | Phase 3 | Pending |
-| DASH-05 | Phase 3 | Pending |
-| AUTH-01 | Phase 3 | Pending |
-| AUTH-02 | Phase 3 | Pending |
-| AUTH-03 | Phase 3 | Pending |
+| DASH-01 | Phase 3 | Complete |
+| DASH-02 | Phase 3 | Complete |
+| DASH-03 | Phase 3 | Complete |
+| DASH-04 | Phase 3 | Complete |
+| DASH-05 | Phase 3 | Complete |
+| AUTH-01 | Phase 3 | Complete |
+| AUTH-02 | Phase 3 | Complete |
+| AUTH-03 | Phase 3 | Complete |
 | CLEAN-01 | Phase 4 | Pending |
 | CLEAN-02 | Phase 4 | Pending |
 | CLEAN-03 | Phase 4 | Pending |
