@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 03-dashboard-auth-surface-04-PLAN.md
-last_updated: "2026-03-18T13:26:20.769Z"
+stopped_at: Completed 04-cleanup-sweep-01-PLAN.md
+last_updated: "2026-03-18T17:06:48.038Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 15
+  completed_plans: 13
   percent: 100
 ---
 
@@ -62,6 +62,7 @@ Progress: [██████████] 100%
 | Phase 03-dashboard-auth-surface P02 | 4 | 2 tasks | 2 files |
 | Phase 03-dashboard-auth-surface P03 | 2 | 2 tasks | 1 files |
 | Phase 03-dashboard-auth-surface P04 | 10 | 2 tasks | 0 files |
+| Phase 04-cleanup-sweep P01 | 12 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,8 @@ Recent decisions affecting current work:
 - [Phase 03-dashboard-auth-surface]: resources-manager.tsx amber warning block preserved as intentional functional status color (not neutral zinc/slate violation)
 - [Phase 03-dashboard-auth-surface]: AUTH-01/02/03 pages confirmed clean from day 1 — no source changes required; all semantic tokens already in use
 - [Phase 03-dashboard-auth-surface]: Orange force-login warning and green OTP success blocks are intentional status colors — must not be treated as neutral violations in future audits
+- [Phase 04-cleanup-sweep]: CANCELLED badge target: bg-muted text-muted-foreground border-border (single semantic string, no dark: duplication needed)
+- [Phase 04-cleanup-sweep]: Regression test assertions use line-level find() pattern on COLORS map entries to avoid false positives from JSX usages of the same color classes
 
 ### Pending Todos
 
@@ -110,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T13:21:05.776Z
-Stopped at: Completed 03-dashboard-auth-surface-04-PLAN.md
+Last session: 2026-03-18T17:06:48.036Z
+Stopped at: Completed 04-cleanup-sweep-01-PLAN.md
 Resume file: None

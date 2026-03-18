@@ -45,9 +45,9 @@
 
 ### Cleanup / Edge Cases
 
-- [ ] **CLEAN-01**: `components/banned-actions.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
-- [ ] **CLEAN-02**: `components/booking-status-badge.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
-- [ ] **CLEAN-03**: `app/dashboard/page.tsx` — decorative `bg-white/10` opacity overlays reviewed; replaced only if not intentional design
+- [x] **CLEAN-01**: `components/banned-actions.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
+- [x] **CLEAN-02**: `components/booking-status-badge.tsx` — audited and any hardcoded color utilities replaced with semantic tokens
+- [x] **CLEAN-03**: `app/dashboard/page.tsx` — decorative `bg-white/10` opacity overlays reviewed; replaced only if not intentional design
 
 ## v2 Requirements
 
@@ -98,9 +98,9 @@ Phase mappings confirmed during roadmap creation (2026-03-17).
 | AUTH-01 | Phase 3 | Complete |
 | AUTH-02 | Phase 3 | Complete |
 | AUTH-03 | Phase 3 | Complete |
-| CLEAN-01 | Phase 4 | Pending |
-| CLEAN-02 | Phase 4 | Pending |
-| CLEAN-03 | Phase 4 | Pending |
+| CLEAN-01 | Phase 4 | Complete |
+| CLEAN-02 | Phase 4 | Complete |
+| CLEAN-03 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 26 total
