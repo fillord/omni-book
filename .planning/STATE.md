@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Completed 04-cleanup-sweep-01-PLAN.md
-last_updated: "2026-03-18T17:06:48.038Z"
+stopped_at: Completed 04-cleanup-sweep-02-PLAN.md
+last_updated: "2026-03-18T17:11:25.187Z"
 last_activity: 2026-03-17 — Roadmap created
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
   percent: 100
 ---
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Phase 03-dashboard-auth-surface P03 | 2 | 2 tasks | 1 files |
 | Phase 03-dashboard-auth-surface P04 | 10 | 2 tasks | 0 files |
 | Phase 04-cleanup-sweep P01 | 12 | 1 tasks | 1 files |
+| Phase 04-cleanup-sweep P02 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,8 @@ Recent decisions affecting current work:
 - [Phase 03-dashboard-auth-surface]: Orange force-login warning and green OTP success blocks are intentional status colors — must not be treated as neutral violations in future audits
 - [Phase 04-cleanup-sweep]: CANCELLED badge target: bg-muted text-muted-foreground border-border (single semantic string, no dark: duplication needed)
 - [Phase 04-cleanup-sweep]: Regression test assertions use line-level find() pattern on COLORS map entries to avoid false positives from JSX usages of the same color classes
+- [Phase 04-cleanup-sweep]: bg-foreground text-background hover:bg-foreground/90 used for contact support CTA — semantic inverse pair, adapts in both modes
+- [Phase 04-cleanup-sweep]: Test filter narrowed with quote-check to exclude TypeScript type definition lines from serviceSelected/resourceSelected assertions
 
 ### Pending Todos
 
@@ -113,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:06:48.036Z
-Stopped at: Completed 04-cleanup-sweep-01-PLAN.md
+Last session: 2026-03-18T17:11:25.184Z
+Stopped at: Completed 04-cleanup-sweep-02-PLAN.md
 Resume file: None

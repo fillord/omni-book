@@ -98,4 +98,4 @@ Phases execute in numeric order: 0 -> 1 -> 2 -> 3 -> 4
 | 1. Landing / Marketing Surface | 2/4 | In Progress|  |
 | 2. Tenant Public Booking Surface | 2/3 | In Progress|  |
 | 3. Dashboard + Auth Surface | 4/4 | Complete   | 2026-03-18 |
-| 4. Cleanup Sweep | 1/3 | In Progress|  |
+| 4. Cleanup Sweep | 2/3 | In Progress|  |
