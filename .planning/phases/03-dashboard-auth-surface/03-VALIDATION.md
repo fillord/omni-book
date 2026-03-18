@@ -17,20 +17,20 @@ created: 2026-03-18
 
 | Property | Value |
 |----------|-------|
-| **Framework** | {pytest 7.x / jest 29.x / vitest / go test / other} |
-| **Config file** | {path or "none — Wave 0 installs"} |
-| **Quick run command** | `{quick command}` |
-| **Full suite command** | `{full command}` |
-| **Estimated runtime** | ~{N} seconds |
+| **Framework** | vitest |
+| **Config file** | vitest.config.ts |
+| **Quick run command** | `npx vitest run --reporter=verbose` |
+| **Full suite command** | `npx vitest run` |
+| **Estimated runtime** | ~15 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `{quick run command}`
-- **After every plan wave:** Run `{full suite command}`
+- **After every task commit:** Run `npx vitest run --reporter=verbose`
+- **After every plan wave:** Run `npx vitest run`
 - **Before `/gsd:verify-work`:** Full suite must be green
-- **Max feedback latency:** {N} seconds
+- **Max feedback latency:** 15 seconds
 
 ---
 
@@ -38,7 +38,14 @@ created: 2026-03-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| {N}-01-01 | 01 | 1 | REQ-{XX} | unit | `{command}` | ✅ / ❌ W0 | ⬜ pending |
+| 3-01-01 | 01 | 1 | DASH-01 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-01-02 | 01 | 1 | DASH-02 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-01-03 | 01 | 1 | DASH-03 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-01-04 | 01 | 1 | DASH-04 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-01-05 | 01 | 1 | DASH-05 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-02-01 | 02 | 2 | AUTH-01 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-02-02 | 02 | 2 | AUTH-02 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
+| 3-02-03 | 02 | 2 | AUTH-03 | visual/manual | `npx vitest run` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -46,11 +53,7 @@ created: 2026-03-18
 
 ## Wave 0 Requirements
 
-- [ ] `{tests/test_file.py}` — stubs for REQ-{XX}
-- [ ] `{tests/conftest.py}` — shared fixtures
-- [ ] `{framework install}` — if no framework detected
-
-*If none: "Existing infrastructure covers all phase requirements."*
+*Existing infrastructure covers all phase requirements.*
 
 ---
 
@@ -58,9 +61,10 @@ created: 2026-03-18
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| {behavior} | REQ-{XX} | {reason} | {steps} |
-
-*If none: "All phase behaviors have automated verification."*
+| Sidebar token family renders distinct from main content in dark mode | DASH-01 | Visual CSS token rendering | Toggle dark mode, inspect sidebar bg vs main content area |
+| Billing page has no `dark:!` force-override classes | DASH-02 | DOM/class inspection | `grep -r "dark:!" src/` on billing component |
+| Chart CartesianGrid/cursor tooltip visible in dark mode | DASH-03 | Visual chart rendering | Toggle dark mode, verify chart elements visible and readable |
+| Auth pages readable in dark mode, brand SVG colors preserved | AUTH-01–AUTH-03 | Visual rendering + SVG color check | Toggle dark mode on login/register/OTP pages |
 
 ---
 
@@ -70,7 +74,7 @@ created: 2026-03-18
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
 - [ ] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
-- [ ] Feedback latency < {N}s
+- [ ] Feedback latency < 15s
 - [ ] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** {pending / approved YYYY-MM-DD}
+**Approval:** pending
