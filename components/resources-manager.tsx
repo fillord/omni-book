@@ -277,8 +277,8 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                 className={['rounded-lg border bg-card p-3 space-y-2', !r.isActive ? 'opacity-60' : ''].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-sm">{getDbTranslation(r as unknown as { name: string; translations: SafeTranslation }, 'name', locale)}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{getDbTranslation(r as unknown as { name: string; translations: SafeTranslation }, 'name', locale)}</p>
                     <p className="text-xs text-muted-foreground">
                       {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 
                         ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label) 

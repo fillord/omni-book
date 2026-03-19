@@ -194,10 +194,10 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                 className={['rounded-lg border bg-card p-3 space-y-2', !s.isActive ? 'opacity-60' : ''].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="font-medium text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm truncate">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                     {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
-                      <p className="text-xs text-muted-foreground truncate max-w-xs">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
+                      <p className="text-xs text-muted-foreground truncate">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
                   <Badge variant={s.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">

@@ -243,7 +243,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               </div>
             )}
             <LocaleSwitcher className="h-8 text-xs" />
-            <PublicThemeToggle className="hidden sm:inline-flex" />
+            <PublicThemeToggle className="inline-flex" />
             {canBook && (
               <a
                 href="#booking"
