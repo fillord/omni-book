@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Dark Mode
-status: complete
-stopped_at: Milestone v1.0 shipped
+milestone: v1.1
+milestone_name: Critical Bug Fixes
+status: defining-requirements
+stopped_at: Milestone v1.1 started — defining requirements
 last_updated: "2026-03-19T00:00:00.000Z"
-last_activity: 2026-03-19 — v1.0 milestone archived
+last_activity: 2026-03-19 — Milestone v1.1 started
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -20,16 +20,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-03-19)
 
-**Core value:** Every page and component renders correctly in both light and dark mode — no white backgrounds trapped in dark mode, no invisible text, no hardcoded color escapes.
-**Current focus:** v1.0 shipped — planning next milestone
+**Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
+**Current focus:** v1.1 Critical Bug Fixes — defining requirements
 
 ## Current Position
 
-v1.0 milestone complete. All 5 phases, 15 plans shipped.
-Status: Ready for next milestone (`/gsd:new-milestone`)
-Last activity: 2026-03-19 — v1.0 archived
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-19 — Milestone v1.1 started
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -49,63 +50,19 @@ Progress: [██████████] 100%
 - Trend: -
 
 *Updated after each plan completion*
-| Phase 00-infrastructure-validation P01 | 5 | 1 tasks | 1 files |
-| Phase 01-landing-marketing-surface P01 | 4 | 3 tasks | 5 files |
-| Phase 01-landing-marketing-surface P02 | 2 | 2 tasks | 4 files |
-| Phase 01-landing-marketing-surface P03 | 3 | 1 tasks | 1 files |
-| Phase 01-landing-marketing-surface P04 | 5 | 2 tasks | 3 files |
-| Phase 02-tenant-public-booking-surface P01 | 2 | 1 tasks | 1 files |
-| Phase 02-tenant-public-booking-surface P02 | 4 | 1 tasks | 2 files |
-| Phase 02-tenant-public-booking-surface P03 | 9 | 2 tasks | 2 files |
-| Phase 03-dashboard-auth-surface P01 | 1 | 1 tasks | 1 files |
-| Phase 03-dashboard-auth-surface P02 | 4 | 2 tasks | 2 files |
-| Phase 03-dashboard-auth-surface P03 | 2 | 2 tasks | 1 files |
-| Phase 03-dashboard-auth-surface P04 | 10 | 2 tasks | 0 files |
-| Phase 04-cleanup-sweep P01 | 12 | 1 tasks | 1 files |
-| Phase 04-cleanup-sweep P02 | 8 | 2 tasks | 4 files |
-| Phase 04-cleanup-sweep P03 | 3 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Recent decisions carrying forward from v1.0:
 
-- [Init]: Use semantic shadcn/ui tokens (not custom `dark:` variants) — tokens auto-adapt; `dark:` would duplicate effort
-- [Init]: Prioritize dashboard + landing first — highest-traffic areas with most custom color usage
-- [Init]: Include hover/focus/ring variants in scope — invisible hover states are jarring UX failure
-- [Phase 00-infrastructure-validation]: Use fs.readFileSync static-file assertions rather than PostCSS/AST parsing — simpler, zero extra deps, sufficient for content assertions
-- [Phase 00-infrastructure-validation]: Assert @layer base block extraction via regex to distinguish the scoped body rule from the raw body rule at line 11
-- [Phase 01-landing-marketing-surface]: Exclude bg-white from LAND-01 regex: bg-white is brand treatment on Pro card CTA, not neutral background violation
-- [Phase 01-landing-marketing-surface]: Footer.tsx preserved as intentional fixed-dark surface with code comment, no class changes — deliberate visual weight
-- [Phase 01-landing-marketing-surface]: FeaturesGrid icon container gets dark:bg-indigo-950/40 for LAND-07 dark mode tint while staying within brand palette
-- [Phase 01-landing-marketing-surface]: Arrow icon hover reduced from 4-class dual pair to 2 semantic classes (text-muted-foreground group-hover:text-foreground)
-- [Phase 01-landing-marketing-surface]: Dot navigation uses opacity-based bg-muted-foreground/40 (not border token) for visibility in both light and dark modes
-- [Phase 01-landing-marketing-surface]: JSX comment in Footer.tsx converted to JS comment above return — syntactically valid position that preserves design intent documentation
-- [Phase 01-landing-marketing-surface]: dark:bg-card used instead of dark:bg-zinc-900 to align niche/demo card backgrounds with theme system
-- [Phase 02-tenant-public-booking-surface]: booking-form.tsx bg-white in date input is a violation, not a brand exception — must be replaced with bg-background
-- [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx RESOURCE_PALETTE functional accent palette is intentional for resource differentiation — must add intentional comment near palette declaration
-- [Phase 02-tenant-public-booking-surface]: tenant-public-page.tsx footer bg-zinc-900 text-zinc-400 preserved as intentional fixed-dark surface with code comment — same pattern as Phase 1 Footer.tsx
-- [Phase 02-tenant-public-booking-surface]: booking-surface.test.ts RED-state contradiction tests updated to footer-exception line-by-line scan pattern matching existing test style
-- [Phase 02-tenant-public-booking-surface]: booking-form.tsx bg-white in date input replaced with bg-background border-input text-foreground (BOOK-02)
-- [Phase 02-tenant-public-booking-surface]: BOOKING_COLORS niche accents preserved untouched as functional brand palette (not neutral violations)
-- [Phase 02-tenant-public-booking-surface]: booking-calendar.tsx fallback dot bg-gray-400 replaced with bg-muted-foreground; RESOURCE_PALETTE preserved with intentional comment
-- [Phase 03-dashboard-auth-surface]: AUTH-01/02/03 and DASH-04 tests are GREEN from day 1 — auth pages and manager files already clean, no remediation needed
-- [Phase 03-dashboard-auth-surface]: readApp() helper introduced for app/(auth)/* paths outside components/ directory
-- [Phase 03-dashboard-auth-surface]: Sidebar footer div uses bg-sidebar (not bg-background) for visual continuity with sidebar surface in dark mode
-- [Phase 03-dashboard-auth-surface]: DialogContent dark:bg-zinc-950/dark:border-zinc-800 overrides removed — shadcn DialogContent uses bg-background by default, overrides caused specificity conflicts
-- [Phase 03-dashboard-auth-surface]: billing-content.tsx cancel button dark: variants collapsed to text-muted-foreground hover:bg-muted — single token handles both modes
-- [Phase 03-dashboard-auth-surface]: analytics-dashboard.tsx Legend formatter color '#52525b' replaced with var(--color-muted-foreground) — same hex as axis tick fills, same semantic intent, caught during execution
-- [Phase 03-dashboard-auth-surface]: resources-manager.tsx amber warning block preserved as intentional functional status color (not neutral zinc/slate violation)
-- [Phase 03-dashboard-auth-surface]: AUTH-01/02/03 pages confirmed clean from day 1 — no source changes required; all semantic tokens already in use
-- [Phase 03-dashboard-auth-surface]: Orange force-login warning and green OTP success blocks are intentional status colors — must not be treated as neutral violations in future audits
-- [Phase 04-cleanup-sweep]: CANCELLED badge target: bg-muted text-muted-foreground border-border (single semantic string, no dark: duplication needed)
-- [Phase 04-cleanup-sweep]: Regression test assertions use line-level find() pattern on COLORS map entries to avoid false positives from JSX usages of the same color classes
-- [Phase 04-cleanup-sweep]: bg-foreground text-background hover:bg-foreground/90 used for contact support CTA — semantic inverse pair, adapts in both modes
-- [Phase 04-cleanup-sweep]: Test filter narrowed with quote-check to exclude TypeScript type definition lines from serviceSelected/resourceSelected assertions
-- [Phase 04-cleanup-sweep]: dark:bg-{color}-950/40 dark:text-{color}-300 applied to COLORS map badge/avatarBg entries in tenant-public-page.tsx — consistent with Phase 2 booking-form.tsx niche selection state pattern
-- [Phase 04-cleanup-sweep]: Dashboard bg-white/10 overlays documented via expanded JSX comment — intentional semi-transparent white overlays on indigo gradient surface, no class changes
+- [v1.0]: Use semantic shadcn/ui tokens (not custom `dark:` variants) — tokens auto-adapt; `dark:` would duplicate effort
+- [v1.0]: Static file assertion tests using `fs.readFileSync` + regex for Tailwind class audits — no DOM/build required
+- [v1.0]: Intentional brand exception documentation via code comments (`// INTENTIONAL: fixed-dark surface`)
+- [v1.0]: Orange force-login warning and green OTP success blocks are functional status colors — not violations
+- [v1.0]: Sidebar uses separate `bg-sidebar` token family, not `bg-background`/`bg-card`
 
 ### Pending Todos
 
@@ -113,11 +70,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 3]: `billing-content.tsx` has `dark:!` force overrides indicating a previous failed fix attempt — understand the root cause of the specificity conflict before stripping overrides
-- [Phase 3]: `components/staff-manager.tsx`, `services-manager.tsx`, `resources-manager.tsx` were not directly reviewed in research — audit at start of Phase 3
+None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T17:14:16.879Z
-Stopped at: Completed 04-cleanup-sweep-03-PLAN.md
+Last session: 2026-03-19T00:00:00.000Z
+Stopped at: Starting v1.1 milestone — roadmap in progress
 Resume file: None

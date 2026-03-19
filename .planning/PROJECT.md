@@ -1,14 +1,14 @@
-# Dark Mode Audit & Fix — omni-book
+# omni-book
 
 ## What This Is
 
-A systematic refactor of the omni-book multi-tenant SaaS to make dark mode work flawlessly across the entire UI. Every component was audited for hardcoded Tailwind color classes and replaced with semantic shadcn/ui CSS variables so that toggling dark mode produces a correct, visually consistent UI without broken contrast or invisible text.
+omni-book is a multi-tenant SaaS booking platform where tenants (businesses) configure their services and resources, and customers book appointments via a public-facing page. It supports multiple business niches (healthcare, legal, fitness, etc.) with configurable options per niche.
 
-**v1.0 shipped 2026-03-19.** All 5 surfaces (infrastructure, landing, tenant public, dashboard, auth) and all 26 requirements delivered across 15 plans in 2 days.
+**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 in progress** — Critical bug fixes for data display correctness, mobile layout overflow, and mobile theme accessibility.
 
 ## Core Value
 
-Every page and component renders correctly in both light and dark mode — no white backgrounds trapped in dark mode, no invisible text, no hardcoded color escapes.
+A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
 
 ## Requirements
 
@@ -43,16 +43,17 @@ Every page and component renders correctly in both light and dark mode — no wh
 
 ### Active
 
-*(Next milestone — define via `/gsd:new-milestone`)*
+<!-- v1.1 Critical Bug Fixes -->
+- [ ] No raw `opt_*` IDs visible anywhere on the frontend — all option IDs must resolve to human-readable labels (BUG-01)
+- [ ] Dashboard service/resource card text does not overflow on mobile — proper truncation/wrap applied (BUG-02)
+- [ ] Theme switcher is visible and accessible on mobile on the public booking page (BUG-03)
 
 ### Out of Scope
 
-- Business logic changes — strict constraint, color refactor only
-- State management or component structure changes — strict constraint
-- Third-party component internals (recharts bar/pie fills) — not accessible via Tailwind class replacement; deferred to v2 (ADV-01)
+- New features during v1.1 — pure bug fix milestone only
+- Third-party component internals (recharts bar/pie fills) — deferred to v2 (ADV-01)
 - `hover-glow` utility CSS var refactor — deferred to v2 (ADV-02)
 - Automated visual regression screenshots — deferred to v2 (ADV-03)
-- Custom CSS properties defined outside Tailwind utility classes — handled case-by-case only
 
 ## Context
 
@@ -69,9 +70,9 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 
 ## Constraints
 
-- **Scope**: Color utility classes only — zero business logic, state management, or structural changes
-- **Tech stack**: Tailwind CSS 4.2.1 + shadcn/ui CSS variables; do not introduce new tokens not already defined in `globals.css`
-- **Verification**: Visual manual review by toggling dark mode on each page after each phase completes
+- **Tech stack**: Next.js 15 App Router, Tailwind CSS 4.2.1, shadcn/ui, next-themes 0.4.6
+- **Scope (v1.1)**: Bug fixes only — no new features, no structural refactors beyond what's needed to fix each bug
+- **Verification**: Manual review on mobile viewport + both themes after each fix
 
 ## Key Decisions
 
@@ -86,4 +87,4 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | Remove billing-content.tsx `dark:!` overrides | Root cause was specificity conflict with DialogContent; removing overrides + fixing base classes resolved both | ✓ Good — code is simpler and more robust |
 
 ---
-*Last updated: 2026-03-19 after v1.0 milestone*
+*Last updated: 2026-03-19 after v1.1 milestone start*
