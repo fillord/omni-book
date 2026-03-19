@@ -51,7 +51,9 @@ Plans:
   2. The card truncation fix does not break the desktop layout — desktop cards continue to render identically to pre-fix
   3. On a mobile viewport, the dark/light theme toggle on the public booking page is fully visible and not covered by the "Book" button or any other element
   4. The theme toggle is tappable on mobile — correct z-index and positioning, responds to tap
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 07-01-PLAN.md — Fix mobile card overflow + make theme toggle visible on mobile
 
 ## Progress
 
@@ -62,5 +64,5 @@ Plans:
 | 2. Tenant Public Booking Surface | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
-| 6. Data Display Correctness | 1/1 | Complete   | 2026-03-19 | - |
-| 7. Mobile UI Fixes | v1.1 | 0/? | Not started | - |
+| 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
+| 7. Mobile UI Fixes | v1.1 | 0/1 | Not started | - |
