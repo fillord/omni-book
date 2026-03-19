@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Critical Bug Fixes
-status: defining-requirements
-stopped_at: Milestone v1.1 started — defining requirements
+status: ready-to-plan
+stopped_at: Roadmap created — Phase 6 ready to plan
 last_updated: "2026-03-19T00:00:00.000Z"
-last_activity: 2026-03-19 — Milestone v1.1 started
+last_activity: 2026-03-19 — v1.1 roadmap created (2 phases, 6 requirements)
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** v1.1 Critical Bug Fixes — defining requirements
+**Current focus:** v1.1 Phase 6 — Data Display Correctness
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-19 — Milestone v1.1 started
+Phase: 6 of 7 (Data Display Correctness)
+Plan: — (not yet planned)
+Status: Ready to plan
+Last activity: 2026-03-19 — v1.1 roadmap created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -61,7 +61,6 @@ Recent decisions carrying forward from v1.0:
 - [v1.0]: Use semantic shadcn/ui tokens (not custom `dark:` variants) — tokens auto-adapt; `dark:` would duplicate effort
 - [v1.0]: Static file assertion tests using `fs.readFileSync` + regex for Tailwind class audits — no DOM/build required
 - [v1.0]: Intentional brand exception documentation via code comments (`// INTENTIONAL: fixed-dark surface`)
-- [v1.0]: Orange force-login warning and green OTP success blocks are functional status colors — not violations
 - [v1.0]: Sidebar uses separate `bg-sidebar` token family, not `bg-background`/`bg-card`
 
 ### Pending Todos
@@ -75,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-19T00:00:00.000Z
-Stopped at: Starting v1.1 milestone — roadmap in progress
+Stopped at: Roadmap created — next step is `/gsd:plan-phase 6`
 Resume file: None
