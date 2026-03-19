@@ -41,3 +41,13 @@ Three classes of user-visible defects eliminated — opt_* ID leakage in data di
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
+
+### Phase 1: Replace fixed duration dropdown with free-text number input (1-1440m)
+
+**Goal:** Replace the fixed-option Select dropdown for durationMin with a number input widget featuring custom stepper buttons, "min" suffix, and quick-select presets (15/30/60), accepting any value from 1 to 1440 minutes.
+**Requirements**: [DUR-01, DUR-02, DUR-03, DUR-04, DUR-05, DUR-06]
+**Depends on:** None
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Replace duration Select with number input stepper + presets, update zod schema
