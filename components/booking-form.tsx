@@ -546,7 +546,9 @@ export function BookingForm({
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {resource.specialization && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{resource.specialization}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                        {resource.specialization.startsWith('opt_') ? t('niche', resource.specialization) : resource.specialization}
+                      </span>
                     )}
                     {resource.experienceYears != null && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
@@ -567,7 +569,10 @@ export function BookingForm({
                               {t('booking', 'capacity').replace('{n}', String(v))}
                             </span>
                           )
-                          return <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{String(v)}</span>
+                          const strVal = String(v)
+                          return <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                            {strVal.startsWith('opt_') ? t('niche', strVal) : strVal}
+                          </span>
                         })
                     }
                   </div>
@@ -700,7 +705,10 @@ export function BookingForm({
             <Separator />
             <SummaryRow label={t('booking', 'specialist')} value={selectedResource?.name ?? '—'} />
             {selectedResource?.specialization && (
-              <SummaryRow label={t('booking', 'specialization')} value={selectedResource.specialization} />
+              <SummaryRow
+                label={t('booking', 'specialization')}
+                value={selectedResource.specialization.startsWith('opt_') ? t('niche', selectedResource.specialization) : selectedResource.specialization}
+              />
             )}
             <Separator />
             <SummaryRow
