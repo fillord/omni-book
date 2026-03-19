@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.1 Critical Bug Fixes (Shipped: 2026-03-19)
+
+**Phases completed:** 2 phases, 2 plans, 4 tasks
+**Files modified:** ~6 source files | **Timeline:** 2026-03-19 (1 day)
+**Git range:** `ccdba1d` → `a603580`
+
+**Delivered:** Three classes of user-visible defects eliminated — raw opt_* ID leakage, mobile card overflow, and mobile theme toggle occlusion.
+
+**Key accomplishments:**
+1. Eliminated all `opt_*` ID leaks in `booking-form.tsx` via inline opt_ guards — users now see human-readable labels everywhere (resource.specialization badge, attribute loop, SummaryRow)
+2. Added static regression test suite (`data-display.test.ts`, 8 assertions) preventing future opt_* leaks
+3. Fixed mobile card text overflow in services/resources managers using Tailwind `min-w-0` + `truncate` pattern
+4. Made PublicThemeToggle visible on all viewports by removing `hidden sm:` — theme toggle no longer occluded by "Book" button
+5. Added 12-assertion mobile UI test suite (`mobile-ui.test.ts`) covering all 4 MOBL/THEM requirements
+
+---
+
 ## v1.0 Dark Mode (Shipped: 2026-03-19)
 
 **Phases completed:** 5 phases, 15 plans
