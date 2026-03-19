@@ -65,8 +65,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-blue-600 text-white border-blue-600',
     slotHover:        'hover:border-blue-500 hover:text-blue-600',
     submitBtn:        'bg-blue-600 hover:bg-blue-700 text-white',
-    serviceSelected:  'border-blue-600 bg-card',
-    resourceSelected: 'border-blue-600 bg-card',
+    serviceSelected:  'border-blue-600 bg-card dark:bg-blue-950/40',
+    resourceSelected: 'border-blue-600 bg-card dark:bg-blue-950/40',
   },
   pink: {
     stepActive:       'border-pink-600 text-pink-600',
@@ -75,8 +75,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-pink-600 text-white border-pink-600',
     slotHover:        'hover:border-pink-500 hover:text-pink-600',
     submitBtn:        'bg-pink-600 hover:bg-pink-700 text-white',
-    serviceSelected:  'border-pink-600 bg-card',
-    resourceSelected: 'border-pink-600 bg-card',
+    serviceSelected:  'border-pink-600 bg-card dark:bg-pink-950/40',
+    resourceSelected: 'border-pink-600 bg-card dark:bg-pink-950/40',
   },
   orange: {
     stepActive:       'border-orange-600 text-orange-600',
@@ -85,8 +85,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-orange-600 text-white border-orange-600',
     slotHover:        'hover:border-orange-500 hover:text-orange-600',
     submitBtn:        'bg-orange-600 hover:bg-orange-700 text-white',
-    serviceSelected:  'border-orange-600 bg-card',
-    resourceSelected: 'border-orange-600 bg-card',
+    serviceSelected:  'border-orange-600 bg-card dark:bg-orange-950/40',
+    resourceSelected: 'border-orange-600 bg-card dark:bg-orange-950/40',
   },
   green: {
     stepActive:       'border-green-600 text-green-600',
@@ -95,8 +95,8 @@ const BOOKING_COLORS: Record<string, NicheColorClasses> = {
     slotSelected:     'bg-green-600 text-white border-green-600',
     slotHover:        'hover:border-green-500 hover:text-green-600',
     submitBtn:        'bg-green-600 hover:bg-green-700 text-white',
-    serviceSelected:  'border-green-600 bg-card',
-    resourceSelected: 'border-green-600 bg-card',
+    serviceSelected:  'border-green-600 bg-card dark:bg-green-950/40',
+    resourceSelected: 'border-green-600 bg-card dark:bg-green-950/40',
   },
 }
 
