@@ -12,13 +12,13 @@
 
 ### Mobile Layout
 
-- [ ] **MOBL-01**: On mobile viewports, service/resource card text in the dashboard does not overflow its container — long text is truncated or wrapped within card boundaries
-- [ ] **MOBL-02**: The fix applies to all text content in cards (title, description, metadata) without breaking the desktop layout
+- [x] **MOBL-01**: On mobile viewports, service/resource card text in the dashboard does not overflow its container — long text is truncated or wrapped within card boundaries
+- [x] **MOBL-02**: The fix applies to all text content in cards (title, description, metadata) without breaking the desktop layout
 
 ### Mobile Theme
 
-- [ ] **THEM-01**: On mobile viewports, the dark/light mode theme switcher on the public booking page is fully visible and not occluded by other elements (e.g., the "Book" button)
-- [ ] **THEM-02**: The theme toggle is accessible and functional on mobile (tappable, correct z-index, correct positioning)
+- [x] **THEM-01**: On mobile viewports, the dark/light mode theme switcher on the public booking page is fully visible and not occluded by other elements (e.g., the "Book" button)
+- [x] **THEM-02**: The theme toggle is accessible and functional on mobile (tappable, correct z-index, correct positioning)
 
 ## Future Requirements
 
@@ -39,10 +39,10 @@
 |-------------|-------|--------|
 | DATA-01 | Phase 6 | Complete |
 | DATA-02 | Phase 6 | Complete |
-| MOBL-01 | Phase 7 | Pending |
-| MOBL-02 | Phase 7 | Pending |
-| THEM-01 | Phase 7 | Pending |
-| THEM-02 | Phase 7 | Pending |
+| MOBL-01 | Phase 7 | Complete |
+| MOBL-02 | Phase 7 | Complete |
+| THEM-01 | Phase 7 | Complete |
+| THEM-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 6 total

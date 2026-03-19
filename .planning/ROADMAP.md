@@ -25,7 +25,7 @@ Full-stack dark mode fix — 66 files updated, 26 requirements delivered, hardco
 **Milestone Goal:** Eliminate three classes of user-visible defects — raw option ID leakage in data display, mobile card overflow in the dashboard, and mobile theme toggle occlusion on the public booking page.
 
 - [x] **Phase 6: Data Display Correctness** - All opt_* IDs resolve to human-readable labels across all niches and field types (completed 2026-03-19)
-- [ ] **Phase 7: Mobile UI Fixes** - Dashboard card text truncates correctly on mobile; theme toggle is visible and tappable on mobile
+- [x] **Phase 7: Mobile UI Fixes** - Dashboard card text truncates correctly on mobile; theme toggle is visible and tappable on mobile (completed 2026-03-19)
 
 ## Phase Details
 
@@ -51,7 +51,7 @@ Plans:
   2. The card truncation fix does not break the desktop layout — desktop cards continue to render identically to pre-fix
   3. On a mobile viewport, the dark/light theme toggle on the public booking page is fully visible and not covered by the "Book" button or any other element
   4. The theme toggle is tappable on mobile — correct z-index and positioning, responds to tap
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 07-01-PLAN.md — Fix mobile card overflow + make theme toggle visible on mobile
 
@@ -65,4 +65,4 @@ Plans:
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
-| 7. Mobile UI Fixes | v1.1 | 0/1 | Not started | - |
+| 7. Mobile UI Fixes | 1/1 | Complete   | 2026-03-19 | - |
