@@ -38,7 +38,9 @@ Full-stack dark mode fix — 66 files updated, 26 requirements delivered, hardco
   2. A healthcare booking shows "In-Person" (not `opt_location_in_person`); a legal booking shows "Contract Review" (not `opt_type_contract_review`), etc.
   3. Label resolution works for all field types (Type, Location, Specialization, Coverage, and any other opt_* category)
   4. The fix covers all niches configured in the platform — not just one niche or one field
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 06-01-PLAN.md — Fix opt_* ID leaks in booking-form.tsx + regression test
 
 ### Phase 7: Mobile UI Fixes
 **Goal**: Mobile users can read all dashboard card content without overflow, and can switch themes on the public booking page without obstruction
@@ -60,5 +62,5 @@ Full-stack dark mode fix — 66 files updated, 26 requirements delivered, hardco
 | 2. Tenant Public Booking Surface | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
-| 6. Data Display Correctness | v1.1 | 0/? | Not started | - |
+| 6. Data Display Correctness | v1.1 | 0/1 | Not started | - |
 | 7. Mobile UI Fixes | v1.1 | 0/? | Not started | - |
