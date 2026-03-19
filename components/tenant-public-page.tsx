@@ -610,7 +610,7 @@ function ResourceCard({
     <div className="group rounded-2xl border-2 border-border bg-card p-5 flex flex-col gap-4 hover:border-border/80 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       {/* Avatar / Icon */}
       {isTable ? (
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-muted">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-muted dark:bg-muted">
           🍽️
         </div>
       ) : (
