@@ -7,8 +7,8 @@
 
 ### Data Display
 
-- [ ] **DATA-01**: User never sees raw `opt_*` IDs in any select dropdown, form field, badge, or display element — all option IDs are resolved to their human-readable labels before rendering
-- [ ] **DATA-02**: The label resolution works globally across all niches (healthcare, legal, fitness, etc.) and all field types (Type, Location, Specialization, Coverage, etc.)
+- [x] **DATA-01**: User never sees raw `opt_*` IDs in any select dropdown, form field, badge, or display element — all option IDs are resolved to their human-readable labels before rendering
+- [x] **DATA-02**: The label resolution works globally across all niches (healthcare, legal, fitness, etc.) and all field types (Type, Location, Specialization, Coverage, etc.)
 
 ### Mobile Layout
 
@@ -37,8 +37,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 6 | Pending |
-| DATA-02 | Phase 6 | Pending |
+| DATA-01 | Phase 6 | Complete |
+| DATA-02 | Phase 6 | Complete |
 | MOBL-01 | Phase 7 | Pending |
 | MOBL-02 | Phase 7 | Pending |
 | THEM-01 | Phase 7 | Pending |

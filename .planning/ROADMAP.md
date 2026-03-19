@@ -24,7 +24,7 @@ Full-stack dark mode fix — 66 files updated, 26 requirements delivered, hardco
 
 **Milestone Goal:** Eliminate three classes of user-visible defects — raw option ID leakage in data display, mobile card overflow in the dashboard, and mobile theme toggle occlusion on the public booking page.
 
-- [ ] **Phase 6: Data Display Correctness** - All opt_* IDs resolve to human-readable labels across all niches and field types
+- [x] **Phase 6: Data Display Correctness** - All opt_* IDs resolve to human-readable labels across all niches and field types (completed 2026-03-19)
 - [ ] **Phase 7: Mobile UI Fixes** - Dashboard card text truncates correctly on mobile; theme toggle is visible and tappable on mobile
 
 ## Phase Details
@@ -38,7 +38,7 @@ Full-stack dark mode fix — 66 files updated, 26 requirements delivered, hardco
   2. A healthcare booking shows "In-Person" (not `opt_location_in_person`); a legal booking shows "Contract Review" (not `opt_type_contract_review`), etc.
   3. Label resolution works for all field types (Type, Location, Specialization, Coverage, and any other opt_* category)
   4. The fix covers all niches configured in the platform — not just one niche or one field
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 06-01-PLAN.md — Fix opt_* ID leaks in booking-form.tsx + regression test
 
@@ -62,5 +62,5 @@ Plans:
 | 2. Tenant Public Booking Surface | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
-| 6. Data Display Correctness | v1.1 | 0/1 | Not started | - |
+| 6. Data Display Correctness | 1/1 | Complete   | 2026-03-19 | - |
 | 7. Mobile UI Fixes | v1.1 | 0/? | Not started | - |
