@@ -1,17 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Advanced Customization & Niche Expansion
-status: defining_requirements
-stopped_at: —
-last_updated: "2026-03-19"
-last_activity: 2026-03-19 — Milestone v1.2 started
+milestone: v1.0
+milestone_name: milestone
+status: Defining requirements
+last_updated: "2026-03-19T18:53:24.273Z"
+last_activity: "2026-03-19 — Completed quick task 260319-vxw: Fix 6 failing cleanup-surface.test.ts tests"
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 1
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
 ---
 
 # Project State
@@ -25,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-03-19 after v1.2 milestone start)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-19 — Completed quick task 260319-vxw: Fix 6 failing cleanup-surface.test.ts tests
+Phase: 01-replace-fixed-duration-dropdown-with-free-text-number-input-1-1440m
+Plan: 01 (complete)
+Status: Phase complete
+Last activity: 2026-03-19 — Completed Phase 01 Plan 01: duration dropdown replaced with number input stepper
 
 ## Accumulated Context
 
@@ -42,6 +40,8 @@ Key patterns carrying forward to next milestone:
 - Inline opt_ guard: `strVal.startsWith('opt_') ? t('niche', strVal) : strVal`
 - `// INTENTIONAL:` comments for brand/functional color exceptions
 - Sidebar uses `bg-sidebar` token family, not `bg-background`/`bg-card`
+- [Phase 01]: col-span-full on duration FormItem so wider widget occupies its own grid row
+- [Phase 01]: FormControl wraps relative div wrapper (not Input) for Radix Slot prop forwarding compatibility
 
 ### Pending Todos
 
@@ -50,6 +50,10 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Roadmap Evolution
+
+- Phase 1 added: Replace fixed duration dropdown with free-text number input (1-1440m)
 
 ### Quick Tasks Completed
 

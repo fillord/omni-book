@@ -35,7 +35,7 @@ Three classes of user-visible defects eliminated — opt_* ID leakage in data di
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 0. Infrastructure Validation | v1.0 | 1/1 | Complete | 2026-03-17 |
-| 1. Landing / Marketing Surface | v1.0 | 4/4 | Complete | 2026-03-17 |
+| 1. Landing / Marketing Surface | 1/1 | Complete   | 2026-03-19 | 2026-03-17 |
 | 2. Tenant Public Booking Surface | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
@@ -47,7 +47,7 @@ Three classes of user-visible defects eliminated — opt_* ID leakage in data di
 **Goal:** Replace the fixed-option Select dropdown for durationMin with a number input widget featuring custom stepper buttons, "min" suffix, and quick-select presets (15/30/60), accepting any value from 1 to 1440 minutes.
 **Requirements**: [DUR-01, DUR-02, DUR-03, DUR-04, DUR-05, DUR-06]
 **Depends on:** None
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Replace duration Select with number input stepper + presets, update zod schema
