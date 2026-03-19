@@ -1,32 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Critical Bug Fixes
-status: milestone_complete
-stopped_at: Milestone archived
-last_updated: "2026-03-19T13:29:52.266Z"
-last_activity: 2026-03-19 — v1.1 milestone complete and archived
+milestone: v1.2
+milestone_name: Advanced Customization & Niche Expansion
+status: defining_requirements
+stopped_at: —
+last_updated: "2026-03-19"
+last_activity: 2026-03-19 — Milestone v1.2 started
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-19 after v1.1 milestone)
+See: .planning/PROJECT.md (updated 2026-03-19 after v1.2 milestone start)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Planning next milestone (`/gsd:new-milestone`)
+**Current focus:** Defining requirements for v1.2
 
 ## Current Position
 
-Milestone v1.1 Critical Bug Fixes — **COMPLETE**
-All 6 requirements delivered. Git tag v1.1 applied. Archives in `.planning/milestones/`.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-19 — Milestone v1.2 started
 
 ## Accumulated Context
 

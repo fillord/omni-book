@@ -4,7 +4,7 @@
 
 omni-book is a multi-tenant SaaS booking platform where tenants (businesses) configure their services and resources, and customers book appointments via a public-facing page. It supports multiple business niches (healthcare, legal, fitness, etc.) with configurable options per niche.
 
-**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added).
+**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added). **v1.2 started 2026-03-19** — Advanced Customization & Niche Expansion.
 
 ## Core Value
 
@@ -44,13 +44,21 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 - ✓ Mobile card text overflow fixed in services/resources managers — `min-w-0` + `truncate` pattern applied — v1.1 (MOBL-01, MOBL-02)
 - ✓ PublicThemeToggle visible on all viewports — `hidden sm:` removed — v1.1 (THEM-01, THEM-02)
 
-### Active
+## Current Milestone: v1.2 Advanced Customization & Niche Expansion
 
-*(No active requirements — planning next milestone)*
+**Goal:** Eliminate remaining technical debt, enable flexible service durations, and expand niche resource/staff directories.
+
+**Target features:**
+- Fix 6 dropped `cleanup-surface.test.ts` regression tests (dark niche backgrounds)
+- Custom service duration via number input (1–1440 min) replacing fixed Select
+- Expanded resource types and specializations for Clinic, Cafe, Sports, Beauty Salon niches
+
+### Active
 
 ### Out of Scope
 
-- New features during v1.1 — pure bug fix milestone only
+- New features during v1.1 — pure bug fix milestone only (completed)
+- Automated visual regression screenshots — deferred to v2 (ADV-03, carried from v1.1)
 - Third-party component internals (recharts bar/pie fills) — deferred to v2 (ADV-01)
 - `hover-glow` utility CSS var refactor — deferred to v2 (ADV-02)
 - Automated visual regression screenshots — deferred to v2 (ADV-03)
