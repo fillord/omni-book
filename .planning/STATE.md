@@ -45,7 +45,7 @@ Key patterns carrying forward to next milestone:
 
 ### Pending Todos
 
-- Fix pre-existing `cleanup-surface.test.ts` failures (6 tests) — dark:bg-{niche}-950/40 and dark:bg-muted regressions from commit f7da11b (v1.0). Not introduced by v1.1. Recommend as candidate for next milestone planning.
+None.
 
 ### Blockers/Concerns
 
