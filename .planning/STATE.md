@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-19 after v1.2 milestone start)
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-03-19 — Milestone v1.2 started
+Last activity: 2026-03-19 — Completed quick task 260319-vxw: Fix 6 failing cleanup-surface.test.ts tests
 
 ## Accumulated Context
 
@@ -50,3 +50,9 @@ None.
 ### Blockers/Concerns
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260319-vxw | Fix 6 failing cleanup-surface.test.ts tests | 2026-03-19 | 03a7ab4 | [260319-vxw-fix-6-failing-cleanup-surface-test-ts-te](./quick/260319-vxw-fix-6-failing-cleanup-surface-test-ts-te/) |
