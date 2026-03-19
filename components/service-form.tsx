@@ -5,7 +5,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Minus, Plus } from 'lucide-react'
 import {
   Form,
   FormField,
@@ -27,7 +27,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   createServiceSchema,
   updateServiceSchema,
-  DURATION_OPTIONS,
   CURRENCIES,
   type CreateServiceInput,
   type UpdateServiceInput,
@@ -244,26 +243,64 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
           <FormField
             control={form.control}
             name="durationMin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('form', 'duration')} <span className="text-destructive">*</span></FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={isDisabled}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DURATION_OPTIONS.map((d) => (
-                        <SelectItem key={d} value={String(d)}>
-                          {d} {t('booking', 'minutes')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const numVal = Math.max(1, Math.min(1440, parseInt(field.value) || 1))
+              return (
+                <FormItem className="col-span-full">
+                  <FormLabel>{t('form', 'duration')} <span className="text-destructive">*</span></FormLabel>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => field.onChange(String(Math.max(1, numVal - 1)))}
+                      disabled={isDisabled || numVal <= 1}
+                    >
+                      <Minus />
+                    </Button>
+                    <FormControl>
+                      <div className="relative flex-1">
+                        <Input
+                          {...field}
+                          type="number"
+                          min={1}
+                          max={1440}
+                          className="pr-10 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          disabled={isDisabled}
+                        />
+                        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          min
+                        </span>
+                      </div>
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={() => field.onChange(String(Math.min(1440, numVal + 1)))}
+                      disabled={isDisabled || numVal >= 1440}
+                    >
+                      <Plus />
+                    </Button>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[15, 30, 60].map((preset) => (
+                      <Button
+                        key={preset}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => field.onChange(String(preset))}
+                        disabled={isDisabled}
+                      >
+                        {preset} min
+                      </Button>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )
+            }}
           />
 
           <FormField
