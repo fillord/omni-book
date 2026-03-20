@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-last_updated: "2026-03-20T09:02:51.638Z"
-last_activity: "2026-03-20 — Completed Phase 02 Plan 01: resource types expanded for all 4 niches with i18n translations"
+milestone: v1.2
+milestone_name: Advanced Customization & Niche Expansion
+status: milestone_complete
+last_updated: "2026-03-20T00:00:00.000Z"
+last_activity: "2026-03-20 — v1.2 milestone archived"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -16,17 +16,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-19 after v1.2 milestone start)
+See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Defining requirements for v1.2
+**Current focus:** Planning next milestone (v1.3)
 
 ## Current Position
 
-Phase: 02-expand-resource-types-and-specialties-for-clinic-restaurant-sports-and-beauty
-Plan: 01 (complete)
-Status: Phase complete
-Last activity: 2026-03-20 — Completed Phase 02 Plan 01: resource types expanded for all 4 niches with i18n translations
+Phase: —
+Plan: —
+Status: Milestone v1.2 complete — ready for next milestone
+Last activity: 2026-03-20 — v1.2 milestone archived (2 phases, 2 plans, 12 requirements delivered)
 
 ## Accumulated Context
 
@@ -55,8 +55,8 @@ None.
 
 ### Roadmap Evolution
 
-- Phase 1 added: Replace fixed duration dropdown with free-text number input (1-1440m)
-- Phase 2 added: Expand resource types and specialties for Clinic, Restaurant, Sports, and Beauty
+- v1.2 complete: Phase 1 (duration input), Phase 2 (resource types expansion) both shipped
+- See ROADMAP.md for full milestone history
 
 ### Quick Tasks Completed
 

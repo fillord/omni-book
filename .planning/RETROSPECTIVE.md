@@ -93,9 +93,54 @@
 
 ---
 
+## Milestone: v1.2 — Advanced Customization & Niche Expansion
+
+**Shipped:** 2026-03-20
+**Phases:** 2 | **Plans:** 2 | **Timeline:** 2 days
+
+### What Was Built
+
+- `service-form.tsx` duration stepper: number input with custom +/− buttons, "min" suffix span, and 15/30/60 quick-select preset buttons — zod schema updated to `min(1)/max(1440)` bounds
+- 12 static-file assertion tests (DUR-01 through DUR-06) for the duration widget
+- `NICHE_CONFIG` expanded: 19 new resource type entries across 4 niches; beauty specialization converted from select to free-text; horeca/sports gain `attr_specialization` field
+- 60 new i18n translation entries (20 keys × 3 locales: RU, EN, KZ) with no opt_ prefix
+
+### What Worked
+
+- **Static assertion test pattern (reused from v1.0/v1.1):** 12 tests for duration widget written before implementation — fast, deterministic, no DOM required.
+- **Config-driven architecture:** `NICHE_CONFIG` + generic rendering pipeline meant `resource-form.tsx` required zero changes for 19 new resource types — only config + translations touched.
+- **No-opt_ discipline for new additions:** Enforcing `resource_type_<value>` and `attr_<field>` key patterns at source prevents future opt_ leakage without any runtime guard needed.
+- **Phase 2 execution speed:** 2 minutes end-to-end — pure config + translation changes with zero structural work.
+
+### What Was Inefficient
+
+- Phase 2 was very small (2 files, 2 commits) but went through full plan/research/verify pipeline — could have been a quick task given its simplicity.
+- Audit was not performed before milestone close — v1.2 lacked a MILESTONE-AUDIT.md (though both phases were clean and well-tested).
+
+### Patterns Established
+
+- `resource_type_<value>` pattern: new resource type label keys in config + translations (no opt_xxx)
+- `attr_<field>` pattern: new attribute field label keys for config + translations
+- `forTypes: ['staff']` scoping: retain existing staff attribute fields with forTypes filter for backward compatibility when removing a type from the dropdown
+
+### Key Lessons
+
+1. Config-driven architectures (NICHE_CONFIG + generic renderer) deliver niche expansions with near-zero component changes — plan accordingly, scope only config + i18n files.
+2. Very small phases (2 files, 5 tasks) may not need the full GSD planning pipeline — consider `/gsd:quick` for pure config/translation tasks.
+3. Always create a MILESTONE-AUDIT.md before completing a milestone, even for small ones — documents tech debt and verifies coverage formally.
+
+### Cost Observations
+
+- Model mix: Sonnet primary (balanced profile)
+- Sessions: 2 sessions (one per phase)
+- Notable: Phase 2 completed in 2 minutes — fastest phase in the project; generic config-driven architecture eliminates component churn for niche expansions
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Duration | Phases | Plans | Rework | Standout Pattern |
 |-----------|----------|--------|-------|--------|-----------------|
 | v1.0 Dark Mode | 2 days | 5 | 15 | Low | Infrastructure-first test validation |
 | v1.1 Critical Bug Fixes | 1 day | 2 | 2 | None | TDD static assertions + minimal diff discipline |
+| v1.2 Adv. Customization | 2 days | 2 | 2 | None | Config-driven architecture + no-opt_ key discipline |

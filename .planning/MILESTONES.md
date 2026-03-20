@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.2 Advanced Customization & Niche Expansion (Shipped: 2026-03-20)
+
+**Phases completed:** 2 phases, 2 plans, 5 tasks
+**Files modified:** 5 source files | **Timeline:** 2026-03-19 → 2026-03-20 (2 days)
+**Git range:** `a46e782` → `2429afe`
+
+**Delivered:** Custom service duration input (1–1440 min) replacing fixed dropdown, and 19 new niche resource types with trilingual translations across 4 verticals.
+
+**Key accomplishments:**
+1. Replaced `durationMin` Select dropdown with number input stepper featuring custom +/− buttons, "min" suffix, and 15/30/60 quick-select presets — accepts any value 1–1440 min
+2. Updated zod schema (removed `DURATION_OPTIONS` constant, added `min(1)/max(1440)` bounds)
+3. Added 12 static-file assertion tests covering DUR-01 through DUR-06
+4. Expanded resource types for all 4 niches: 6 clinic types, 5 horeca types, 5 sports types, 3 beauty workspace types (19 total new entries)
+5. Converted beauty `specialization` from select (6 opt_* options) to free-text; added `attr_specialization` field to horeca/sports staff — 60 new RU/EN/KZ translation entries added
+
+---
+
 ## v1.1 Critical Bug Fixes (Shipped: 2026-03-19)
 
 **Phases completed:** 2 phases, 2 plans, 4 tasks

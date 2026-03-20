@@ -4,7 +4,7 @@
 
 omni-book is a multi-tenant SaaS booking platform where tenants (businesses) configure their services and resources, and customers book appointments via a public-facing page. It supports multiple business niches (healthcare, legal, fitness, etc.) with configurable options per niche.
 
-**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added). **v1.2 started 2026-03-19** — Advanced Customization & Niche Expansion.
+**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added). **v1.2 shipped 2026-03-20** — Advanced Customization & Niche Expansion: custom duration input + 19 new resource types with trilingual translations (12 requirements).
 
 ## Core Value
 
@@ -43,15 +43,10 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 - ✓ All `opt_*` ID leaks in `booking-form.tsx` resolved — users see human-readable labels everywhere — v1.1 (DATA-01, DATA-02)
 - ✓ Mobile card text overflow fixed in services/resources managers — `min-w-0` + `truncate` pattern applied — v1.1 (MOBL-01, MOBL-02)
 - ✓ PublicThemeToggle visible on all viewports — `hidden sm:` removed — v1.1 (THEM-01, THEM-02)
-
-## Current Milestone: v1.2 Advanced Customization & Niche Expansion
-
-**Goal:** Eliminate remaining technical debt, enable flexible service durations, and expand niche resource/staff directories.
-
-**Target features:**
-- Fix 6 dropped `cleanup-surface.test.ts` regression tests (dark niche backgrounds)
-- Custom service duration via number input (1–1440 min) replacing fixed Select
-- Expanded resource types and specializations for Clinic, Cafe, Sports, Beauty Salon niches
+- ✓ `durationMin` Select replaced with number input stepper (1–1440 min) + custom buttons + presets — v1.2 (DUR-01, DUR-02, DUR-03, DUR-04, DUR-05, DUR-06)
+- ✓ 19 new resource types across 4 niches (6 clinic, 5 horeca, 5 sports, 3 beauty) — v1.2 (RES-01, RES-02, RES-03, RES-04)
+- ✓ Beauty specialization converted from select to free-text; horeca/sports gain `attr_specialization` for staff — v1.2 (SPEC-01)
+- ✓ RU/EN/KZ translations for all 19 new resource type labels + `attr_specialization` (60 entries) — v1.2 (I18N-01)
 
 ### Active
 
@@ -67,7 +62,7 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 
 The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built with shadcn/ui components on top of Tailwind CSS 4.2.1. The color system is OKLch-based, defined in `app/globals.css` as CSS custom properties (`:root` for light, `.dark` for dark). The `next-themes` library manages the `dark` class on the `<html>` element.
 
-**v1.1 state:** ~27,500 LOC TypeScript. 6 bug-fix requirements delivered. 20 new regression tests added (`data-display.test.ts` + `mobile-ui.test.ts`). Pre-existing `cleanup-surface.test.ts` failures (6 tests, dark mode selection state) remain — root cause is commit f7da11b from v1.0 completion, not introduced by v1.1.
+**v1.2 state:** ~20,000 LOC TypeScript (app code). 12 requirements delivered across 2 phases. Duration stepper widget added to `service-form.tsx` with 12 new static-file assertion tests. `NICHE_CONFIG` expanded with 19 new resource type entries and 60 new i18n translation keys. Pre-existing `cleanup-surface.test.ts` failures (6 tests, dark mode selection state) documented as tech debt — root cause is commit f7da11b from v1.0 completion.
 
 **Known patterns established:**
 - Static file assertion tests using `fs.readFileSync` + regex for Tailwind class audits (no DOM/build required) — extended in v1.1 to cover opt_* display correctness and mobile class audits
@@ -99,6 +94,10 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | `min-w-0` on flex child (not `overflow-hidden` on container) | Canonical Tailwind pattern; `overflow-hidden` on the container can clip shadows/outlines | ✓ Good — correct pattern per Tailwind docs |
 | Remove `max-w-xs` from description after adding `min-w-0` | `max-w-xs` becomes incorrect once parent has `min-w-0`; description should fill available width | ✓ Good — avoids unintended width cap |
 | Static file assertions scoped by `sm:hidden` / `hidden sm:` boundary | Allows mobile-only class audits without a DOM or build step | ✓ Good — extends established static assertion pattern |
+| `col-span-full` on duration FormItem | Wider stepper widget (input + buttons + presets) needs its own grid row | ✓ Good — clean layout, no column-sharing conflicts |
+| `FormControl` wraps relative div wrapper (not Input) | Radix Slot forwards `id`/`aria-invalid` to first child — wrapping the container div is valid since Input is the only interactive element | ✓ Good — resolves Slot prop forwarding without restructuring |
+| New resource type keys use `resource_type_<value>` pattern (no `opt_xxx`) | Breaking away from opaque opt_ pattern for all new additions — readable keys preferred | ✓ Good — eliminates future opt_ leakage risk at source |
+| Beauty specialization → free-text (not select) | Removes 6 opaque `opt_xxx` options; staff records with type:'staff' still match forTypes filter | ✓ Good — simpler UX, backward compatible for stored records |
 
 ---
-*Last updated: 2026-03-19 after v1.1 milestone*
+*Last updated: 2026-03-20 after v1.2 milestone*
