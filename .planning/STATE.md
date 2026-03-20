@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-last_updated: "2026-03-19T18:56:31.263Z"
-last_activity: "2026-03-19 — Completed Phase 01 Plan 01: duration dropdown replaced with number input stepper"
+last_updated: "2026-03-20T08:58:48.738Z"
+last_activity: "2026-03-20 — Completed Phase 02 Plan 01: resource types expanded for all 4 niches with i18n translations"
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-03-19 after v1.2 milestone start)
 
 ## Current Position
 
-Phase: 01-replace-fixed-duration-dropdown-with-free-text-number-input-1-1440m
+Phase: 02-expand-resource-types-and-specialties-for-clinic-restaurant-sports-and-beauty
 Plan: 01 (complete)
 Status: Phase complete
-Last activity: 2026-03-19 — Completed Phase 01 Plan 01: duration dropdown replaced with number input stepper
+Last activity: 2026-03-20 — Completed Phase 02 Plan 01: resource types expanded for all 4 niches with i18n translations
 
 ## Accumulated Context
 
@@ -42,6 +42,8 @@ Key patterns carrying forward to next milestone:
 - Sidebar uses `bg-sidebar` token family, not `bg-background`/`bg-card`
 - [Phase 01]: col-span-full on duration FormItem so wider widget occupies its own grid row
 - [Phase 01]: FormControl wraps relative div wrapper (not Input) for Radix Slot prop forwarding compatibility
+- [Phase 02-01]: Beauty specialization changed from select to free-text; horeca/sports gain attr_specialization for staff backward compatibility
+- [Phase 02-01]: New resource type keys follow resource_type_<value> pattern; attribute label keys use attr_<field> pattern — no opt_xxx for new additions
 
 ### Pending Todos
 
