@@ -54,6 +54,7 @@ None.
 ### Roadmap Evolution
 
 - Phase 1 added: Replace fixed duration dropdown with free-text number input (1-1440m)
+- Phase 2 added: Expand resource types and specialties for Clinic, Restaurant, Sports, and Beauty
 
 ### Quick Tasks Completed
 
