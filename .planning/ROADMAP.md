@@ -51,3 +51,13 @@ Three classes of user-visible defects eliminated — opt_* ID leakage in data di
 
 Plans:
 - [ ] 01-01-PLAN.md — Replace duration Select with number input stepper + presets, update zod schema
+
+### Phase 2: Expand resource types and specialties for Clinic, Restaurant, Sports, and Beauty
+
+**Goal:** Expand NICHE_CONFIG with new resource types for all four niches (6 clinic, 5 restaurant, 5 sports, 3 beauty), convert beauty specialization from select to free-text, add specialization attribute to horeca/sports staff, and provide RU/EN/KZ translations for all new label keys.
+**Requirements**: [RES-01, RES-02, RES-03, RES-04, SPEC-01, I18N-01]
+**Depends on:** Phase 1
+**Plans:** 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Update NICHE_CONFIG resource types + attribute fields, add 60 i18n translation entries
