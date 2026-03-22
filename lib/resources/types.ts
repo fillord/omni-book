@@ -8,6 +8,7 @@ export type ResourceType =
   | 'room'           // HoReCa, photo studios, lofts
   | 'court'          // Sports
   | 'table'          // Restaurants / cafes
+  | 'couch'          // Beauty
 
 export interface ResourceConfig {
   type: ResourceType

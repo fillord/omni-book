@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const RESOURCE_TYPES = ['staff', 'room', 'court', 'table', 'other'] as const
+export const RESOURCE_TYPES = ['staff', 'room', 'court', 'table', 'other', 'couch'] as const
 export type ResourceType = (typeof RESOURCE_TYPES)[number]
 
 export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
@@ -9,6 +9,7 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   court: 'Корт',
   table: 'Столик',
   other: 'Другое',
+  couch: 'Кушетка',
 }
 
 export const createResourceSchema = z.object({
