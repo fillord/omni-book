@@ -187,7 +187,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+            className="h-8 rounded-md neu-inset bg-[var(--neu-bg)] border-0 px-2 text-sm"
           >
             <option value="all">{t('dashboard', 'allTypes')}</option>
             {nicheConfig.resourceTypes.map((rt) => (
@@ -197,7 +197,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+            className="h-8 rounded-md neu-inset bg-[var(--neu-bg)] border-0 px-2 text-sm"
           >
             <option value="all">{t('dashboard', 'allStatuses')}</option>
             <option value="active">{t('dashboard', 'activeFilter')}</option>
@@ -274,7 +274,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
             {filtered.map((r) => (
               <div
                 key={r.id}
-                className={['rounded-lg border bg-card p-3 space-y-2', !r.isActive ? 'opacity-60' : ''].join(' ')}
+                className={['rounded-lg neu-raised bg-[var(--neu-bg)] p-3 space-y-2', !r.isActive ? 'opacity-60' : ''].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">

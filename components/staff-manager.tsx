@@ -184,7 +184,7 @@ export function StaffManager() {
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-14 rounded-lg bg-muted animate-pulse" />
+              <div key={i} className="h-14 rounded-lg neu-inset bg-[var(--neu-bg)] animate-pulse" />
             ))}
           </div>
         ) : members.length === 0 ? (
@@ -198,7 +198,7 @@ export function StaffManager() {
               return (
                 <div
                   key={m.id}
-                  className="flex items-center gap-3 rounded-lg border px-3 py-2.5 hover-lift"
+                  className="flex items-center gap-3 rounded-lg neu-raised bg-[var(--neu-bg)] px-3 py-2.5"
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
                     {(m.name ?? m.email).slice(0, 2).toUpperCase()}

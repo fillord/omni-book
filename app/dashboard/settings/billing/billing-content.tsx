@@ -57,7 +57,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   return (
     <div className="space-y-8">
       {/* Current Plan Card - ИСПРАВЛЕНА ДЛЯ ТЕМНОЙ ТЕМЫ */}
-      <Card className="border-indigo-100 dark:border-indigo-900/50 shadow-sm bg-indigo-50/30 dark:bg-indigo-950/20">
+      <Card>
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
             <div>
@@ -67,25 +67,25 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   {tenant.plan}
                 </h2>
                 {isPending && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-amber-600 text-xs font-medium">
                     <Clock size={14} />
                     Ожидает активации
                   </span>
                 )}
                 {isPro && !isPending && tenant.planStatus === 'ACTIVE' && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-emerald-600 text-xs font-medium">
                     <CheckCircle2 size={14} />
                     Активен
                   </span>
                 )}
                 {tenant.planStatus === 'EXPIRED' && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-orange-600 text-xs font-medium">
                     <AlertTriangle size={14} />
                     Истек
                   </span>
                 )}
                 {tenant.planStatus === 'CANCELED' && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-red-600 text-xs font-medium">
                     <XCircle size={14} />
                     Отменен
                   </span>
@@ -98,7 +98,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
       {/* Upgrade / Renewal Banner */}
       {showUpgradeCard && (
-        <Card className="border-border shadow-md overflow-hidden relative bg-card">
+        <Card className="overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-10 -mt-20 pointer-events-none" />
           
           <CardHeader className="pb-4">
@@ -115,7 +115,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="bg-muted rounded-xl p-6 my-6 border border-border">
+            <div className="bg-[var(--neu-bg)] neu-inset rounded-xl p-6 my-6">
               <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-4xl font-bold text-foreground">10 000 ₸</span>
                 <span className="text-sm text-muted-foreground">/ месяц</span>
@@ -155,14 +155,14 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                 
                 <div className="py-6 space-y-6">
                   {/* ИСПРАВЛЕН БЛОК С ЦЕНОЙ ВНУТРИ ПОПАПА (С !IMPORTANT) */}
-                  <div className="bg-muted p-4 rounded-lg border border-border text-center space-y-2">
+                  <div className="bg-[var(--neu-bg)] neu-inset p-4 rounded-lg text-center space-y-2">
                     <p className="text-sm text-muted-foreground">Сумма к оплате:</p>
                     <p className="text-3xl font-bold text-foreground">10 000 ₸</p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="flex gap-4 items-start">
-                      <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-full neu-raised bg-[var(--neu-bg)] flex items-center justify-center shrink-0">
                         <CreditCard className="text-red-600 dark:text-red-400" size={20} />
                       </div>
                       <div className="flex flex-col gap-1">
@@ -183,8 +183,8 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   </div>
   
                   {/* ИСПРАВЛЕН БЛОК "ВНИМАНИЕ" (С !IMPORTANT) */}
-                  <div className="bg-indigo-50 dark:bg-indigo-950/80 border border-indigo-100 dark:border-indigo-800 rounded p-3 text-indigo-800 dark:text-indigo-200 text-sm">
-                    <strong className="dark:text-indigo-400">Внимание:</strong> После перевода обязательно нажмите кнопку ниже, чтобы мы проверили платеж.
+                  <div className="bg-[var(--neu-bg)] neu-inset rounded p-3 text-foreground text-sm">
+                    <strong>Внимание:</strong> После перевода обязательно нажмите кнопку ниже, чтобы мы проверили платеж.
                   </div>
                 </div>
 

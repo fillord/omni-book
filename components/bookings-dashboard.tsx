@@ -277,13 +277,13 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
     <div className="space-y-4">
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 rounded-lg border bg-muted/30 p-1 w-fit">
+      <div className="flex items-center gap-1 rounded-lg neu-inset bg-[var(--neu-bg)] p-1 w-fit">
         <button
           onClick={() => setTab('table')}
           className={[
             'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
             tab === 'table'
-              ? 'bg-background shadow-sm font-medium'
+              ? 'neu-raised bg-[var(--neu-bg)] font-medium'
               : 'text-muted-foreground hover:text-foreground',
           ].join(' ')}
         >
@@ -295,7 +295,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
           className={[
             'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
             tab === 'calendar'
-              ? 'bg-background shadow-sm font-medium'
+              ? 'neu-raised bg-[var(--neu-bg)] font-medium'
               : 'text-muted-foreground hover:text-foreground',
           ].join(' ')}
         >
@@ -313,10 +313,10 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
               key={s}
               onClick={() => toggleStatus(s)}
               className={[
-                'rounded-full border px-2.5 py-0.5 text-xs transition-colors',
+                'rounded-full px-2.5 py-0.5 text-xs transition-colors',
                 selectedStatuses.includes(s)
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border hover:border-muted-foreground/50',
+                  ? 'neu-inset bg-[var(--neu-bg)] text-neu-accent font-medium'
+                  : 'neu-raised bg-[var(--neu-bg)] text-muted-foreground',
               ].join(' ')}
             >
               {t('status', STATUS_FILTER_LABELS[s])}
@@ -328,7 +328,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
         <select
           value={resourceId}
           onChange={(e) => handleResourceChange(e.target.value)}
-          className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+          className="h-8 rounded-md neu-inset bg-[var(--neu-bg)] border-0 px-2 text-sm"
         >
           <option value="">{t('dashboard', 'allResources')}</option>
           {resources.map((r) => (
@@ -342,14 +342,14 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
             type="date"
             value={dateFrom}
             onChange={(e) => { setDateFrom(e.target.value); setPage(1) }}
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+            className="h-8 rounded-md neu-inset bg-[var(--neu-bg)] border-0 px-2 text-sm"
           />
           <span className="text-muted-foreground text-sm">—</span>
           <input
             type="date"
             value={dateTo}
             onChange={(e) => { setDateTo(e.target.value); setPage(1) }}
-            className="h-8 rounded-md border border-input bg-transparent px-2 text-sm"
+            className="h-8 rounded-md neu-inset bg-[var(--neu-bg)] border-0 px-2 text-sm"
           />
         </div>
 
@@ -403,7 +403,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                   const clientName = booking.user?.name ?? booking.guestName
                   const allowed = TRANSITIONS[booking.status] ?? []
                   return (
-                    <div key={booking.id} className="rounded-lg border bg-card p-3 space-y-2">
+                    <div key={booking.id} className="rounded-lg neu-raised bg-[var(--neu-bg)] p-3 space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <p className="font-medium text-sm">{clientName ?? '—'}</p>
@@ -423,7 +423,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
                             <button
                               key={s}
                               onClick={() => handleStatusChange(booking.id, s)}
-                              className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted transition-colors"
+                              className="rounded-md neu-raised bg-[var(--neu-bg)] px-2.5 py-1 text-xs transition-colors"
                             >
                               {t('status', ACTION_LABELS[s])}
                             </button>
