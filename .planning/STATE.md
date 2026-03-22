@@ -9,7 +9,7 @@ progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 01-neumorphism-refactor
-Plan: 01 of 4 complete
-Status: In progress — plan 01-01 complete, advancing to 01-02
-Last activity: 2026-03-23 — Completed 01-01-PLAN.md (Neumorphism CSS foundation)
+Plan: 02 of 4 complete
+Status: In progress — plan 01-02 complete, advancing to 01-03
+Last activity: 2026-03-23 — Completed 01-02-PLAN.md (Neumorphism core components: Button, Input, Card)
 
 ## Accumulated Context
 
@@ -47,6 +47,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 01-neumorphism-refactor]: Use var(--neu-bg) for shadcn token remapping so existing component className strings remain valid
 - [Phase 01-neumorphism-refactor]: --border: transparent removes hard borders; visual depth via .neu-raised/.neu-inset box-shadow
 - [Phase 01-neumorphism-refactor]: Global CSS transition uses explicit properties list (not transition: all) to avoid conflicting with animation keyframes
+- [Phase 01-neumorphism-refactor plan 02]: neu-btn/neu-raised/neu-inset applied per cva variant (not base class) so ghost/link variants stay flat
+- [Phase 01-neumorphism-refactor plan 02]: Remove dark: Tailwind overrides from component variants when surface uses Neumorphism CSS custom properties
+- [Phase 01-neumorphism-refactor plan 02]: Input focus uses ring-only (not border) — inset shadow provides depth context, border-based focus conflicts
 
 ### Pending Todos
 
