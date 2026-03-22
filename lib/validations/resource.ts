@@ -1,6 +1,16 @@
 import { z } from 'zod'
 
-export const RESOURCE_TYPES = ['staff', 'room', 'court', 'table', 'other', 'couch'] as const
+export const RESOURCE_TYPES = [
+  'staff', 'room', 'court', 'table', 'other', 'couch',
+  // Рестораны
+  'vip_lounge', 'terrace', 'bar_counter', 'karaoke_room',
+  // Спорт
+  'trainer', 'field', 'pool', 'sauna', 'equipment',
+  // Медицина
+  'doctor', 'nurse', 'operating_room', 'laboratory', 'office', 'treatment_room',
+  // Красота
+  'master', 'manicure_table', 'sink',
+] as const
 export type ResourceType = (typeof RESOURCE_TYPES)[number]
 
 export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
@@ -10,6 +20,24 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   table: 'Столик',
   other: 'Другое',
   couch: 'Кушетка',
+  vip_lounge: 'VIP-зал',
+  terrace: 'Терраса',
+  bar_counter: 'Барная стойка',
+  karaoke_room: 'Зал с karaoke',
+  trainer: 'Тренер',
+  field: 'Поле',
+  pool: 'Бассейн',
+  sauna: 'Сауна',
+  equipment: 'Снаряжение',
+  doctor: 'Врач',
+  nurse: 'Медсестра',
+  operating_room: 'Операционная',
+  laboratory: 'Лаборатория',
+  office: 'Кабинет (УЗИ/МРТ)',
+  treatment_room: 'Процедурный кабинет',
+  master: 'Мастер',
+  manicure_table: 'Маникюрный стол',
+  sink: 'Мойка',
 }
 
 export const createResourceSchema = z.object({
