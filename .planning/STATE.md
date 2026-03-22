@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-22T20:49:43.340Z"
+last_updated: "2026-03-22T20:53:31.499Z"
 last_activity: "2026-03-23 — Completed 01-03-PLAN.md (Neumorphism popup/overlay components: Dialog, Sheet, Select, DropdownMenu, Badge)"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 01-neumorphism-refactor
-Plan: 03 of 4 complete
-Status: In progress — plan 01-03 complete, advancing to 01-04
-Last activity: 2026-03-23 — Completed 01-03-PLAN.md (Neumorphism popup/overlay components: Dialog, Sheet, Select, DropdownMenu, Badge)
+Plan: 04 of 4 — code tasks complete, awaiting checkpoint:human-verify (Task 3)
+Status: In progress — plan 01-04 tasks 1-2 complete, stopped at checkpoint:human-verify
+Last activity: 2026-03-23 — Completed 01-04-PLAN.md tasks 1-2 (HeroSection, Navbar, ThemeToggle Neumorphism adaptation; 253 tests pass)
 
 ## Accumulated Context
 
@@ -53,6 +53,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 01-neumorphism-refactor plan 03]: Sheet side borders removed — neu-raised box-shadow provides visual panel separation, hard borders conflict with Neumorphism borderless design
 - [Phase 01-neumorphism-refactor plan 03]: SelectTrigger uses neu-inset with bg-[var(--neu-bg)] — bg-transparent does not show inset shadow correctly
 - [Phase 01-neumorphism-refactor plan 03]: Badge outline variant uses neu-inset replacing border-border — depth via inset shadow replaces border outline pattern
+- [Phase 01-neumorphism-refactor]: [Phase 01-neumorphism-refactor plan 04]: ThemeToggle hover:bg-muted removed (Pitfall 9 — invisible after token remap); replaced with neu-raised + hover:text-neu-accent
+- [Phase 01-neumorphism-refactor]: [Phase 01-neumorphism-refactor plan 04]: HeroSection replaces gradient with bg-background; decorative blobs use bg-neu-accent opacity variants
 
 ### Pending Todos
 

@@ -46,7 +46,7 @@ Custom service duration input (1-1440 min) replacing fixed dropdown, 19 new nich
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 0. Infrastructure Validation | v1.0 | 1/1 | Complete | 2026-03-17 |
-| 1. Replace Duration Dropdown | 3/4 | In Progress|  | 2026-03-19 |
+| 1. Replace Duration Dropdown | 4/4 | Complete   | 2026-03-22 | 2026-03-19 |
 | 2. Expand Resource Types | v1.2 | 1/1 | Complete | 2026-03-20 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
@@ -58,7 +58,7 @@ Custom service duration input (1-1440 min) replacing fixed dropdown, 19 new nich
 **Goal:** Apply a complete Neumorphism (Soft UI) visual system to the entire omni-book application — CSS variable injection with token remapping, .neu-raised/.neu-inset utility classes on all shadcn/ui components, landing page adaptation, and smooth 300ms theme transitions — achieving 100% visual consistency across marketing, auth, dashboard, and booking surfaces in both light and dark themes.
 **Requirements:** [NEU-01, NEU-02, NEU-03, NEU-04, NEU-05, NEU-06, NEU-07, NEU-08, NEU-09, NEU-10, NEU-11, NEU-12, NEU-13, NEU-14]
 **Depends on:** None (standalone visual refactor)
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Test scaffold + CSS foundation (variables, token remapping, utility classes, global transition)
