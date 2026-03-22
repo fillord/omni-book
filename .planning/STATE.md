@@ -57,6 +57,7 @@ None.
 
 - v1.2 complete: Phase 1 (duration input), Phase 2 (resource types expansion) both shipped
 - See ROADMAP.md for full milestone history
+- Phase 1 added: Refactor the UI design of the entire project to a Neumorphism Soft UI style with Light and Dark themes
 
 ### Quick Tasks Completed
 
