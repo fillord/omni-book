@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-last_updated: "2026-03-22T20:42:05.161Z"
-last_activity: "2026-03-23 — Completed quick task 260323-1el: Масштабное обновление типов ресурсов для бизнес-ниш"
+status: executing
+last_updated: "2026-03-22T20:49:43.340Z"
+last_activity: "2026-03-23 — Completed 01-03-PLAN.md (Neumorphism popup/overlay components: Dialog, Sheet, Select, DropdownMenu, Badge)"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 01-neumorphism-refactor
-Plan: 02 of 4 complete
-Status: In progress — plan 01-02 complete, advancing to 01-03
-Last activity: 2026-03-23 — Completed 01-02-PLAN.md (Neumorphism core components: Button, Input, Card)
+Plan: 03 of 4 complete
+Status: In progress — plan 01-03 complete, advancing to 01-04
+Last activity: 2026-03-23 — Completed 01-03-PLAN.md (Neumorphism popup/overlay components: Dialog, Sheet, Select, DropdownMenu, Badge)
 
 ## Accumulated Context
 
@@ -50,6 +50,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 01-neumorphism-refactor plan 02]: neu-btn/neu-raised/neu-inset applied per cva variant (not base class) so ghost/link variants stay flat
 - [Phase 01-neumorphism-refactor plan 02]: Remove dark: Tailwind overrides from component variants when surface uses Neumorphism CSS custom properties
 - [Phase 01-neumorphism-refactor plan 02]: Input focus uses ring-only (not border) — inset shadow provides depth context, border-based focus conflicts
+- [Phase 01-neumorphism-refactor plan 03]: Sheet side borders removed — neu-raised box-shadow provides visual panel separation, hard borders conflict with Neumorphism borderless design
+- [Phase 01-neumorphism-refactor plan 03]: SelectTrigger uses neu-inset with bg-[var(--neu-bg)] — bg-transparent does not show inset shadow correctly
+- [Phase 01-neumorphism-refactor plan 03]: Badge outline variant uses neu-inset replacing border-border — depth via inset shadow replaces border outline pattern
 
 ### Pending Todos
 
