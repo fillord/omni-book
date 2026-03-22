@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Advanced Customization & Niche Expansion
-status: milestone_complete
-last_updated: "2026-03-20T00:00:00.000Z"
-last_activity: "2026-03-20 — v1.2 milestone archived"
+milestone: v1.0
+milestone_name: milestone
+status: completed
+last_updated: "2026-03-22T20:42:05.161Z"
+last_activity: "2026-03-23 — Completed quick task 260323-1el: Масштабное обновление типов ресурсов для бизнес-ниш"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 
 ## Current Position
 
-Phase: —
-Plan: —
-Status: Milestone v1.2 complete — ready for next milestone
-Last activity: 2026-03-23 — Completed quick task 260323-1el: Масштабное обновление типов ресурсов для бизнес-ниш
+Phase: 01-neumorphism-refactor
+Plan: 01 of 4 complete
+Status: In progress — plan 01-01 complete, advancing to 01-02
+Last activity: 2026-03-23 — Completed 01-01-PLAN.md (Neumorphism CSS foundation)
 
 ## Accumulated Context
 
@@ -44,6 +44,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 01]: FormControl wraps relative div wrapper (not Input) for Radix Slot prop forwarding compatibility
 - [Phase 02-01]: Beauty specialization changed from select to free-text; horeca/sports gain attr_specialization for staff backward compatibility
 - [Phase 02-01]: New resource type keys follow resource_type_<value> pattern; attribute label keys use attr_<field> pattern — no opt_xxx for new additions
+- [Phase 01-neumorphism-refactor]: Use var(--neu-bg) for shadcn token remapping so existing component className strings remain valid
+- [Phase 01-neumorphism-refactor]: --border: transparent removes hard borders; visual depth via .neu-raised/.neu-inset box-shadow
+- [Phase 01-neumorphism-refactor]: Global CSS transition uses explicit properties list (not transition: all) to avoid conflicting with animation keyframes
 
 ### Pending Todos
 
