@@ -13,74 +13,90 @@ body {
 }
 
 :root {
-  --background: oklch(1 0 0); /* Идеально белый */
-  --foreground: oklch(0.15 0.01 250); /* Темно-сизый, почти черный */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 250);
-  --primary: oklch(0.45 0.18 260); /* Насыщенный индиго/синий */
+  /* Neumorphism palette */
+  --neu-bg: #e0e5ec;
+  --neu-text: #4a5568;
+  --neu-shadow-light: #ffffff;
+  --neu-shadow-dark: #a3b1c6;
+  --neu-accent: #4299e1;
+
+  --background: var(--neu-bg);
+  --foreground: var(--neu-text);
+  --card: var(--neu-bg);
+  --card-foreground: var(--neu-text);
+  --popover: var(--neu-bg);
+  --popover-foreground: var(--neu-text);
+  --primary: var(--neu-accent);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.96 0.01 250);
   --secondary-foreground: oklch(0.2 0.02 260);
-  --muted: oklch(0.96 0.01 250);
+  --muted: var(--neu-bg);
   --muted-foreground: oklch(0.5 0.01 250);
   --accent: oklch(0.96 0.01 250);
   --accent-foreground: oklch(0.2 0.02 260);
   --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.9 0.01 250);
-  --input: oklch(0.9 0.01 250);
-  --ring: oklch(0.45 0.18 260);
-  
-  --radius: 0.5rem; /* Более строгие, аккуратные углы */
-  
+  --border: transparent;
+  --input: var(--neu-bg);
+  --ring: var(--neu-accent);
+
+  --radius: 0.875rem;
+
   --chart-1: oklch(0.5 0.15 260);
   --chart-2: oklch(0.6 0.12 280);
   --chart-3: oklch(0.7 0.1 300);
   --chart-4: oklch(0.8 0.08 220);
   --chart-5: oklch(0.65 0.1 200);
-  
-  --sidebar: oklch(0.98 0.005 250);
+
+  --sidebar: var(--neu-bg);
   --sidebar-foreground: oklch(0.15 0.01 250);
   --sidebar-primary: oklch(0.45 0.18 260);
   --sidebar-primary-foreground: oklch(0.98 0 0);
   --sidebar-accent: oklch(0.94 0.01 250);
   --sidebar-accent-foreground: oklch(0.15 0.01 250);
-  --sidebar-border: oklch(0.9 0.01 250);
+  --sidebar-border: transparent;
   --sidebar-ring: oklch(0.45 0.18 260);
 }
 
 .dark {
-  --background: oklch(0.12 0.01 250); /* Очень темный, с синим отливом */
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0.01 250);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0.01 250);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.65 0.18 260); /* Светящийся индиго */
+  /* Neumorphism palette */
+  --neu-bg: #1e1e24;
+  --neu-text: #d1d5db;
+  --neu-shadow-light: #2c2c35;
+  --neu-shadow-dark: #101013;
+  --neu-accent: #10b981;
+
+  --background: var(--neu-bg);
+  --foreground: var(--neu-text);
+  --card: var(--neu-bg);
+  --card-foreground: var(--neu-text);
+  --popover: var(--neu-bg);
+  --popover-foreground: var(--neu-text);
+  --primary: var(--neu-accent);
   --primary-foreground: oklch(0.1 0.01 250);
   --secondary: oklch(0.2 0.02 250);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.2 0.02 250);
+  --muted: var(--neu-bg);
   --muted-foreground: oklch(0.65 0.01 250);
   --accent: oklch(0.25 0.02 250);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.7 0.19 22);
-  --border: oklch(0.25 0.02 250);
-  --input: oklch(0.25 0.02 250);
-  --ring: oklch(0.65 0.18 260);
-  
-  --sidebar: oklch(0.12 0.01 250);
+  --border: transparent;
+  --input: var(--neu-bg);
+  --ring: var(--neu-accent);
+
+  --sidebar: var(--neu-bg);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.65 0.18 260);
   --sidebar-primary-foreground: oklch(0.1 0.01 250);
   --sidebar-accent: oklch(0.2 0.02 250);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.25 0.02 250);
+  --sidebar-border: transparent;
   --sidebar-ring: oklch(0.65 0.18 260);
 }
 
 @theme inline {
+  --color-neu-accent: var(--neu-accent);
+  --color-neu-bg: var(--neu-bg);
   --font-sans: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -131,6 +147,33 @@ body {
   }
   html {
     @apply font-sans;
+  }
+
+  /* Neumorphism utility classes */
+  .neu-raised {
+    box-shadow: 10px 10px 20px var(--neu-shadow-dark), -10px -10px 20px var(--neu-shadow-light);
+  }
+
+  .neu-inset {
+    box-shadow: inset 5px 5px 10px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
+  }
+
+  .neu-btn {
+    box-shadow: 10px 10px 20px var(--neu-shadow-dark), -10px -10px 20px var(--neu-shadow-light);
+    background-color: var(--neu-bg);
+  }
+
+  .neu-btn:hover {
+    color: var(--neu-accent);
+  }
+
+  .neu-btn:active {
+    box-shadow: inset 5px 5px 10px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
+  }
+
+  /* Global theme transition — explicit properties only, never shorthand-all (see Pitfall 10) */
+  * {
+    transition: background-color 300ms ease-in-out, color 300ms ease-in-out, box-shadow 300ms ease-in-out;
   }
 }
 
