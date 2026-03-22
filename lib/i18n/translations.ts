@@ -551,6 +551,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       resource_type_manicure_table: 'Маникюрный стол',
       resource_type_sink: 'Мойка',
       resource_type_couch: 'Кушетка',
+      resource_type_master: 'Мастер',
+      resource_type_trainer: 'Тренер',
+      resource_type_staff: 'Сотрудник',
       attr_specialization: 'Специализация',
     },
     days: {
@@ -1103,6 +1106,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       resource_type_manicure_table: 'Маникюр үстелі',
       resource_type_sink: 'Жуғыш',
       resource_type_couch: 'Кушетка',
+      resource_type_master: 'Маман',
+      resource_type_trainer: 'Жаттықтырушы',
+      resource_type_staff: 'Қызметкер',
       attr_specialization: 'Мамандығы',
     },
     days: {
@@ -1655,6 +1661,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       resource_type_manicure_table: 'Manicure Table',
       resource_type_sink: 'Wash Station',
       resource_type_couch: 'Treatment Couch',
+      resource_type_master: 'Master / Specialist',
+      resource_type_trainer: 'Trainer',
+      resource_type_staff: 'Staff',
       attr_specialization: 'Specialization',
     },
     days: {

@@ -244,7 +244,7 @@ function AttributeFieldInput({
             disabled={disabled}
             className="h-4 w-4 rounded border-gray-300"
           />
-          <label htmlFor={`attr-${field.key}`} className="text-sm font-medium">{field.label}</label>
+          <label htmlFor={`attr-${field.key}`} className="text-sm font-medium">{t('niche', field.label)}</label>
         </div>
       )
     default:
@@ -609,7 +609,7 @@ export function ResourceForm({ resource, niche, onSubmit, disabled = false }: Pr
                 {t('common', 'saving')}
               </span>
             ) : (
-              isEdit ? t('common', 'save') : t('common', 'create')
+              isEdit ? t('common', 'save') : t('common', 'add')
             )}
           </Button>
         </div>

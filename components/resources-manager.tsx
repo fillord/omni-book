@@ -409,7 +409,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('common', 'create')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}</DialogTitle>
+            <DialogTitle>{t('common', 'add')} {t('niche', nicheConfig.resourceLabel).toLowerCase()}</DialogTitle>
           </DialogHeader>
           <ResourceForm niche={niche} onSubmit={handleCreate} />
         </DialogContent>

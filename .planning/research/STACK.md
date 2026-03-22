@@ -1,363 +1,203 @@
 # Stack Research
 
-**Domain:** Semantic theming — Tailwind CSS 4.x + shadcn/ui dark mode correctness
-**Researched:** 2026-03-17
-**Confidence:** HIGH (all findings grounded in actual globals.css, component source, and official Tailwind 4 docs)
+**Domain:** Custom service duration input + expanded niche resource/staff type directories (v1.2)
+**Researched:** 2026-03-19
+**Confidence:** HIGH (all findings grounded in actual codebase source; no external libraries required)
 
 ---
 
-## The Core Mechanism: How Tokens Become Utilities
+## Executive Summary
 
-This is not a theoretical question. The app's `globals.css` already implements the full system. Understanding it precisely determines every replacement decision.
+Both features require **zero new dependencies**. Everything needed is already installed and in use in the codebase. The work is pure code changes to existing files:
 
-### Step 1 — CSS custom properties defined in `:root` and `.dark`
-
-```css
-/* app/globals.css — light theme */
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.15 0.01 250);
-  --card: oklch(1 0 0);
-  /* ... all tokens */
-}
-
-/* dark theme — same variable names, different values */
-.dark {
-  --background: oklch(0.12 0.01 250);
-  --foreground: oklch(0.98 0 0);
-  /* ... all tokens */
-}
-```
-
-The `.dark` selector override is the entire mechanism. When next-themes adds `class="dark"` to `<html>`, every CSS variable defined under `.dark` takes precedence via cascade. No JavaScript, no React state, no conditional rendering — pure CSS.
-
-### Step 2 — `@theme inline` bridges variables to Tailwind's utility system
-
-```css
-/* app/globals.css — @theme inline block */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  /* ... all tokens mapped as --color-* */
-}
-```
-
-Tailwind CSS 4 uses a namespace convention: anything defined as `--color-{name}` in `@theme` generates utility classes `bg-{name}`, `text-{name}`, `border-{name}`, `ring-{name}`, etc.
-
-The `inline` keyword is critical. Without it, `var(--background)` would resolve once at compile time using the variable's definition context, breaking the dynamic reference. With `inline`, the utility class generates `background-color: var(--background)` in the final CSS — preserving the live CSS variable reference that switches on `.dark`.
-
-### Step 3 — next-themes sets the class
-
-`components/theme-providers.tsx` configures next-themes with `attribute: 'class'`. When the user toggles theme, next-themes sets `<html class="dark">`. The `.dark` CSS block activates. All `var(--*)` references cascade to their dark values. Every `bg-background`, `text-foreground`, etc. updates automatically across the entire document.
-
-### Step 4 — Body baseline
-
-```css
-/* app/globals.css — @layer base */
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-```
-
-The body baseline is already set. Any component that inherits text color correctly gets `text-foreground` for free. Components that hardcode `text-gray-900` bypass this inheritance.
+- **Custom duration input**: Replace one `<Select>` with `<Input type="number">` in `service-form.tsx`, widen the Zod range in `lib/validations/service.ts` from `min(5).max(480)` to `min(1).max(1440)`.
+- **Expanded niche resource types**: Add new `{ value, label }` entries to `resourceTypes` arrays in `lib/niche/config.ts`, add matching `opt_*` translation keys to the three locale blocks in `lib/i18n/translations.ts`.
 
 ---
 
-## Complete Token Inventory
-
-These are the exact tokens defined in `app/globals.css`. No others exist — do not invent new ones.
-
-### Surface Tokens (backgrounds)
-
-| CSS Variable | Tailwind Utility | Light Value | Dark Value | Semantic Meaning |
-|---|---|---|---|---|
-| `--background` | `bg-background` | `oklch(1 0 0)` — pure white | `oklch(0.12 0.01 250)` — very dark blue-gray | Page/app background |
-| `--card` | `bg-card` | `oklch(1 0 0)` — white | `oklch(0.16 0.01 250)` — dark card surface | Cards, panels, containers |
-| `--popover` | `bg-popover` | `oklch(1 0 0)` — white | `oklch(0.16 0.01 250)` — dark popover | Dropdowns, tooltips, popovers |
-| `--muted` | `bg-muted` | `oklch(0.96 0.01 250)` — light gray | `oklch(0.2 0.02 250)` — dark muted | Secondary areas, table alternates, skeletons |
-| `--secondary` | `bg-secondary` | `oklch(0.96 0.01 250)` — light gray | `oklch(0.2 0.02 250)` — dark secondary | Secondary interactive elements |
-| `--accent` | `bg-accent` | `oklch(0.96 0.01 250)` — light gray | `oklch(0.25 0.02 250)` — slightly lighter | Hover highlights, subtle accents |
-| `--primary` | `bg-primary` | `oklch(0.45 0.18 260)` — indigo | `oklch(0.65 0.18 260)` — bright indigo | Brand primary, CTA buttons |
-| `--destructive` | `bg-destructive` | `oklch(0.58 0.22 27)` — red | `oklch(0.7 0.19 22)` — lighter red | Error/danger states |
-| `--sidebar` | `bg-sidebar` | `oklch(0.98 0.005 250)` — near white | `oklch(0.12 0.01 250)` — dark sidebar | Sidebar panel background |
-
-### Text Tokens (foregrounds)
-
-| CSS Variable | Tailwind Utility | Semantic Meaning |
-|---|---|---|
-| `--foreground` | `text-foreground` | Primary body text on `--background` |
-| `--card-foreground` | `text-card-foreground` | Text inside card/panel surfaces |
-| `--popover-foreground` | `text-popover-foreground` | Text inside popovers/dropdowns |
-| `--muted-foreground` | `text-muted-foreground` | Secondary/subdued text, captions, timestamps |
-| `--secondary-foreground` | `text-secondary-foreground` | Text on secondary backgrounds |
-| `--accent-foreground` | `text-accent-foreground` | Text on accent backgrounds |
-| `--primary-foreground` | `text-primary-foreground` | Text on primary (indigo) backgrounds |
-| `--destructive` | `text-destructive` | Error text, danger labels |
-| `--sidebar-foreground` | `text-sidebar-foreground` | Text inside sidebar |
-| `--sidebar-primary-foreground` | `text-sidebar-primary-foreground` | Text on sidebar primary elements |
-| `--sidebar-muted-foreground` | N/A — not defined | Not available |
-
-### Border & Input Tokens
-
-| CSS Variable | Tailwind Utility | Semantic Meaning |
-|---|---|---|
-| `--border` | `border-border` | Default dividers, card borders, separators |
-| `--input` | `border-input` | Form field borders; also `bg-input` for input backgrounds |
-| `--ring` | `ring-ring`, `outline-ring` | Focus rings on interactive elements |
-| `--sidebar-border` | `border-sidebar-border` | Sidebar internal dividers |
-
-### Sidebar Extended Tokens
-
-These exist for sidebar-specific theming and allow the sidebar to have a subtly different shade from the main content area.
-
-| CSS Variable | Utility | Purpose |
-|---|---|---|
-| `--sidebar` | `bg-sidebar` | Sidebar panel |
-| `--sidebar-foreground` | `text-sidebar-foreground` | Sidebar text |
-| `--sidebar-primary` | `bg-sidebar-primary`, `text-sidebar-primary` | Active/highlighted sidebar items |
-| `--sidebar-primary-foreground` | `text-sidebar-primary-foreground` | Text on highlighted sidebar items |
-| `--sidebar-accent` | `bg-sidebar-accent` | Sidebar hover states |
-| `--sidebar-accent-foreground` | `text-sidebar-accent-foreground` | Text on sidebar hover states |
-| `--sidebar-border` | `border-sidebar-border` | Sidebar dividers |
-| `--sidebar-ring` | `ring-sidebar-ring` | Focus rings in sidebar |
-
-### Chart Tokens
-
-These are for data visualization only — do not use for general UI.
-
-| Variable | Utility | Notes |
-|---|---|---|
-| `--chart-1` through `--chart-5` | `bg-chart-1` etc., `text-chart-1` etc. | Recharts data series colors only |
-
-### Radius Tokens
-
-| Variable | Utility | Value |
-|---|---|---|
-| `--radius` | (base value) | `0.5rem` |
-| `--radius-sm` | `rounded-sm` | `calc(0.5rem * 0.6)` |
-| `--radius-md` | `rounded-md` | `calc(0.5rem * 0.8)` |
-| `--radius-lg` | `rounded-lg` | `0.5rem` |
-| `--radius-xl` | `rounded-xl` | `calc(0.5rem * 1.4)` |
-| `--radius-2xl` | `rounded-2xl` | `calc(0.5rem * 1.8)` |
-
----
-
-## The Dark Variant: `@custom-variant dark`
-
-The app defines:
-
-```css
-@custom-variant dark (&:is(.dark *));
-```
-
-This means: the `dark:` utility variant applies when the element is a descendant of an element with class `dark`.
-
-**Important:** This differs slightly from the Tailwind docs canonical form `(&:where(.dark, .dark *))` — notably it does NOT apply when the element itself has class `dark`, only its descendants. In practice this is inconsequential for layout children, but matters if you ever put `class="dark"` directly on a component rather than `<html>`.
-
-next-themes with `attribute: 'class'` adds `.dark` to `<html>`, so all descendants qualify. The `dark:` variant works as expected throughout the app.
-
-**Critical implication:** `dark:` variants in this app are for exceptions and overrides inside shadcn/ui component internals. For general component work, semantic tokens are the correct approach because they require zero `dark:` duplication.
-
----
-
-## The Replacement Map
-
-This is the authoritative, complete mapping for this project.
-
-### Background Replacements
-
-| Hardcoded Class | Semantic Replacement | Rationale |
-|---|---|---|
-| `bg-white` | `bg-background` | Page/app backgrounds — switches to `oklch(0.12...)` in dark |
-| `bg-white` (in a card/panel) | `bg-card` | Slightly elevated surfaces — better semantic intent |
-| `bg-gray-50` | `bg-muted` | Secondary/subdued areas — maps to `oklch(0.96...)` / `oklch(0.2...)` |
-| `bg-gray-100` | `bg-muted` | Same as above — light gray fills |
-| `bg-gray-200` | `bg-muted` or `bg-secondary` | Both map to same values in this theme |
-| `bg-gray-50` (on input) | `bg-input/50` | Disabled state input backgrounds — use opacity modifier |
-| `bg-blue-50`, `bg-indigo-50` | `bg-primary/10` | Light tints of primary — use opacity modifier on `bg-primary` |
-| `bg-orange-50` | No direct token — keep or add dark: variant | Notification/warning colors have no semantic token in this theme |
-
-### Text Replacements
-
-| Hardcoded Class | Semantic Replacement | Rationale |
-|---|---|---|
-| `text-black` | `text-foreground` | Main body text |
-| `text-gray-900` | `text-foreground` | Primary text — switches to `oklch(0.98...)` in dark |
-| `text-gray-800` | `text-foreground` | Primary text — same mapping |
-| `text-gray-700` | `text-foreground` or `text-card-foreground` | Strong secondary text |
-| `text-gray-600` | `text-muted-foreground` | Secondary text |
-| `text-gray-500` | `text-muted-foreground` | Subdued text — maps to `oklch(0.5...)` / `oklch(0.65...)` |
-| `text-gray-400` | `text-muted-foreground` | Further subdued — same token is correct |
-| `text-white` (on primary bg) | `text-primary-foreground` | White text on indigo buttons/badges |
-| `text-white` (on dark panel) | `text-card-foreground` | Text in panels that should invert |
-| `text-blue-600`, `text-indigo-600` | `text-primary` | Brand color text |
-
-### Border Replacements
-
-| Hardcoded Class | Semantic Replacement | Rationale |
-|---|---|---|
-| `border-gray-200` | `border-border` | Default dividers — maps to `oklch(0.9...)` / `oklch(0.25...)` |
-| `border-gray-300` | `border-border` or `border-input` | Form field borders → `border-input`; structural borders → `border-border` |
-| `border-gray-100` | `border-border` | Light dividers |
-| `divide-gray-200` | `divide-border` | Table/list dividers — same token via `divide-*` utilities |
-
-### Hover State Replacements
-
-| Hardcoded Class | Semantic Replacement | Rationale |
-|---|---|---|
-| `hover:bg-gray-50` | `hover:bg-muted` | Lightest hover — maps to muted surface |
-| `hover:bg-gray-100` | `hover:bg-muted` | Standard hover background |
-| `hover:bg-gray-200` | `hover:bg-accent` | Stronger hover — accent maps to slightly darker muted |
-| `hover:text-gray-900` | `hover:text-foreground` | Hover text contrast |
-| `hover:text-gray-700` | `hover:text-foreground` | Strong hover text |
-| `group-hover:bg-gray-50` | `group-hover:bg-muted` | Same pattern with group modifier |
-
-### Focus & Ring Replacements
-
-| Hardcoded Class | Semantic Replacement | Rationale |
-|---|---|---|
-| `focus:border-gray-300` | `focus:border-input` | Form field focus border |
-| `focus:border-blue-500` | `focus:border-ring` | Focus indicator — ring is primary-matched |
-| `focus:ring-2 focus:ring-gray-200` | `focus-visible:ring-3 focus-visible:ring-ring/50` | Standard shadcn focus pattern |
-| `focus:ring-blue-500` | `focus-visible:ring-ring` | Brand focus ring |
-| `ring-gray-200` | `ring-border` | Subtle outline rings |
-| `outline-gray-300` | `outline-ring/50` | Outline utilities |
-
-### Opacity Modifier Pattern
-
-Tailwind 4 supports the slash opacity modifier on all color utilities. These are correct semantic patterns:
-
-```
-bg-primary/10   → indigo at 10% opacity (replaces bg-indigo-50)
-bg-muted/50     → muted at 50% opacity (CardFooter uses this)
-ring-ring/50    → ring at 50% opacity (focus ring glow)
-text-foreground/70 → slightly subdued foreground
-border-border/50   → subtle border
-```
-
----
-
-## What NOT to Do
-
-### Do not add `dark:` variants as a substitute for semantic tokens
-
-```tsx
-// WRONG — manual duplication, won't stay in sync
-<div className="bg-white dark:bg-gray-800">
-
-// CORRECT — single class, automatic
-<div className="bg-card">
-```
-
-The entire point of the token system is that the `.dark` CSS block handles the flip. Adding `dark:` variants is only appropriate for true exceptions — cases where the dark behavior needs to differ from what the semantic token provides (e.g., the app's `dark:border-orange-800` on the expired-plan banner, which has no semantic token).
-
-### Do not use raw oklch values as arbitrary values
-
-```tsx
-// WRONG — loses token semantics entirely
-<div className="bg-[oklch(0.16_0.01_250)]">
-
-// CORRECT
-<div className="bg-card">
-```
-
-### Do not create new CSS variables in globals.css
-
-The constraint from PROJECT.md is explicit: only use tokens already defined in `globals.css`. The existing token set is comprehensive enough to cover all standard UI patterns.
-
-### Do not use `text-foreground` on colored backgrounds
-
-```tsx
-// WRONG — text-foreground is near-black/near-white; unreadable on primary
-<button className="bg-primary text-foreground">
-
-// CORRECT — use the paired foreground token
-<button className="bg-primary text-primary-foreground">
-```
-
-Each surface token has a paired foreground token. Always use the pair.
-
----
-
-## ThemeProvider Architecture (Actual Implementation)
-
-The app uses segment-scoped ThemeProviders. This is intentional — different sections preserve independent theme state via different `storageKey` values.
-
-```
-app/layout.tsx
-  └─ <html> (bare — no ThemeProvider at root)
-      ├─ app/(auth)/layout.tsx → <AdminThemeProvider>    storageKey="admin-theme"
-      ├─ app/(marketing)/layout.tsx → <AdminThemeProvider>  storageKey="admin-theme"
-      ├─ app/dashboard/layout.tsx → <AdminThemeProvider>  storageKey="admin-theme"
-      ├─ app/admin/layout.tsx → <AdminThemeProvider>      storageKey="admin-theme"
-      ├─ app/(tenant)/layout.tsx → <BookingThemeProvider>  storageKey="booking-theme"
-      └─ app/book/layout.tsx → <BookingThemeProvider>      storageKey="booking-theme"
-```
-
-All providers use `attribute: 'class'`, so next-themes injects `.dark` class on the wrapping element's closest DOM ancestor that `ThemeProvider` controls. In practice, since `ThemeProvider` renders a React context and no DOM element itself, the class lands on `<html>` (next-themes v0.4+ behavior with App Router).
-
-The `@custom-variant dark (&:is(.dark *))` selector in `globals.css` matches all descendants of `.dark` — which in this setup means the entire document when `.dark` is on `<html>`.
-
----
-
-## Core Technologies (Reference)
-
-| Technology | Version | Purpose | Why |
-|---|---|---|---|
-| Tailwind CSS | 4.2.1 | Utility classes | `@theme inline` bridges CSS variables to utilities; no config file needed for token registration |
-| shadcn/ui | 4.0.2 | Component library | Ships with semantic token conventions; all components use `bg-card`, `text-foreground`, etc. by default |
-| next-themes | 0.4.6 | Theme switching | `attribute: 'class'` adds `.dark` to `<html>`; triggers CSS cascade change |
-| OKLch colors | — | Color model | Perceptually uniform; dark theme values chosen for contrast rather than mechanical inversion |
-
----
-
-## Supporting Libraries
+## Recommended Stack
+
+### Core Technologies (Unchanged — Already Installed)
+
+| Technology | Version | Purpose | Why Relevant |
+|------------|---------|---------|--------------|
+| zod | ^4.3.6 | Schema validation for the duration field | `z.number().int().min(1).max(1440)` — same API already used in `lib/validations/service.ts` line 9; only range values change |
+| react-hook-form | ^7.71.2 | Form state and submission | Already manages `durationMin` field as `FormValues.durationMin: string`; no changes to RHF wiring |
+| @hookform/resolvers | ^5.2.2 | Bridges Zod schema into RHF | `zodResolver(createServiceSchema)` already wired in `service-form.tsx`; no changes |
+| shadcn/ui Input | (part of shadcn 4.0.2) | Renders the number input | `<Input type="number" min={1} max={1440}>` — same component already used for `price` field (line 276–285 of `service-form.tsx`) |
+| TypeScript | ^5 | Static types | No new types needed; `durationMin: string` form field type and `number` schema type are unchanged |
+
+### Supporting Libraries (Unchanged — Already Installed)
 
 | Library | Version | Purpose | When to Use |
-|---|---|---|---|
-| clsx | 2.1.1 | Conditional class composition | Combining semantic tokens with conditional classes |
-| tailwind-merge | 3.5.0 | Class conflict resolution | Merging consumer className overrides without duplication |
-| class-variance-authority | 0.7.1 | Component variant definitions | Defining button/badge variant maps using semantic tokens |
+|---------|---------|---------|-------------|
+| shadcn/ui Select | (part of shadcn 4.0.2) | Still needed for `currency` field | Do NOT remove Select imports; currency still uses Select. Remove only the duration `<Select>` usage. |
+| lucide-react | ^0.577.0 | Icons | No new icons needed; existing `Loader2` spinner unchanged |
+
+### Development Tools (Unchanged)
+
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| jest + ts-jest | Unit testing | Existing static-assertion test pattern (`fs.readFileSync` + regex) can be extended to verify `DURATION_OPTIONS` is removed from form usage and `durationMin` schema range |
+| TypeScript compiler | Type checking | No new tsconfig changes needed |
+
+---
+
+## Installation
+
+No new packages to install. Both features use only code changes.
+
+```bash
+# No npm install required.
+# All needed packages are already in package.json dependencies.
+```
+
+---
+
+## Change Surface: Duration Input
+
+### Files That Change
+
+| File | What Changes | Type |
+|------|-------------|------|
+| `lib/validations/service.ts` | Remove `DURATION_OPTIONS` export; change `.min(5).max(480)` to `.min(1).max(1440)` | Logic |
+| `components/service-form.tsx` | Remove Select import usage for duration; replace with `<Input type="number" min={1} max={1440}>` | UI |
+
+### What Does NOT Change
+
+- `CURRENCIES` export and currency `<Select>` — untouched
+- `FormValues.durationMin: string` type — stays string (parsed via `parseInt` in `handleSubmit`, already line 116)
+- `zodResolver` wiring — untouched
+- Database schema — `durationMin` column already stores integer; no migration needed
+- Any downstream consumer of `durationMin` (booking engine, calendar, etc.) — already receives integer via server actions
+
+### Integration Point: price field is the exact model
+
+`service-form.tsx` lines 269–287 show the established pattern for numeric inputs in this codebase:
+
+```tsx
+<Input
+  {...field}
+  type="number"
+  min={0}
+  placeholder="0"
+  disabled={isDisabled}
+/>
+```
+
+Duration input follows the same pattern with `min={1}`, `max={1440}`, and an appropriate placeholder (e.g., `"30"`).
+
+### Zod Schema Change
+
+Current (line 9 of `lib/validations/service.ts`):
+```ts
+durationMin: z.number().int().min(5, 'Минимум 5 мин').max(480, 'Максимум 480 мин'),
+```
+
+Target:
+```ts
+durationMin: z.number().int().min(1, 'Минимум 1 мин').max(1440, 'Максимум 1440 мин'),
+```
+
+`updateServiceSchema` is `createServiceSchema.partial()` — inherits the change automatically.
+
+---
+
+## Change Surface: Expanded Niche Resource/Staff Types
+
+### Files That Change
+
+| File | What Changes | Type |
+|------|-------------|------|
+| `lib/niche/config.ts` | Add new `{ value: string, label: 'opt_*' }` entries to `resourceTypes` arrays for target niches | Data |
+| `lib/i18n/translations.ts` | Add new `opt_*` key entries to the `niche` section in all three locale blocks (`ru`, `kz`, `en`) | Data |
+
+### What Does NOT Change
+
+- `lib/validations/resource.ts` — `RESOURCE_TYPES` enum (`['staff', 'room', 'court', 'table', 'other']`) is the Prisma-backed type. Niche `resourceTypes` in config are **display-layer string values** used in attribute field `forTypes` filtering and Select options. They do NOT need to match `RESOURCE_TYPES`. Existing niches already use values like `'equipment'`, `'staff'`, `'court'` that are not all in the Zod enum — the config types are decorative/display, not validated against the Prisma schema.
+- `components/resource-form.tsx` — already reads `getNicheConfig(niche).resourceTypes` dynamically; new entries appear automatically without any component code change
+- Database schema — no migration needed; resource `type` field stores the string value from the config
+
+### How opt_* Keys Work
+
+New resource type labels follow the same `opt_[6-char-hex]` convention used throughout `lib/niche/config.ts`. Any unique hex fragment not already in `translations.ts` is valid. The key must be added to all three locale blocks (`ru`, `kz`, `en`) under the `niche` section.
+
+### Niche Config Structure (for reference)
+
+```ts
+// lib/niche/config.ts — existing shape
+resourceTypes: [
+  { value: 'staff', label: 'opt_fc9da4' },  // value = stored string; label = opt_* key
+  { value: 'room',  label: 'opt_da78ed' },
+]
+```
+
+New entries follow exactly this shape. The `value` string becomes what gets stored in `resource.type` and what `forTypes` filters match against.
 
 ---
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|---|---|---|
-| Semantic tokens (`bg-card`) | `dark:` variants (`bg-white dark:bg-gray-900`) | Only when component genuinely needs behavior that diverges from the semantic token (e.g., warning banners with custom colors not in the token set) |
-| CSS variable tokens | Hardcoded color utilities | Never — hardcoded utilities are the problem being solved |
-| Existing token set | Adding new tokens to globals.css | Out of scope for this project; only if a future design system expansion is planned |
+| Recommended | Alternative | Why Not |
+|-------------|-------------|---------|
+| `<Input type="number">` (shadcn) | `<Input type="text">` with pattern validation | Number input gives browser-native up/down controls and blocks non-numeric entry; text input requires extra regex validation |
+| `<Input type="number">` (shadcn) | A masked/formatted input library (e.g., react-number-format) | Overkill for an integer 1–1440 range; introduces a new dependency for no DX benefit; price field already uses plain number input |
+| Inline opt_* keys in config + translations file | Separate JSON config per niche | The translations.ts pattern is established and working; extracting to JSON adds indirection with no benefit at this codebase size |
+| Widen existing Zod schema range | Create a separate free-form schema | Single schema is simpler; `updateServiceSchema.partial()` inherits correctly; no divergence to maintain |
+
+---
+
+## What NOT to Add
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `react-number-format` or `imask` | Masked inputs are overkill for 1–1440 integer range; adds bundle weight and new dependency surface | `<Input type="number" min={1} max={1440}>` with Zod validation |
+| `@radix-ui/react-number-field` or similar | Not in the shadcn component set used here; introduces a different component system | shadcn `Input` with `type="number"` — identical to how `price` field works today |
+| New niche files or JSON config | The codebase uses a single `NICHE_CONFIG` object and a single `translations.ts`; fragmentation would require changes to `getNicheConfig` and i18n context | Add entries to existing files |
+| New niche type (`'legal'`, `'fitness'`, etc.) | Adding a new `Niche` type requires updating the `Niche` union, `NICHE_CONFIG`, `getNicheConfig`, translations, and seed data — out of scope for this milestone | Expand resource types within existing niches |
 
 ---
 
 ## Version Compatibility
 
 | Package | Compatible With | Notes |
-|---|---|---|
-| Tailwind CSS 4.2.1 | `@theme inline` directive | This syntax is Tailwind 4 only; Tailwind 3 uses `tailwind.config.js` theme extension instead |
-| next-themes 0.4.6 | Next.js 15 App Router | v0.4+ required for App Router compatibility; v0.3 had hydration issues with App Router |
-| shadcn 4.0.2 | Tailwind 4 | shadcn v4 generates Tailwind 4-compatible components; v3 components use legacy color utilities |
+|---------|-----------------|-------|
+| zod ^4.3.6 | `z.number().int().min().max()` API | Verified: this exact API is used in the live `service.ts` file |
+| react-hook-form ^7.71.2 | `<Input type="number">` via `{...field}` spread | RHF spreads `onChange`/`onBlur`/`value`/`ref`; works identically for text and number inputs |
+| shadcn/ui Input | `type="number"` attribute | Input is a thin wrapper over native `<input>`; `type="number"` passes through |
+| @hookform/resolvers ^5.2.2 | zod ^4.x | Verified: `^5.2.2` in package.json supports zod v4 |
+
+---
+
+## Stack Patterns by Variant
+
+**If displaying duration to end users (booking form, service cards):**
+- Read `service.durationMin` integer directly
+- Format as `${durationMin} мин` using the existing `t('booking', 'minutes')` key
+- No change needed — downstream consumers already handle integer values
+
+**If validating on the server (API routes, server actions):**
+- `createServiceSchema.parse()` / `.safeParse()` already used in server actions
+- Widened range is inherited automatically — no server action changes needed
+
+**If testing the change:**
+- Follow established static assertion pattern: `fs.readFileSync` + regex to verify `DURATION_OPTIONS` is not referenced in `service-form.tsx` after removal
+- Verify new Zod range with a unit test asserting `createServiceSchema.parse({ durationMin: 1440 })` succeeds and `durationMin: 1441` fails
 
 ---
 
 ## Sources
 
-- `app/globals.css` — authoritative token definitions (verified line by line)
-- `components/theme-providers.tsx` — actual next-themes configuration (`attribute: 'class'`, `storageKey` per segment)
-- `components/ui/card.tsx`, `button.tsx`, `input.tsx` etc. — empirical verification of which tokens shadcn/ui components use
-- Tailwind CSS official docs (https://tailwindcss.com/docs/theme) — `@theme inline` behavior, `--color-*` namespace convention
-- Tailwind CSS official docs (https://tailwindcss.com/docs/dark-mode) — `@custom-variant dark` syntax and class-based dark mode
-- HIGH confidence: all key claims verified against actual codebase source and official Tailwind 4 documentation
+- `components/service-form.tsx` — verified current Select usage (lines 244–267), price Input pattern (lines 269–287), form shape
+- `lib/validations/service.ts` — verified current `DURATION_OPTIONS` and Zod range (`min(5).max(480)`)
+- `lib/niche/config.ts` — verified `resourceTypes` structure, `opt_*` label convention
+- `lib/i18n/translations.ts` — verified `niche` section location (line 469, 1001, 1533 per locale), `opt_*` key format
+- `lib/validations/resource.ts` — verified `RESOURCE_TYPES` enum is independent from niche config resource types
+- `components/resource-form.tsx` — verified `getNicheConfig(niche).resourceTypes` dynamic read (line 34)
+- `package.json` — verified installed versions: zod 4.3.6, react-hook-form 7.71.2, @hookform/resolvers 5.2.2
+- HIGH confidence: all findings from direct codebase inspection; no external sources required for implementation decisions
 
 ---
 
-*Stack research for: Tailwind CSS 4.x + shadcn/ui semantic theming*
-*Researched: 2026-03-17*
+*Stack research for: v1.2 custom duration input + niche resource type expansion*
+*Researched: 2026-03-19*

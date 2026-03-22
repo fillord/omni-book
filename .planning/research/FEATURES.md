@@ -1,226 +1,233 @@
 # Feature Research
 
-**Domain:** Dark mode theming — semantic token coverage for a Next.js 15 + shadcn/ui multi-tenant SaaS
-**Researched:** 2026-03-17
-**Confidence:** HIGH (based on direct codebase audit)
+**Domain:** Custom service duration input + expanded niche resource/staff type directories — omni-book v1.2
+**Researched:** 2026-03-19
+**Confidence:** HIGH (codebase audit; no WebSearch available — domain knowledge applied from well-established booking UX patterns)
 
 ---
 
-## Overview
+## Context: What Already Exists
 
-This is not a greenfield feature spec. It is an audit-and-fix exercise. "Features" here are the theming behaviors a production SaaS must exhibit in dark mode, and the specific surfaces where they must be verified or repaired. Research was conducted by inspecting every component file in the codebase for hardcoded Tailwind color classes vs. semantic CSS variable tokens.
+Before defining what is new, the existing baseline matters for dependency tracking:
 
-**Token system available:** Full shadcn/ui OKLch token set is already defined in `app/globals.css` for both `:root` (light) and `.dark` (dark):
-`background`, `foreground`, `card`, `card-foreground`, `popover`, `popover-foreground`, `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `muted`, `muted-foreground`, `accent`, `accent-foreground`, `destructive`, `border`, `input`, `ring`, `chart-1..5`, `sidebar`, `sidebar-foreground`, `sidebar-accent`, `sidebar-border`, `sidebar-ring`.
-
-**Missing from token system:** No `body` baseline application of `bg-background text-foreground` was found in `globals.css`'s `body` rule — only `font-family` is set.
+| Component | Current State |
+|-----------|---------------|
+| `lib/validations/service.ts` | `DURATION_OPTIONS = [5,10,15,20,30,40,45,60,90,120,180]`; Zod: `min(5).max(480)` |
+| `components/service-form.tsx` | Duration rendered as a shadcn `<Select>` driven by `DURATION_OPTIONS` |
+| `components/booking-form.tsx` | Displays duration as `{durationMin} {t('booking','minutes')}` (lines 497, 704) |
+| `lib/niche/config.ts` | 4 niches: `medicine`, `beauty`, `horeca`, `sports`; each has `resourceTypes[]` and `attributeFields[]` |
+| `lib/validations/resource.ts` | `RESOURCE_TYPES = ['staff','room','court','table','other']` — global enum used at DB-level |
+| `lib/i18n/translations.ts` | All niche strings are `opt_XXXXXX` keys in the `niche` i18n section (RU/KZ/EN) |
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Must Work — Dark Mode Is Broken Without These)
+### Table Stakes (Users Expect These)
 
-These are the behaviors users observe immediately when toggling dark mode. A single failure here makes the entire theme feel broken.
+Features tenants expect when creating services. Missing these makes the form feel incomplete or rigid.
 
-| Feature | Why Expected | Complexity | Files Affected |
-|---------|--------------|------------|---------------|
-| Body/page background responds to theme | Root canvas flipping white in dark mode is the most visible failure | LOW | `app/globals.css` (body rule missing `bg-background`) |
-| Card backgrounds flip to dark | Cards are the primary content container on every page; white cards on a dark canvas scream "broken" | LOW | Dashboard stat cards, resource/service list cards, analytics cards |
-| Text contrast on all surfaces | Unreadable text is an accessibility failure, not just aesthetic | LOW | All surfaces — replace `text-gray-900`, `text-gray-500`, `text-zinc-900`, `text-zinc-500` with tokens |
-| Form input backgrounds and borders | Inputs that stay white in dark mode break every data entry flow | LOW | `booking-form.tsx`, `resource-form.tsx`, `service-form.tsx`, auth pages |
-| Table row backgrounds and dividers | Data tables with white rows in dark mode are unusable | LOW | `bookings-dashboard.tsx` (uses shadcn Table component — already semantic), admin tenant table |
-| Navigation/sidebar background | The main navigation chrome must not stay white | LOW | `dashboard-sidebar.tsx` (audit shows clean), `components/landing/Navbar.tsx` (audit shows clean) |
-| Modal/dialog/sheet/dropdown backgrounds | Overlay surfaces that stay light-colored create jarring contrast breaks | LOW | shadcn `dialog`, `dropdown-menu`, `sheet` — all use `--popover` token already |
-| Border colors on all surfaces | Visible borders disappear or create harsh contrast when hardcoded | LOW | Replace `border-gray-200`, `border-gray-300` with `border-border`; replace `border-zinc-200` with `border-border` |
-| Hover state backgrounds | Interactive elements with `hover:bg-gray-100` stay light on dark hover | LOW | Multiple files — `hover:bg-zinc-50` → `hover:bg-muted`, etc. |
-| Focus ring colors | Focus rings must remain visible in dark mode for keyboard nav | LOW | Replace `focus:border-gray-300` with `focus:border-input` |
-| Badge/pill backgrounds | Inline status pills with hardcoded backgrounds become invisible or clash | LOW | `analytics-dashboard.tsx` stat cards, booking form service pills, tenant public page |
-
-### Surface-by-Surface Table Stakes Breakdown
-
-**Surface: `app/globals.css` (body rule)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `body` | No `bg-background text-foreground` on body — root canvas not token-driven | Add `@apply bg-background text-foreground;` (or CSS variable equivalent) to the `body` rule |
-
-**Surface: Dashboard (`app/dashboard/`, `components/dashboard/`)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `app/dashboard/page.tsx` | Uses `bg-white/10`, `bg-white/15`, `border-white/30` — alpha-transparency on white is intentional (gradient overlays on colored hero card, correct for dark mode too) | These are safe — white at low alpha on colored background works in both modes |
-| `app/dashboard/layout.tsx` | Uses `dark:` prefix variants directly (`dark:border-orange-800`, etc.) for superadmin banner | Verify pattern is not applied to structural backgrounds; the existing instance is a contextual alert, acceptable |
-| `components/dashboard/activity-timeline.tsx` | Needs audit | Audit for hardcoded grays |
-| `components/bookings-dashboard.tsx` | Clean — no hardcoded gray/white found | No action needed |
-| `components/analytics-dashboard.tsx` | Stat card `iconBg` uses hardcoded Tailwind color classes (`bg-blue-50 text-blue-600`, `bg-green-50 text-green-600`, etc.) | Wrap in `dark:` variant or use opacity modifiers; these icon badges are the only issue |
-| `components/analytics-dashboard.tsx` | Chart `stroke="#f4f4f5"` (CartesianGrid lines) hardcoded — invisible in dark mode | Replace with CSS variable reference via `style` prop or computed value |
-| `components/dashboard-sidebar.tsx` | Clean — no hardcoded grays found | No action needed |
-| `components/staff-manager.tsx` | Needs audit | Not directly reviewed |
-| `components/services-manager.tsx` | Needs audit | Not directly reviewed |
-| `components/resources-manager.tsx` | Needs audit | Not directly reviewed |
-
-**Surface: Landing (`components/landing/`, `app/(marketing)/`)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `components/landing/PricingCards.tsx` | `bg-white text-indigo-600 hover:bg-indigo-50` on CTA button inside a gradient hero card | Button on a dark gradient card — needs `dark:` variant or semantic token |
-| `components/landing/HeroSection.tsx` | No hardcoded grays found | No action needed |
-| `components/landing/Navbar.tsx` | No hardcoded grays found | No action needed |
-| `components/landing/Footer.tsx` | No hardcoded grays found | No action needed |
-| `components/landing/NicheCards.tsx` | No hardcoded grays found | No action needed |
-| `components/landing/DemoSection.tsx` | No hardcoded grays found | No action needed |
-| `components/landing/FeaturesGrid.tsx` | Needs audit | Not directly reviewed |
-| `components/landing/StatsCounter.tsx` | Needs audit | Not directly reviewed |
-| `components/landing/Testimonials.tsx` | Needs audit | Not directly reviewed |
-
-**Surface: Tenant Booking (`app/(tenant)/`, `components/tenant-public-page.tsx`, `components/booking-form.tsx`, `components/booking-calendar.tsx`)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `components/tenant-public-page.tsx` | `bg-white text-slate-900` as root container, `bg-white dark:bg-zinc-900` on header and content — uses manual `dark:` prefixes instead of semantic tokens | Replace `bg-white` → `bg-background`, `text-slate-900` → `text-foreground`, `bg-zinc-950` → `bg-background`, `bg-zinc-900` → `bg-card`, `border-zinc-200` → `border-border` |
-| `components/tenant-public-page.tsx` | Hero button `bg-white text-blue-700 hover:bg-blue-50` per niche — white button on colored hero background | Keep as-is or use `text-primary-foreground bg-background` — needs design intent verification |
-| `components/booking-form.tsx` | Uses `dark:` prefix throughout (`dark:bg-zinc-900`, `dark:border-zinc-700`, etc.) — heavy manual dual-class pattern | Migrate to semantic tokens; `bg-zinc-900` (dark) / `bg-white` (light) → `bg-background`; `border-zinc-200/dark:border-zinc-700` → `border-input` |
-| `components/booking-form.tsx` | Niche accent classes (`bg-blue-600 text-white`, `bg-pink-600 text-white`, etc.) for step indicators and slot selection — these are intentional brand colors | Leave niche accent colors as-is; they are not theme-mode colors |
-| `components/booking-calendar.tsx` | `bg-gray-400` on calendar legend dots | Replace with `bg-muted-foreground` |
-
-**Surface: Auth (`app/(auth)/`)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `app/(auth)/login/page.tsx` | `bg-orange-600 hover:bg-orange-700 text-white` on force-login emergency button | Intentional semantic color (warning state) — acceptable, keep |
-| `app/(auth)/register/page.tsx` | Needs audit | Not directly reviewed |
-| `app/(auth)/verify-otp/page.tsx` | Needs audit | Not directly reviewed |
-
-**Surface: Admin Platform (`app/admin/`)**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `app/admin/page.tsx` | No hardcoded color classes found | No action needed |
-| `app/admin/tenants/admin-tenant-row.tsx` | Uses alpha-opacity semantic colors (`bg-amber-500/15 text-amber-700 dark:text-amber-300`) — manually dual-classed | Acceptable pattern for semantic status colors; no replacement needed |
-
-**Surface: Shared/Root**
-
-| Component | Issue | Fix |
-|-----------|-------|-----|
-| `components/service-form.tsx` | `border-gray-300` on checkbox | Replace with `border-input` |
-| `components/resource-form.tsx` | `border-gray-300` on two checkbox elements | Replace with `border-input` |
-| `components/banned-actions.tsx` | No hardcoded colors found | No action needed |
-| `components/ui/skeleton.tsx` | Uses `bg-muted` — already semantic | No action needed |
-| `components/ui/sonner.tsx` | Passes `--popover`, `--popover-foreground`, `--border` CSS vars to Sonner — already semantic | No action needed |
-
----
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Free-entry duration (number input, 1–1440 min) | Tenants create services of arbitrary length — 25-min consultations, 75-min fitness classes, 8h paintball sessions don't fit preset options | LOW | Replaces `<Select>` with `<Input type="number">`; must update Zod `max(480)` → `max(1440)` and `min(5)` → `min(1)` |
+| Inline validation with clear error message | Number inputs accept invalid values (0, decimals, empty); user must be told the rule at the point of error | LOW | Zod error messages already localized; add `FormMessage` display (already wired via `form.control`) |
+| Human-readable duration display on public booking page | Customers see "90 min" or "1 h 30 min" — raw minutes are acceptable but "90 minutes" is clearer | LOW | Currently displays `{durationMin} minutes`; optional formatting helper (e.g. 90 → "1 ч 30 мин") is a polish step, not required |
+| Existing duration values survive the migration | Services saved with old Select values (5, 10, 15… 180) must render correctly after form switch | LOW | Number input pre-populates from `service.durationMin` — no DB migration needed |
+| Duration unit label adjacent to input | Without a unit label ("min"), a number input is ambiguous | LOW | Add static "мин" suffix next to the input (via InputAdornment pattern or wrapping div) |
+| Resource type Select reads from niche config, not global enum | Tenants only see types relevant to their niche — showing "court" to a clinic is confusing | MEDIUM | Already done via `nicheConfig.resourceTypes[]` in `resource-form.tsx`; new types must be added to both `RESOURCE_TYPES` enum and `NICHE_CONFIG.resourceTypes` |
+| New resource types visible in staff specialization dropdowns | Attribute fields (e.g. `specialization` select) only render for the correct `forTypes` — new types need `forTypes` entries | LOW | Config-driven via `attributeFields[].forTypes`; adding a new type means extending the array |
+| opt_ translations for new types in all 3 locales | New `opt_*` keys must exist in RU, KZ, and EN locale maps or the UI renders raw `opt_XXXXXX` strings | MEDIUM | Three locale maps must be updated simultaneously; KZ is often the highest-effort locale |
 
 ### Differentiators (Competitive Advantage)
 
-These are above minimum viable dark mode correctness. They improve the dark mode experience but the product is not broken without them.
+These improve the experience beyond table stakes. Not critical for v1.2 launch.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Chart grid lines using semantic color | `stroke="#f4f4f5"` CartesianGrid lines become invisible in dark mode (they match dark bg) — fixing this makes analytics actually usable in dark mode | LOW | `analytics-dashboard.tsx`: pass computed color from CSS variable rather than hardcoded hex |
-| Recharts chart fills themed via CSS variables | Bar/area fills currently use hardcoded hex colors (`#22c55e`, `#ef4444`); they remain visible but don't adapt to theme palette | MEDIUM | Out of scope per PROJECT.md — third-party internals; acceptable as-is |
-| Stat card icon badges themed | `bg-blue-50 text-blue-600` (light only) icon containers in analytics stat cards look fine in light, washed out in dark | LOW | Replace with `bg-primary/10 text-primary` or similar alpha token pattern |
-| Tenant booking page color transitions | `transition-colors duration-300` already present in tenant-public-page; smooth theming crossfades are already partially implemented | LOW | Ensure the same transition is on all major containers |
-| System theme preference auto-detection | `next-themes` with `defaultTheme="system"` honors OS preference on first visit — verify this is wired correctly in providers | LOW | Check `components/theme-providers.tsx` configuration |
-| Dark mode persistence across sessions | `next-themes` persists theme in localStorage by default — verify no SSR flash | LOW | Ensure `suppressHydrationWarning` on `<html>` — standard next-themes setup |
+| Duration display formatting (90 min → "1 ч 30 мин") | Appointment summaries feel more professional with natural language durations | LOW | Single formatting helper function; used in booking-form summary rows and public page service cards |
+| Quick-select chips alongside number input | Common durations (15, 30, 60, 90) as clickable presets that populate the input; user can override with custom value | MEDIUM | Not in scope for v1.2 — adds UI complexity; number input alone is sufficient |
+| Staff specialization free-text fallback | When a tenant's specialty doesn't match preset options, allow free-text entry | MEDIUM | Deferred — current `select` type covers standard cases; `text` type already exists as alternative |
+| Niche-specific scheduling defaults per new resource type | `buildDefaultSchedule()` in `resource-form.tsx` uses a `switch(niche)` block; new sub-types don't need new cases | LOW | Schedule defaults are niche-level, not type-level — no change needed |
 
----
-
-### Anti-Features (Do Not Do These)
+### Anti-Features (Commonly Requested, Often Problematic)
 
 | Anti-Feature | Why Requested | Why Problematic | Alternative |
 |--------------|---------------|-----------------|-------------|
-| Adding `dark:` prefix variants alongside existing semantic tokens | Feels like "covering both bases" | Creates class duplication that diverges over time; `dark:bg-zinc-900` plus `bg-background` on same element means the explicit zinc value wins and the token is ignored | Use only the semantic token — it already switches automatically via `.dark` class |
-| Inverting SVG icons in dark mode (`dark:invert`) | Quick way to make white icons visible | Breaks color icons, applies to all SVG children including colored elements, creates unexpected hues | Use `currentColor` in SVGs so they inherit `text-foreground`; or use Lucide icons which already use `currentColor` |
-| Creating new CSS custom properties outside `globals.css` | To handle "edge cases" | Fragments the token system; new properties won't automatically get dark mode values | Map the edge case to an existing token or add a properly paired `:root` + `.dark` entry to `globals.css` |
-| Using Tailwind arbitrary values for colors (`bg-[#ffffff]`) | Precision color matching | Bypasses the entire token system; invisible to dark mode switching | Use the nearest semantic token; if exact shade is critical, add it to the token system |
-| Replacing niche accent classes (blue-600, pink-600, orange-600, green-600) | They are "hardcoded colors" | They are intentional brand/niche identity colors, not background utility colors; `bg-blue-600 text-white` on a selected booking slot IS correct in both modes | Leave niche accent colors alone; only audit background/text/border utility colors |
-| Modifying component structure or logic as part of color fixes | Developer temptation while already in a file | Violates project's strict scope constraint — pure color class replacement only | Make only the color class change; nothing else |
-| Adding Tailwind `dark:` variants when the file already uses semantic tokens | Redundancy | The shadcn semantic tokens already apply the dark value automatically; adding explicit `dark:` overrides can conflict | Trust the token system — if a component uses `bg-card` it is already correct in dark mode |
+| Duration in hours:minutes picker (HH:MM input) | "More intuitive" | Two-field compound inputs require parsing on submit, break react-hook-form's single-field model, and are harder to validate; most booking tools use minutes internally | Keep single number input in minutes; add formatted display on the customer-facing side only |
+| Replacing `RESOURCE_TYPES` enum with a pure string field | "More flexible, no enum constraint" | The global `RESOURCE_TYPES` enum may be referenced in DB queries, type guards, or Prisma schema — removing it without a migration plan breaks existing resources | Extend the enum with new values rather than replacing it; treat it as an append-only list |
+| Generating opt_ keys from niche type labels at runtime | "Saves writing translation keys" | Breaks the static translation lookup pattern; the `opt_XXXXXX` hash system is intentionally opaque to avoid key collisions and allow refactoring of display labels independently | Continue generating new `opt_*` keys for each new string and adding all three locale strings |
+| Per-service min/max duration constraints | "Block services under 15 min" | Additional validation complexity that should be a tenant preference, not a system constraint; the 1-min floor already prevents abuse | Keep Zod validation to system-wide floor/ceiling (1–1440); tenants self-govern sensible values |
+| Allowing decimal minutes (0.5, 1.5) | "Some treatments are 7.5 min" | Fractional minutes complicate slot-grid calculations throughout the booking engine; existing schema stores integer | Integer minutes only; 1-minute granularity is sufficient for any real-world service |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Body baseline (bg-background on body)
-    └──enables──> All page surfaces (without this, even correct-token components may sit on a white canvas)
+[Custom Duration Input]
+    └──requires──> Zod schema update (min/max bounds in createServiceSchema)
+    └──requires──> DURATION_OPTIONS removal or deprecation from service-form.tsx
+    └──requires──> Duration display stays correct on booking-form.tsx (no change needed — already uses raw durationMin)
 
-Semantic border tokens (border-border, border-input)
-    └──required by──> Form inputs, cards, dividers, tables
+[New Niche Resource Types]
+    └──requires──> RESOURCE_TYPES enum extension in lib/validations/resource.ts
+    └──requires──> NicheConfig.resourceTypes[] entries in lib/niche/config.ts
+    └──requires──> New opt_ keys in lib/i18n/translations.ts (all 3 locales)
+    └──optionally──> New attributeFields[] entries if the type has specific metadata
 
-Semantic background tokens (bg-background, bg-card, bg-muted)
-    └──required by──> Text contrast (text must be tested against the actual background token it sits on)
-                          └──required by──> Hover state tokens (hover:bg-muted only makes sense if bg-background is the base)
+[New Staff Specializations]
+    └──requires──> New opt_ keys in lib/i18n/translations.ts (all 3 locales)
+    └──requires──> attributeFields[].options[] extension in lib/niche/config.ts
+    └──no DB change needed (stored as JSON in resource.attributes)
 
-Manual dark: variants (existing pattern in booking-form.tsx, tenant-public-page.tsx)
-    └──conflicts──> Semantic token approach
-                    (migrating away from dual-class pattern to single semantic token is the goal)
+[RESOURCE_TYPES enum extension]
+    └──may require──> Prisma schema check (if type is an enum column, not a string column)
 ```
 
 ### Dependency Notes
 
-- **Body baseline enables everything:** If `globals.css` body does not apply `bg-background`, pages that correctly use `bg-card` for cards will have those cards floating on a white document background even in dark mode. Fix the body first.
-- **tenant-public-page.tsx and booking-form.tsx use conflicting patterns:** These files were written with explicit `dark:` prefixed classes. Migrating them to semantic tokens is correct but requires care — removing the `dark:` class AND replacing the light-mode class with a token in one pass.
-- **Niche accent colors are independent:** The per-niche coloring system (`blue`, `pink`, `orange`, `green`) for booking UI accent colors is business logic expressed as CSS. It is not a theming system and must not be converted to semantic tokens.
+- **Duration input does not touch booking-form.tsx:** The customer-facing booking flow already renders `{durationMin}` directly from the service record; no consumer needs updating when the creation form switches to free entry.
+- **Resource type enum is the critical gate:** Before adding new resource types to `NICHE_CONFIG.resourceTypes`, verify whether the `resource.type` DB column is a Prisma enum (requiring a migration) or a plain string (no migration needed). The current `RESOURCE_TYPES` in `validations/resource.ts` is a TypeScript/Zod enum only — if the DB column is `String`, adding new values is safe without migration.
+- **All three locales must be updated together:** Missing a KZ or EN translation for a new `opt_*` key will fall back silently to the raw `opt_XXXXXX` string on KZ/EN pages. The existing `optLabel` helper and inline guard pattern (`strVal.startsWith('opt_') ? t('niche', strVal) : strVal`) have no fallback beyond the raw key.
 
 ---
 
-## MVP Definition
+## MVP Definition (v1.2 Scope)
 
-This milestone is a fix, not a feature launch. "MVP" here means the minimum set of surfaces that must be correct before the dark mode can be called working.
+### Launch With (v1.2)
 
-### Fix First (Phase 1 — Structural Correctness)
+- [ ] Number input for duration (min=1, max=1440, integer) replacing the Select component — why essential: unlocks all non-preset durations that exist in real businesses
+- [ ] Zod schema bounds updated to `min(1).max(1440)` — why essential: form would reject valid custom values without this
+- [ ] "мин" unit label visible next to input — why essential: unlocks accessibility and eliminates ambiguity
+- [ ] Medicine (Clinic) niche: expanded resource types and specializations — why essential: most common niche, has broadest real-world type requirements
+- [ ] Cafe/Horeca niche: expanded resource types — why essential: existing `table`/`room`/`staff` coverage is thin
+- [ ] Sports niche: expanded resource types and staff specializations — why essential: courts and trainers are the core product for this niche
+- [ ] Beauty Salon niche: expanded staff specializations — why essential: existing 6 specializations miss common services like nail tech and eyebrow specialist
+- [ ] All new opt_ keys populated in RU, KZ, EN locales — why essential: any missing key renders as raw hash in production
 
-- [ ] `app/globals.css` body applies `bg-background text-foreground` — fixes root canvas
-- [ ] `components/service-form.tsx` and `components/resource-form.tsx` — `border-gray-300` checkbox borders → `border-input`
-- [ ] `components/booking-calendar.tsx` — `bg-gray-400` legend dot → `bg-muted-foreground`
+### Add After Validation (v1.x)
 
-### Fix Next (Phase 2 — Primary User Surfaces)
+- [ ] Duration formatted as "X ч Y мин" in booking summaries — trigger: customer feedback that raw minutes feel unprofessional
+- [ ] Quick-select duration chips alongside number input — trigger: tenant feedback that freeform entry is slower than preset buttons
 
-- [ ] `components/tenant-public-page.tsx` — full migration from manual `dark:` dual-classes to semantic tokens (most impactful public-facing surface)
-- [ ] `components/booking-form.tsx` — full migration from manual `dark:` dual-classes to semantic tokens (booking flow is the core product)
-- [ ] `components/landing/PricingCards.tsx` — CTA button white background on gradient card
+### Future Consideration (v2+)
 
-### Fix Last (Phase 3 — Dashboard Polish)
-
-- [ ] `components/analytics-dashboard.tsx` — stat card icon badge backgrounds + CartesianGrid stroke color
-- [ ] Remaining landing components (`FeaturesGrid.tsx`, `StatsCounter.tsx`, `Testimonials.tsx`) — full audit
-- [ ] Auth pages (`register/page.tsx`, `verify-otp/page.tsx`) — full audit
-- [ ] Dashboard subcomponents (`staff-manager.tsx`, `services-manager.tsx`, `resources-manager.tsx`, `activity-timeline.tsx`) — full audit
+- [ ] Duration in HH:MM compound input — defer: unnecessary complexity given integer-minute storage
+- [ ] Per-niche duration validation presets — defer: no evidence this is needed
 
 ---
 
 ## Feature Prioritization Matrix
 
-| Feature/Fix | User Visibility | Implementation Cost | Priority |
-|-------------|-----------------|---------------------|----------|
-| Body `bg-background` in globals.css | CRITICAL — affects all pages | LOW — single line | P1 |
-| `tenant-public-page.tsx` token migration | HIGH — public-facing, first impression | MEDIUM — many dual-class patterns to refactor | P1 |
-| `booking-form.tsx` token migration | HIGH — core product flow | MEDIUM — many dual-class patterns | P1 |
-| Analytics CartesianGrid stroke | MEDIUM — chart gridlines invisible in dark | LOW — one computed value | P2 |
-| Analytics stat card icon badges | LOW — small colored squares | LOW — three classes | P2 |
-| `PricingCards.tsx` CTA button | MEDIUM — conversion-critical button | LOW — one conditional class | P2 |
-| Checkbox `border-gray-300` fixes | LOW — small chrome detail | LOW — two files, two lines each | P2 |
-| Auth page audit | MEDIUM — login is a trust surface | LOW — mostly semantic already | P2 |
-| Landing FeaturesGrid / Testimonials audit | LOW — mostly semantic from codebase evidence | LOW | P3 |
-| Dashboard manager component audit | MEDIUM — admin UX quality | LOW per file | P2 |
+| Feature | Tenant Value | Implementation Cost | Priority |
+|---------|-------------|---------------------|----------|
+| Number input replacing Select | HIGH — removes constraint for all tenants | LOW — form component swap + schema change | P1 |
+| Zod min/max update (1–1440) | HIGH — required for custom input to work | LOW — two constants | P1 |
+| Unit label "мин" next to input | MEDIUM — UX clarity | LOW — static text wrapper | P1 |
+| Medicine expanded types/specializations | HIGH — most used niche | LOW — config + translations | P1 |
+| Beauty expanded specializations | HIGH — second most common niche | LOW — config + translations | P1 |
+| Horeca expanded resource types | MEDIUM — tables/rooms already exist | LOW — config + translations | P2 |
+| Sports expanded types/specializations | MEDIUM — existing court/trainer coverage | LOW — config + translations | P2 |
+| Duration display formatting helper | LOW — cosmetic | LOW — single function | P3 |
 
 **Priority key:**
-- P1: Required for dark mode to be non-broken on primary flows
-- P2: Required for dark mode to be polished and complete
-- P3: Nice to have, fine to leave for follow-up
+- P1: Must land in v1.2 for the milestone goal to be achieved
+- P2: Should land in v1.2 if P1 is complete
+- P3: Nice to have, can slip to v1.3
+
+---
+
+## Niche Resource Type and Specialization Reference
+
+This section documents what the expanded config should contain, based on established domain knowledge of each niche.
+
+### Medicine (Clinic)
+
+**Current resource types:** `staff` (Врач), `room` (Кабинет), `equipment` (Оборудование)
+
+**Gaps:** Missing types for nurse, lab technician, procedure room distinctions.
+
+**Recommended additions:**
+- Resource type: `nurse` — Медсестра / Мейіргер / Nurse
+- Resource type: `lab` — Лаборатория / Зертхана / Laboratory
+- Resource type: `procedure_room` — Процедурный кабинет / Процедуралық кабинет / Procedure Room
+
+**Current specializations (staff `specialization` text field):** free text
+
+**Recommended specialization select options (new opt_ values needed):**
+- Терапевт / Therapist
+- Педиатр / Pediatrician
+- Кардиолог / Cardiologist
+- Дерматолог / Dermatologist
+- Стоматолог / Dentist
+- Невролог / Neurologist
+- Офтальмолог / Ophthalmologist
+- Гинеколог / Gynecologist
+- Хирург / Surgeon
+- УЗИ-специалист / Sonographer
+
+### Beauty Salon
+
+**Current resource types:** `staff` (Мастер), `room` (Кабинет)
+
+**Current specializations:** `opt_e5a075` Парикмахер, `opt_9a187d` Стилист, `opt_a4e207` Косметолог, `opt_e36b15` Мастер маникюра, `opt_bc063e` Визажист, `opt_bada78` Массажист
+
+**Gaps:** Missing nail extension technician, eyebrow/lash specialist, tattoo/PMU artist, and spa therapist.
+
+**Recommended specialization additions:**
+- Мастер педикюра / Pedicure Technician
+- Мастер наращивания ногтей / Nail Extension Technician
+- Мастер бровей / Eyebrow Specialist
+- Мастер ресниц / Lash Technician
+- Мастер татуажа / PMU / Permanent Makeup Artist
+- СПА-терапевт / Spa Therapist
+- Барбер / Barber
+
+### Horeca (Cafe / Restaurant)
+
+**Current resource types:** `table` (Столик), `room` (Зал / VIP), `staff` (Официант / Шеф)
+
+**Gaps:** Private event rooms and outdoor/terrace zones are commonly bookable separately; delivery/catering staff roles exist in some venues.
+
+**Recommended additions:**
+- Resource type: `bar_seat` — Место у бара / Бар орны / Bar Seat
+- Resource type: `outdoor` — Терраса / летняя площадка / Outdoor / Terrace
+- Resource type: `event_room` — Банкетный зал / Банкет залы / Banquet Hall
+
+**Staff role additions:**
+- Бармен / Bartender
+- Сомелье / Sommelier
+- Организатор мероприятий / Event Coordinator
+
+### Sports (Sports Club / Fitness)
+
+**Current resource types:** `court` (Корт / Поле), `room` (Зал), `staff` (Тренер), `equipment` (Инвентарь)
+
+**Gaps:** Pool lanes, climbing walls, locker rooms, and group class rooms are distinct bookable resources in modern sports facilities.
+
+**Recommended additions:**
+- Resource type: `pool_lane` — Дорожка в бассейне / Жүзу жолағы / Pool Lane
+- Resource type: `studio` — Студия / Студия / Studio (для групповых занятий)
+- Resource type: `locker_room` — Раздевалка / Киім ауыстыру / Locker Room (for time-block bookings)
+
+**Staff specialization additions (trainer subtypes):**
+- Персональный тренер / Personal Trainer
+- Тренер по йоге / Yoga Instructor
+- Тренер по пилатесу / Pilates Instructor
+- Тренер по боксу / Boxing Trainer
+- Тренер по плаванию / Swimming Coach
+- Тренер по единоборствам / Martial Arts Instructor
+- Тренер по групповым программам / Group Fitness Instructor
 
 ---
 
 ## Sources
 
-- Direct codebase audit: `app/globals.css`, `components/tenant-public-page.tsx`, `components/booking-form.tsx`, `components/booking-calendar.tsx`, `components/analytics-dashboard.tsx`, `components/service-form.tsx`, `components/resource-form.tsx`, `components/dashboard-sidebar.tsx`, `components/bookings-dashboard.tsx`, `components/ui/sonner.tsx`, `components/ui/skeleton.tsx`, `components/landing/` (all files), `app/dashboard/` (all files), `app/admin/` (all files), `app/(auth)/login/page.tsx`
-- Project context: `.planning/PROJECT.md` (semantic replacement map, scope constraints)
-- Architecture context: `.planning/codebase/ARCHITECTURE.md`, `.planning/codebase/STRUCTURE.md`
-- shadcn/ui token conventions (well-established, HIGH confidence from direct inspection of globals.css token definitions)
+- Direct codebase audit: `lib/niche/config.ts`, `lib/validations/service.ts`, `lib/validations/resource.ts`, `lib/i18n/translations.ts`, `components/service-form.tsx`, `components/resource-form.tsx`, `components/booking-form.tsx`
+- Project context: `.planning/PROJECT.md` (v1.2 target features, existing patterns)
+- Domain knowledge: Standard booking system resource taxonomies for clinic, beauty, hospitality, and sports verticals (HIGH confidence for table stakes; MEDIUM confidence for specific specialization lists — these should be validated with real tenants)
 
 ---
 
-*Feature research for: Dark mode audit and fix — omni-book multi-tenant SaaS*
-*Researched: 2026-03-17*
+*Feature research for: v1.2 Custom Duration Input + Niche Expansion — omni-book multi-tenant SaaS*
+*Researched: 2026-03-19*

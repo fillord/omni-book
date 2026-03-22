@@ -239,63 +239,66 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
         </Tabs>
 
         {/* Duration + Price + Currency */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <FormField
             control={form.control}
             name="durationMin"
             render={({ field }) => {
               const numVal = Math.max(1, Math.min(1440, parseInt(field.value) || 1))
               return (
-                <FormItem className="col-span-full">
+                <FormItem>
                   <FormLabel>{t('form', 'duration')} <span className="text-destructive">*</span></FormLabel>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => field.onChange(String(Math.max(1, numVal - 1)))}
-                      disabled={isDisabled || numVal <= 1}
-                    >
-                      <Minus />
-                    </Button>
-                    <FormControl>
-                      <div className="relative flex-1">
-                        <Input
-                          {...field}
-                          type="number"
-                          min={1}
-                          max={1440}
-                          className="pr-10 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                          disabled={isDisabled}
-                        />
-                        <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => field.onChange(String(Math.max(1, numVal - 1)))}
+                        disabled={isDisabled || numVal <= 1}
+                      >
+                        <Minus />
+                      </Button>
+                      <div className="relative min-w-0 flex-1">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="number"
+                            min={1}
+                            max={1440}
+                            className="w-full pr-12 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            disabled={isDisabled}
+                          />
+                        </FormControl>
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           min
                         </span>
                       </div>
-                    </FormControl>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => field.onChange(String(Math.min(1440, numVal + 1)))}
-                      disabled={isDisabled || numVal >= 1440}
-                    >
-                      <Plus />
-                    </Button>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {[15, 30, 60].map((preset) => (
                       <Button
-                        key={preset}
                         type="button"
                         variant="outline"
-                        size="sm"
-                        onClick={() => field.onChange(String(preset))}
-                        disabled={isDisabled}
+                        size="icon-sm"
+                        onClick={() => field.onChange(String(Math.min(1440, numVal + 1)))}
+                        disabled={isDisabled || numVal >= 1440}
                       >
-                        {preset} min
+                        <Plus />
                       </Button>
-                    ))}
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[15, 30, 60].map((preset) => (
+                        <Button
+                          key={preset}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => field.onChange(String(preset))}
+                          disabled={isDisabled}
+                        >
+                          {preset}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                   <FormMessage />
                 </FormItem>
