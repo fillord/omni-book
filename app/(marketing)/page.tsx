@@ -13,7 +13,7 @@ export default function MarketingHome() {
   return (
     <>
       <Navbar />
-      <main>
+      <main className="bg-[var(--neu-bg)]">
         <HeroSection />
         <FadeIn>
           <StatsCounter />

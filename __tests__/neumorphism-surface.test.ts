@@ -133,8 +133,8 @@ describe("NEU-05: Input uses neu-inset", () => {
     expect(source).toContain("neu-inset");
   });
 
-  it("input.tsx contains border-transparent", () => {
-    expect(source).toContain("border-transparent");
+  it("input.tsx contains bg-[var(--neu-bg)] explicit background", () => {
+    expect(source).toContain("bg-[var(--neu-bg)]");
   });
 
   it("input.tsx does NOT contain the old pattern 'border border-input'", () => {
