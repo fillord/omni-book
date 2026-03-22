@@ -18,7 +18,7 @@ export function ThemeToggle({ className = '', iconOnly = false }: Props) {
 
   if (!mounted) {
     return (
-      <div className={`h-8 w-8 rounded-md bg-muted animate-pulse ${className}`} />
+      <div className={`h-8 w-8 rounded-md bg-background neu-raised animate-pulse ${className}`} />
     )
   }
 
@@ -32,7 +32,7 @@ export function ThemeToggle({ className = '', iconOnly = false }: Props) {
     return (
       <button
         onClick={toggle}
-        className={`flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors ${className}`}
+        className={`flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground neu-raised hover:text-neu-accent transition-all ${className}`}
         aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         title={isDark ? 'Светлая тема' : 'Тёмная тема'}
       >
@@ -44,7 +44,7 @@ export function ThemeToggle({ className = '', iconOnly = false }: Props) {
   return (
     <button
       onClick={toggle}
-      className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors w-full ${className}`}
+      className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-muted-foreground neu-raised hover:text-neu-accent transition-all w-full ${className}`}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDark ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
