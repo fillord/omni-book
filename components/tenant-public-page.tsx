@@ -21,61 +21,41 @@ type ColorClasses = {
   border: string
   avatarBg: string
   badge: string
-  heroGradient: string
-  heroBtn: string
-  heroHint: string
-  stickyBtn: string
   priceAccent: string
 }
 
 const COLORS: Record<string, ColorClasses> = {
   blue: {
-    accent:       'text-blue-600',
-    light:        'bg-blue-50',
-    border:       'border-blue-200',
-    avatarBg:     'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
-    badge:        'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
-    heroGradient: 'bg-gradient-to-br from-blue-600 to-blue-800',
-    heroBtn:      'bg-white text-blue-700 hover:bg-blue-50',
-    heroHint:     'text-blue-100',
-    stickyBtn:    'bg-blue-600 text-white hover:bg-blue-700',
-    priceAccent:  'text-blue-600',
+    accent:      'text-blue-600',
+    light:       'bg-blue-50',
+    border:      'border-blue-200',
+    avatarBg:    'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+    badge:       'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+    priceAccent: 'text-blue-600',
   },
   pink: {
-    accent:       'text-pink-600',
-    light:        'bg-pink-50',
-    border:       'border-pink-200',
-    avatarBg:     'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
-    badge:        'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
-    heroGradient: 'bg-gradient-to-br from-pink-500 to-pink-700',
-    heroBtn:      'bg-white text-pink-700 hover:bg-pink-50',
-    heroHint:     'text-pink-100',
-    stickyBtn:    'bg-pink-600 text-white hover:bg-pink-700',
-    priceAccent:  'text-pink-600',
+    accent:      'text-pink-600',
+    light:       'bg-pink-50',
+    border:      'border-pink-200',
+    avatarBg:    'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+    badge:       'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+    priceAccent: 'text-pink-600',
   },
   orange: {
-    accent:       'text-orange-600',
-    light:        'bg-orange-50',
-    border:       'border-orange-200',
-    avatarBg:     'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
-    badge:        'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
-    heroGradient: 'bg-gradient-to-br from-orange-500 to-orange-700',
-    heroBtn:      'bg-white text-orange-700 hover:bg-orange-50',
-    heroHint:     'text-orange-100',
-    stickyBtn:    'bg-orange-600 text-white hover:bg-orange-700',
-    priceAccent:  'text-orange-600',
+    accent:      'text-orange-600',
+    light:       'bg-orange-50',
+    border:      'border-orange-200',
+    avatarBg:    'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+    badge:       'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+    priceAccent: 'text-orange-600',
   },
   green: {
-    accent:       'text-green-600',
-    light:        'bg-green-50',
-    border:       'border-green-200',
-    avatarBg:     'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
-    badge:        'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
-    heroGradient: 'bg-gradient-to-br from-green-600 to-green-800',
-    heroBtn:      'bg-white text-green-700 hover:bg-green-50',
-    heroHint:     'text-green-100',
-    stickyBtn:    'bg-green-600 text-white hover:bg-green-700',
-    priceAccent:  'text-green-600',
+    accent:      'text-green-600',
+    light:       'bg-green-50',
+    border:      'border-green-200',
+    avatarBg:    'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+    badge:       'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+    priceAccent: 'text-green-600',
   },
 }
 
@@ -203,10 +183,10 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
   const hasSocial   = !!(social.instagram || social.whatsapp || social.telegram)
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+    <div className="min-h-screen bg-[var(--neu-bg)] text-foreground transition-colors duration-300">
 
       {/* ── Sticky header ─────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 bg-card backdrop-blur border-b border-border transition-colors duration-300">
+      <header className="sticky top-0 z-50 bg-[var(--neu-bg)] backdrop-blur neu-raised transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -247,7 +227,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
             {canBook && (
               <a
                 href="#booking"
-                className={`text-sm font-semibold px-4 py-2 rounded-xl transition-colors ${colors.stickyBtn}`}
+                className={`text-sm font-semibold px-4 py-2 rounded-xl neu-btn ${colors.accent} transition-colors`}
               >
                 {t('niche', nicheConfig.bookingLabel)}
               </a>
@@ -258,9 +238,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
-        className={`${colors.heroGradient} py-20 md:py-32`}
+        className="bg-[var(--neu-bg)] py-20 md:py-32"
         style={tenant.coverUrl ? {
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.72)), url(${tenant.coverUrl})`,
+          backgroundImage: `url(${tenant.coverUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         } : undefined}
@@ -271,36 +251,36 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={tenant.logoUrl}
-            alt={tenantName}
-            className="w-16 h-16 rounded-2xl mb-4 object-cover shadow-lg"
-          />
-        )}
+              alt={tenantName}
+              className="w-16 h-16 rounded-2xl mb-4 object-cover neu-raised"
+            />
+          )}
 
-        <span className={`inline-block mb-3 text-xs font-semibold uppercase tracking-widest ${colors.heroHint}`}>
-          {t('niche', nicheConfig.label)}
-        </span>
-        <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-4">
-          {tenantName}
-        </h1>
+          <span className={`inline-block mb-3 text-xs font-semibold uppercase tracking-widest ${colors.accent}`}>
+            {t('niche', nicheConfig.label)}
+          </span>
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight mb-4">
+            {tenantName}
+          </h1>
 
-        {/* Tenant description (from settings) */}
-        {tenantDesc && (
-          <p className="text-lg text-white/85 mb-3 max-w-2xl leading-relaxed">
-            {tenantDesc}
-          </p>
-        )}
+          {/* Tenant description (from settings) */}
+          {tenantDesc && (
+            <p className="text-lg text-muted-foreground mb-3 max-w-2xl leading-relaxed">
+              {tenantDesc}
+            </p>
+          )}
 
-          <p className="text-xl md:text-2xl font-medium text-white/80 mb-2">
+          <p className="text-xl md:text-2xl font-medium text-foreground mb-2">
             {t('niche', nicheConfig.heroTitle)}
           </p>
-          <p className="text-base text-white/60 mb-8">
+          <p className="text-base text-muted-foreground mb-8">
             {t('niche', nicheConfig.heroSubtitle)}
           </p>
 
           {canBook && (
             <a
               href="#booking"
-              className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-base transition-colors shadow-lg ${colors.heroBtn} w-full sm:w-auto`}
+              className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl font-semibold text-base neu-btn ${colors.accent} transition-colors w-full sm:w-auto`}
             >
               {t('niche', nicheConfig.bookingLabel)} →
             </a>
@@ -310,7 +290,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
       {/* ── Contact info bar ──────────────────────────────────────────────── */}
       {hasContacts && (
-        <section className="border-b border-border bg-card/50">
+        <section className="bg-[var(--neu-bg)]">
           <div className="max-w-5xl mx-auto px-4 py-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               {tenant.workingHours && (
@@ -334,7 +314,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         </section>
       )}
 
-      <main className="max-w-5xl mx-auto px-4 py-12 space-y-16">
+      <main className="max-w-5xl mx-auto px-4 py-12 space-y-16 bg-[var(--neu-bg)]">
 
         {/* ── Specialists / Staff ─────────────────────────────────────────── */}
         {sections.includes('specialists') && staffResources.length > 0 && (
@@ -392,7 +372,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               {tenant.services.map((s) => (
                 <div
                   key={s.id}
-                  className={`snap-start shrink-0 w-56 rounded-2xl border-2 border-border bg-card p-4 flex flex-col gap-2`}
+                  className="snap-start shrink-0 w-56 rounded-2xl bg-[var(--neu-bg)] neu-raised p-4 flex flex-col gap-2"
                 >
                   <p className="font-semibold text-foreground text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                   {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
@@ -404,7 +384,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
                         ? t('booking', 'free')
                         : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
                     </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-background text-muted-foreground border border-border">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
                       {s.durationMin} {t('booking', 'minutes')}
                     </span>
                   </div>
@@ -421,7 +401,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'portfolio')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed border-border bg-card/50 p-12 text-center`}>
+            <div className="rounded-2xl bg-[var(--neu-bg)] neu-inset p-12 text-center">
               <p className="text-muted-foreground text-sm">{t('public', 'galleryPlaceholder')}</p>
             </div>
           </section>
@@ -434,7 +414,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               <SectionHeading title={t('public', 'menu')} className="mb-0" />
               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}>{t('public', 'soon')}</span>
             </div>
-            <div className={`rounded-2xl border-2 border-dashed border-border bg-card/50 p-12 text-center`}>
+            <div className="rounded-2xl bg-[var(--neu-bg)] neu-inset p-12 text-center">
               <p className="text-muted-foreground text-sm">{t('public', 'menuPlaceholder')}</p>
             </div>
           </section>
@@ -444,9 +424,9 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         {sections.includes('pricing') && tenant.services.length > 0 && (
           <section>
             <SectionHeading title={t('public', 'priceList')} />
-            <div className="rounded-2xl border border-border overflow-hidden divide-y divide-border">
+            <div className="rounded-2xl bg-[var(--neu-bg)] neu-raised overflow-hidden divide-y divide-transparent">
               {tenant.services.map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-card hover:bg-muted transition-colors">
+                <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-[var(--neu-bg)] transition-colors">
                   <div>
                     <p className="font-semibold text-foreground text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
                     {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
@@ -468,7 +448,7 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         )}
 
         {/* ── Booking form ────────────────────────────────────────────────── */}
-        <section id="booking" className="rounded-2xl bg-card border-border border-2 p-6 md:p-8">
+        <section id="booking" className="rounded-2xl bg-[var(--neu-bg)] neu-raised p-6 md:p-8">
           <h2 className="text-2xl font-bold text-foreground mb-1">{t('niche', nicheConfig.bookingLabel)}</h2>
           <p className="text-muted-foreground text-sm mb-8">
             {t('public', 'bookingHint').replace('{resource}', t('niche', nicheConfig.resourceLabel).toLowerCase())}
@@ -607,7 +587,7 @@ function ResourceCard({
     .join(', ')
 
   return (
-    <div className="group rounded-2xl border-2 border-border bg-card p-5 flex flex-col gap-4 hover:border-border/80 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+    <div className="group rounded-2xl bg-[var(--neu-bg)] neu-raised p-5 flex flex-col gap-4 transition-all duration-200">
       {/* Avatar / Icon */}
       {isTable ? (
         <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-muted dark:bg-muted">
@@ -665,7 +645,7 @@ function InfoBlock({
   href?: string
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 neu-inset bg-[var(--neu-bg)] rounded-xl p-3">
       <span className="text-xl">{icon}</span>
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>

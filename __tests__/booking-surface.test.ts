@@ -184,24 +184,26 @@ describe("BOOK-03: booking-calendar.tsx uses intentional functional palette, no 
 
 // ---- BOOK-04 ----
 describe("BOOK-04: brand accent colors are preserved in both components", () => {
-  it("tenant-public-page.tsx COLORS map contains bg-blue-600 (blue niche accent)", () => {
+  // In neumorphism, accent is text-only (no solid bg fills on public page buttons/CTAs).
+  // Solid bg-*-600 fills live only in booking-form.tsx (CTA submit button).
+  it("tenant-public-page.tsx COLORS map uses text-blue-600 accent (neumorphic — no solid fill)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).toContain("bg-blue-600");
+    expect(source).toContain("text-blue-600");
   });
 
-  it("tenant-public-page.tsx COLORS map contains bg-pink-600 (pink niche accent)", () => {
+  it("tenant-public-page.tsx COLORS map uses text-pink-600 accent (neumorphic — no solid fill)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).toContain("bg-pink-600");
+    expect(source).toContain("text-pink-600");
   });
 
-  it("tenant-public-page.tsx COLORS map contains bg-orange-600 (orange niche accent)", () => {
+  it("tenant-public-page.tsx COLORS map uses text-orange-600 accent (neumorphic — no solid fill)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).toContain("bg-orange-600");
+    expect(source).toContain("text-orange-600");
   });
 
-  it("tenant-public-page.tsx COLORS map contains bg-green-600 (green niche accent)", () => {
+  it("tenant-public-page.tsx COLORS map uses text-green-600 accent (neumorphic — no solid fill)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).toContain("bg-green-600");
+    expect(source).toContain("text-green-600");
   });
 
   it("booking-form.tsx BOOKING_COLORS contains bg-blue-600 (blue niche)", () => {
@@ -226,10 +228,10 @@ describe("BOOK-04: brand accent colors are preserved in both components", () => 
 });
 
 // ---- BOOK-05 ----
-describe("BOOK-05: root container uses semantic bg-background token, not hardcoded neutral", () => {
-  it("tenant-public-page.tsx contains bg-background (semantic root canvas token)", () => {
+describe("BOOK-05: root container uses neumorphic canvas token, not hardcoded neutral", () => {
+  it("tenant-public-page.tsx contains bg-[var(--neu-bg)] (neumorphic canvas token)", () => {
     const source = readComponent("tenant-public-page.tsx");
-    expect(source).toContain("bg-background");
+    expect(source).toContain("bg-[var(--neu-bg)]");
   });
 
   it("tenant-public-page.tsx min-h-screen root container does not use bg-white as canvas", () => {
