@@ -8,16 +8,16 @@ export function HeroSection() {
   const { t } = useI18n()
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-violet-50 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 py-24 md:py-36">
+    <section className="relative overflow-hidden bg-background py-24 md:py-36">
       {/* Animated gradient blobs */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-indigo-100/60 dark:bg-indigo-900/20 blur-3xl animate-gradient"
+        className="pointer-events-none absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full bg-neu-accent/10 blur-3xl animate-gradient"
         style={{ backgroundImage: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2), rgba(99,102,241,0.2))', backgroundSize: '200% 200%' }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-violet-100/60 dark:bg-violet-900/20 blur-3xl"
+        className="pointer-events-none absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-neu-accent/5 blur-3xl"
       />
 
       {/* Floating decorative icons */}
@@ -35,7 +35,7 @@ export function HeroSection() {
       </div>
 
       <div className="relative max-w-4xl mx-auto px-4 text-center">
-        <span className="inline-block mb-4 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold tracking-wide uppercase animate-fade-in">
+        <span className="inline-block mb-4 px-3 py-1 rounded-full neu-raised bg-background text-neu-accent text-xs font-semibold tracking-wide uppercase animate-fade-in">
           {t('landing', 'heroBadge')}
         </span>
 

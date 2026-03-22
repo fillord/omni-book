@@ -25,7 +25,7 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 bg-background/90 backdrop-blur border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/90 backdrop-blur neu-raised">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="font-bold text-xl tracking-tight text-foreground">
           omni<span className="text-indigo-600">book</span>
