@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 Phase: —
 Plan: —
 Status: Milestone v1.2 complete — ready for next milestone
-Last activity: 2026-03-20 — v1.2 milestone archived (2 phases, 2 plans, 12 requirements delivered)
+Last activity: 2026-03-23 — Completed quick task 260323-1el: Масштабное обновление типов ресурсов для бизнес-ниш
 
 ## Accumulated Context
 
