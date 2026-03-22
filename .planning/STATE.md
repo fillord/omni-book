@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-03-22T20:53:31.499Z"
-last_activity: "2026-03-23 — Completed 01-03-PLAN.md (Neumorphism popup/overlay components: Dialog, Sheet, Select, DropdownMenu, Badge)"
+status: complete
+last_updated: "2026-03-23T02:33:21Z"
+last_activity: 2026-03-23 — Completed 01-04-PLAN.md (Phase 01 fully done: HeroSection, Navbar, ThemeToggle + shadow rendering fix; checkpoint approved; 38 tests pass)
 progress:
   total_phases: 1
   completed_phases: 1
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 01-neumorphism-refactor
-Plan: 04 of 4 — code tasks complete, awaiting checkpoint:human-verify (Task 3)
-Status: In progress — plan 01-04 tasks 1-2 complete, stopped at checkpoint:human-verify
-Last activity: 2026-03-23 — Completed 01-04-PLAN.md tasks 1-2 (HeroSection, Navbar, ThemeToggle Neumorphism adaptation; 253 tests pass)
+Plan: 04 of 4 — ALL COMPLETE
+Status: Complete — Phase 01 fully done; checkpoint approved; 38 tests pass; SUMMARY created
+Last activity: 2026-03-23 — Completed 01-04-PLAN.md (HeroSection, Navbar, ThemeToggle Neumorphism + .neu-* @layer fix; visual checkpoint approved)
 
 ## Accumulated Context
 
@@ -55,6 +55,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 01-neumorphism-refactor plan 03]: Badge outline variant uses neu-inset replacing border-border — depth via inset shadow replaces border outline pattern
 - [Phase 01-neumorphism-refactor]: [Phase 01-neumorphism-refactor plan 04]: ThemeToggle hover:bg-muted removed (Pitfall 9 — invisible after token remap); replaced with neu-raised + hover:text-neu-accent
 - [Phase 01-neumorphism-refactor]: [Phase 01-neumorphism-refactor plan 04]: HeroSection replaces gradient with bg-background; decorative blobs use bg-neu-accent opacity variants
+- [Phase 01-neumorphism-refactor]: .neu-* classes moved from @layer base to @layer utilities — Tailwind specificity requires utility layer for shadow classes
+- [Phase 01-neumorphism-refactor]: Explicit bg-[var(--neu-bg)] on component roots required for shadow depth — shorthand tokens (bg-card, bg-background) don't guarantee correct background for Neumorphism shadows
 
 ### Pending Todos
 
