@@ -65,3 +65,18 @@ Plans:
 - [ ] 01-02-PLAN.md — Core UI components (Button, Input, Card)
 - [ ] 01-03-PLAN.md — Popup/overlay components (Dialog, Select, DropdownMenu, Sheet, Badge)
 - [ ] 01-04-PLAN.md — Landing page adaptation (HeroSection, Navbar, ThemeToggle) + full regression
+
+### Phase 2: Super-Admin "God Mode" & Platform Management
+
+**Goal:** Build a comprehensive super-admin panel for platform owners to monitor, manage, and communicate with tenants — delivering a Financial Analytics Dashboard (MRR + plan breakdown), per-tenant drill-down with read-only data views (services, resources, staff), Global Announcement Banners visible across all tenant dashboards, targeted in-app notifications (Bell icon) for individual tenant owners, and an Audit & Activity Log for critical tenant actions — all built with strict Neumorphism UI adherence (var(--neu-bg), .neu-raised, .neu-inset).
+**Requirements:** [GOD-01, GOD-02, GOD-03, GOD-04, GOD-05, GOD-06]
+**Depends on:** Phase 1 (Neumorphism design system)
+**Plans:** 0 plans
+
+Requirements:
+- GOD-01: Financial & Platform Analytics Dashboard — MRR display and breakdown of active tenants per plan tier (Free / Pro / Enterprise)
+- GOD-02: Tenant Drill-Down (Deep View) — clickable tenant row opens read-only view of that tenant's Services, Resources, and Staff/Masters
+- GOD-03: Global Announcement Banners — super-admin creates banners that appear at the top of ALL tenant dashboards platform-wide
+- GOD-04: Targeted In-App Notifications — Bell icon notification system; super-admin sends custom messages to specific individual tenants
+- GOD-05: Audit & Activity Logs — system log table recording tenant logins, plan changes (upgrade/downgrade), and deletion of critical data
+- GOD-06: Neumorphism Design Adherence — all new pages, charts, tables, and modals use var(--neu-bg), .neu-raised for cards/buttons, .neu-inset for inputs/table containers
