@@ -63,12 +63,12 @@ export default async function AdminIndexPage() {
 
       {/* KPI cards */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="bg-card">
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Всего компаний
             </CardTitle>
-            <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            <div className="h-9 w-9 rounded-full neu-raised bg-[var(--neu-bg)] text-neu-accent flex items-center justify-center">
               <Building2 className="h-4 w-4" />
             </div>
           </CardHeader>
@@ -79,12 +79,12 @@ export default async function AdminIndexPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Всего бронирований
             </CardTitle>
-            <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            <div className="h-9 w-9 rounded-full neu-raised bg-[var(--neu-bg)] text-neu-accent flex items-center justify-center">
               <CalendarCheck className="h-4 w-4" />
             </div>
           </CardHeader>
@@ -95,12 +95,12 @@ export default async function AdminIndexPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Новых бронирований за 30 дней
             </CardTitle>
-            <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+            <div className="h-9 w-9 rounded-full neu-raised bg-[var(--neu-bg)] text-neu-accent flex items-center justify-center">
               <Activity className="h-4 w-4" />
             </div>
           </CardHeader>
@@ -115,7 +115,7 @@ export default async function AdminIndexPage() {
       {/* Main two-column grid */}
       <section className="grid gap-6 lg:grid-cols-2">
         {/* Top tenants by bookings */}
-        <Card className="bg-card">
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -131,7 +131,7 @@ export default async function AdminIndexPage() {
                 Пока нет активных компаний с бронированиями.
               </p>
             ) : (
-              <div className="divide-y divide-border text-sm">
+              <div className="space-y-1 text-sm">
                 {topTenants.map((tenant) => (
                   <div
                     key={tenant.id}
@@ -161,7 +161,7 @@ export default async function AdminIndexPage() {
         </Card>
 
         {/* Recent tenants */}
-        <Card className="bg-card">
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base md:text-lg">
               <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -177,7 +177,7 @@ export default async function AdminIndexPage() {
                 Новых регистраций пока нет.
               </p>
             ) : (
-              <div className="divide-y divide-border text-sm">
+              <div className="space-y-1 text-sm">
                 {recentTenants.map((tenant) => (
                   <div
                     key={tenant.id}

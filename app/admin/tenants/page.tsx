@@ -30,11 +30,11 @@ export default async function AdminTenantsPage() {
         </div>
       </div>
 
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <div className="neu-raised bg-[var(--neu-bg)] rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-muted/30 border-b border-border">
+              <tr className="neu-inset bg-[var(--neu-bg)]">
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Компания</th>
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Владелец</th>
                 <th className="p-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Регистрация</th>

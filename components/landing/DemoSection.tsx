@@ -9,36 +9,32 @@ const DEMOS = [
     nameKey: "demoNamePolyclinic",
     descriptionKey: "demoPolyclinicDesc",
     nicheKey: "medicine",
-    color: "bg-blue-50 border-blue-200 hover:border-blue-400 dark:bg-card dark:border-blue-900/60 dark:hover:border-blue-500/80",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400",
-    dot: "bg-blue-500 dark:bg-blue-400",
+    badgeColor: "text-blue-500",
+    dotColor: "bg-blue-500",
   },
   {
     slug: "beauty-studio",
     nameKey: "demoNameBeauty",
     descriptionKey: "demoBeautyDesc",
     nicheKey: "beauty",
-    color: "bg-pink-50 border-pink-200 hover:border-pink-400 dark:bg-card dark:border-pink-900/60 dark:hover:border-pink-500/80",
-    badge: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-400",
-    dot: "bg-pink-500 dark:bg-pink-400",
+    badgeColor: "text-pink-500",
+    dotColor: "bg-pink-500",
   },
   {
     slug: "bistro-central",
     nameKey: "demoNameBistro",
     descriptionKey: "demoBistroDesc",
     nicheKey: "horeca",
-    color: "bg-orange-50 border-orange-200 hover:border-orange-400 dark:bg-card dark:border-orange-900/60 dark:hover:border-orange-500/80",
-    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400",
-    dot: "bg-orange-500 dark:bg-orange-400",
+    badgeColor: "text-orange-500",
+    dotColor: "bg-orange-500",
   },
   {
     slug: "sport-arena",
     nameKey: "demoNameSport",
     descriptionKey: "demoSportDesc",
     nicheKey: "sport",
-    color: "bg-green-50 border-green-200 hover:border-green-400 dark:bg-card dark:border-green-900/60 dark:hover:border-green-500/80",
-    badge: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400",
-    dot: "bg-green-500 dark:bg-green-400",
+    badgeColor: "text-green-500",
+    dotColor: "bg-green-500",
   },
 ]
 
@@ -58,16 +54,16 @@ export function DemoSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {DEMOS.map(({ slug, nameKey, descriptionKey, nicheKey, color, badge, dot }) => (
+          {DEMOS.map(({ slug, nameKey, descriptionKey, nicheKey, badgeColor, dotColor }) => (
             <a
               key={slug}
               href={`/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={`group rounded-2xl border-2 p-5 flex flex-col gap-3 transition-all ${color}`}
+              className="group rounded-2xl neu-raised bg-[var(--neu-bg)] p-5 flex flex-col gap-3 transition-all hover-lift"
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge}`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full neu-inset bg-[var(--neu-bg)] ${badgeColor}`}>
                   {t('landing', nicheKey)}
                 </span>
                 <ArrowUpRight
@@ -84,7 +80,7 @@ export function DemoSection() {
                 </p>
               </div>
               <div className="flex items-center gap-1.5 mt-auto">
-                <span className={`w-2 h-2 rounded-full ${dot}`} />
+                <span className={`w-2 h-2 rounded-full ${dotColor}`} />
                 <span className="text-xs text-muted-foreground">/{slug}</span>
               </div>
             </a>

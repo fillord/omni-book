@@ -60,10 +60,10 @@ const TESTIMONIALS_EN: Testimonial[] = [
 ]
 
 const NICHE_COLORS: Record<string, string> = {
-  medicine: "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200",
-  beauty: "bg-pink-100 text-pink-700 dark:bg-pink-900/60 dark:text-pink-200",
-  horeca: "bg-orange-100 text-orange-700 dark:bg-orange-900/60 dark:text-orange-200",
-  sports: "bg-green-100 text-green-700 dark:bg-green-900/60 dark:text-green-200",
+  medicine: "text-blue-500",
+  beauty:   "text-pink-500",
+  horeca:   "text-orange-500",
+  sports:   "text-green-500",
 }
 
 export function Testimonials() {
@@ -101,13 +101,13 @@ export function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           {/* Testimonial card */}
-          <div className="bg-card rounded-2xl border border-border p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
+          <div className="neu-raised bg-[var(--neu-bg)] rounded-2xl p-8 md:p-10 text-center min-h-[220px] flex flex-col justify-center">
             <div key={active} className="animate-fade-in">
               <p className="text-lg md:text-xl text-foreground leading-relaxed mb-6 italic">
                 &ldquo;{testimonials[active].text}&rdquo;
               </p>
               <div className="flex items-center justify-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${NICHE_COLORS[testimonials[active].niche] ?? 'bg-muted text-muted-foreground'}`}>
+                <div className={`w-10 h-10 rounded-full neu-raised bg-[var(--neu-bg)] flex items-center justify-center text-sm font-bold ${NICHE_COLORS[testimonials[active].niche] ?? 'text-muted-foreground'}`}>
                   {testimonials[active].avatar}
                 </div>
                 <div className="text-left">

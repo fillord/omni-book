@@ -38,9 +38,9 @@ export function FeaturesGrid() {
           {FEATURES.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="bg-card text-card-foreground rounded-2xl border border-border p-6 flex gap-4 hover-lift"
+              className="rounded-2xl neu-raised bg-[var(--neu-bg)] p-6 flex gap-4 hover-lift"
             >
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 shrink-0">
+              <div className="w-10 h-10 rounded-lg neu-raised bg-[var(--neu-bg)] flex items-center justify-center text-neu-accent shrink-0">
                 <Icon size={20} />
               </div>
               <div>

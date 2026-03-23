@@ -3,27 +3,11 @@
 import { Stethoscope, Scissors, UtensilsCrossed, Dumbbell } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
 
-const COLOR_MAP = {
-  blue: {
-    bg: "bg-blue-50 dark:bg-card",
-    icon: "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400",
-    border: "border-blue-100 dark:border-blue-900/50",
-  },
-  pink: {
-    bg: "bg-pink-50 dark:bg-card",
-    icon: "bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400",
-    border: "border-pink-100 dark:border-pink-900/50",
-  },
-  orange: {
-    bg: "bg-orange-50 dark:bg-card",
-    icon: "bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400",
-    border: "border-orange-100 dark:border-orange-900/50",
-  },
-  green: {
-    bg: "bg-green-50 dark:bg-card",
-    icon: "bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400",
-    border: "border-green-100 dark:border-green-900/50",
-  },
+const ICON_COLORS: Record<string, string> = {
+  blue:   "text-blue-500",
+  pink:   "text-pink-500",
+  orange: "text-orange-500",
+  green:  "text-green-500",
 }
 
 export function NicheCards() {
@@ -49,27 +33,24 @@ export function NicheCards() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {NICHES.map(({ icon: Icon, title, description, color }) => {
-            const c = COLOR_MAP[color]
-            return (
-              <div
-                key={title}
-                className={`rounded-2xl border ${c.border} ${c.bg} p-6 flex flex-col gap-4 hover-lift cursor-default`}
-              >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.icon}`}>
-                  <Icon size={24} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground mb-2">
-                    {title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {description}
-                  </p>
-                </div>
+          {NICHES.map(({ icon: Icon, title, description, color }) => (
+            <div
+              key={title}
+              className="rounded-2xl neu-raised bg-[var(--neu-bg)] p-6 flex flex-col gap-4 hover-lift cursor-default"
+            >
+              <div className={`w-12 h-12 rounded-xl neu-raised bg-[var(--neu-bg)] flex items-center justify-center ${ICON_COLORS[color]}`}>
+                <Icon size={24} />
               </div>
-            )
-          })}
+              <div>
+                <h3 className="font-semibold text-foreground mb-2">
+                  {title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

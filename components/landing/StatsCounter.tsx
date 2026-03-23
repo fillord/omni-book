@@ -74,7 +74,7 @@ export function StatsCounter() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, idx) => (
             <div key={idx} className="text-center">
-              <p className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+              <p className="text-4xl md:text-5xl font-bold text-neu-accent mb-2">
                 <AnimatedNumber end={stat.value} suffix={stat.suffix} />
               </p>
               <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>

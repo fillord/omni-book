@@ -68,7 +68,7 @@ export function Navbar() {
           <ClientOnly fallback={<div className="w-24 h-8 bg-muted rounded animate-pulse" />}>
             <Link
               href="/register"
-              className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors font-medium"
+              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-neu-accent font-medium transition-all active:neu-inset"
             >
               {t('common', 'register')}
             </Link>

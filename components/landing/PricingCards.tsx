@@ -70,51 +70,31 @@ export function PricingCards() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          {PLANS.map(({ name, priceKey, period, description, features, cta, href, highlight }) => (
+          {PLANS.map(({ name, priceKey, period, features, cta, href, highlight }) => (
             <div
               key={name}
-              className={`rounded-2xl p-6 flex flex-col gap-5 border-2 ${
-                highlight
-                  ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200 dark:shadow-indigo-900/40"
-                  : "bg-card text-card-foreground border-border"
+              className={`rounded-2xl neu-raised bg-[var(--neu-bg)] p-6 flex flex-col gap-5 ${
+                highlight ? "ring-2 ring-neu-accent/40 scale-[1.02]" : ""
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span
-                    className={`text-sm font-semibold ${
-                      highlight ? "text-indigo-100" : "text-muted-foreground"
-                    }`}
-                  >
-                    {name}
-                  </span>
+                  <span className="text-sm font-semibold text-muted-foreground">{name}</span>
                   {highlight && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-white font-medium">
+                    <span className="text-xs px-2 py-0.5 rounded-full neu-inset bg-[var(--neu-bg)] text-neu-accent font-medium">
                       {t('landing', 'popular')}
                     </span>
                   )}
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span
-                    className={`text-3xl font-bold ${
-                      highlight ? "text-white" : "text-foreground"
-                    }`}
-                  >
+                  <span className={`text-3xl font-bold ${highlight ? "text-neu-accent" : "text-foreground"}`}>
                     {t('landing', priceKey)}
                   </span>
                   {period && (
-                    <span
-                      className={`text-sm ${highlight ? "text-indigo-200" : "text-muted-foreground"}`}
-                    >
-                      {t('landing', period)}
-                    </span>
+                    <span className="text-sm text-muted-foreground">{t('landing', period)}</span>
                   )}
                 </div>
-                <p
-                  className={`text-sm mt-1 ${
-                    highlight ? "text-indigo-100" : "text-muted-foreground"
-                  }`}
-                >
+                <p className="text-sm mt-1 text-muted-foreground">
                   {name === "Free" ? t('landing', 'freeDesc') : name === "Pro" ? t('landing', 'proDesc') : t('landing', 'entDesc')}
                 </p>
               </div>
@@ -122,15 +102,8 @@ export function PricingCards() {
               <ul className="flex flex-col gap-2.5">
                 {features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
-                    <Check
-                      size={14}
-                      className={`shrink-0 ${highlight ? "text-indigo-200" : "text-indigo-500"}`}
-                    />
-                    <span
-                      className={highlight ? "text-indigo-50" : "text-foreground"}
-                    >
-                      {t('landing', f)}
-                    </span>
+                    <Check size={14} className={`shrink-0 ${highlight ? "text-neu-accent" : "text-muted-foreground"}`} />
+                    <span className="text-foreground">{t('landing', f)}</span>
                   </li>
                 ))}
               </ul>
@@ -138,10 +111,8 @@ export function PricingCards() {
               {(name === "Free" || name === "Pro") ? (
                 <Link
                   href={href}
-                  className={`mt-auto text-center text-sm font-semibold py-2.5 rounded-xl transition-colors ${
-                    highlight
-                      ? "bg-white text-indigo-600 hover:bg-indigo-50"
-                      : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  className={`mt-auto text-center text-sm font-semibold py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] transition-all active:neu-inset ${
+                    highlight ? "text-neu-accent" : "text-foreground hover:text-neu-accent"
                   }`}
                 >
                   {t('landing', cta)}
@@ -149,7 +120,7 @@ export function PricingCards() {
               ) : (
                 <a
                   href={href}
-                  className="mt-auto text-center text-sm font-semibold py-2.5 rounded-xl border-2 border-border text-foreground hover:border-border hover:bg-muted transition-colors"
+                  className="mt-auto text-center text-sm font-semibold py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-foreground hover:text-neu-accent transition-all active:neu-inset"
                 >
                   {t('landing', cta)}
                 </a>

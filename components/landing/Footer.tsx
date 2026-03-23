@@ -12,15 +12,14 @@ export function Footer() {
     { label: t('landing', 'docs'), href: "#" },
     { label: t('landing', 'support'), href: "#" },
   ]
-  // intentional: fixed dark footer surface — brand design choice, dark in both modes
   return (
-    <footer className="bg-zinc-900 text-zinc-400 py-12">
+    <footer className="neu-raised bg-[var(--neu-bg)] py-12">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
-          <Link href="/" className="font-bold text-lg text-white">
-            omni<span className="text-indigo-400">book</span>
+          <Link href="/" className="font-bold text-lg text-foreground">
+            omni<span className="text-neu-accent">book</span>
           </Link>
-          <p className="text-xs text-zinc-500">{t('landing', 'heroSubtitle')}</p>
+          <p className="text-xs text-muted-foreground">{t('landing', 'heroSubtitle')}</p>
         </div>
 
         <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
@@ -28,14 +27,14 @@ export function Footer() {
             <a
               key={l.label}
               href={l.href}
-              className="text-sm hover:text-white transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {l.label}
             </a>
           ))}
         </nav>
 
-        <p className="text-xs text-zinc-500">© 2026 omni-book</p>
+        <p className="text-xs text-muted-foreground">© 2026 omni-book</p>
       </div>
     </footer>
   )

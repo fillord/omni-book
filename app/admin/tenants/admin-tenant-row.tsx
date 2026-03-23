@@ -88,8 +88,8 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
   return (
     <tr
       className={[
-        'border-b border-border transition-colors hover:bg-muted/40',
-        isBanned ? 'bg-destructive/10' : isPending ? 'bg-amber-500/10' : '',
+        'transition-colors',
+        isBanned ? 'opacity-60' : isPending ? 'opacity-80' : '',
       ].join(' ')}
     >
       <td className="p-4 align-top">
@@ -123,7 +123,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
       </td>
       <td className="p-4 align-top text-sm">
         <select
-          className="border border-border rounded px-2 py-1 bg-background text-foreground disabled:opacity-50 w-full mb-2"
+          className="neu-inset bg-[var(--neu-bg)] border-0 rounded px-2 py-1 text-foreground disabled:opacity-50 w-full mb-2"
           value={tenant.plan}
           disabled={loading}
           onChange={(e) => handlePlanChange(e.target.value as Plan)}
@@ -135,12 +135,11 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
 
         <select
           className={[
-            'border rounded px-2 py-1 disabled:opacity-50 w-full text-xs font-semibold',
-            'bg-background text-foreground border-border',
-            isBanned ? 'bg-destructive/15 text-destructive border-destructive/40' :
-            isPending ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40' :
-            tenant.planStatus === 'ACTIVE' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40' :
-            'bg-muted text-foreground border-border',
+            'neu-inset bg-[var(--neu-bg)] border-0 rounded px-2 py-1 disabled:opacity-50 w-full text-xs font-semibold',
+            isBanned ? 'text-destructive' :
+            isPending ? 'text-amber-500' :
+            tenant.planStatus === 'ACTIVE' ? 'text-emerald-400 [filter:drop-shadow(0_0_4px_currentColor)]' :
+            'text-foreground',
           ].join(' ')}
           value={tenant.planStatus}
           disabled={loading}
@@ -159,7 +158,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
           defaultValue={tenant.maxResources}
           onBlur={handleMaxResourcesChange}
           disabled={loading}
-          className="w-20 border border-border rounded px-2 py-1 bg-background text-foreground disabled:opacity-50 text-sm"
+          className="w-20 neu-inset bg-[var(--neu-bg)] border-0 rounded px-2 py-1 text-foreground disabled:opacity-50 text-sm"
         />
       </td>
       <td className="p-4 align-top text-sm text-foreground">
@@ -171,7 +170,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
             <button
               onClick={handleBan}
               disabled={loading}
-              className="text-xs px-3 py-1.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-300 hover:bg-amber-500/25 disabled:opacity-50 transition-colors font-medium border border-amber-500/30"
+              className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-amber-500 hover:text-amber-600 disabled:opacity-50 transition-all active:neu-inset font-medium"
             >
               Забанить
             </button>
@@ -179,7 +178,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="text-xs px-3 py-1.5 rounded-md bg-destructive/15 text-destructive hover:bg-destructive/25 disabled:opacity-50 transition-colors font-medium border border-destructive/30"
+            className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-destructive hover:text-destructive/80 disabled:opacity-50 transition-all active:neu-inset font-medium"
           >
             Удалить
           </button>

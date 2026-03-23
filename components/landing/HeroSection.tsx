@@ -53,7 +53,7 @@ export function HeroSection() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center animate-slide-up stagger-3">
           <Link
             href="/register"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-base hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 dark:shadow-indigo-900/30 hover-scale"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl neu-raised bg-[var(--neu-bg)] text-neu-accent font-semibold text-base transition-all active:neu-inset hover-scale"
           >
             {t('landing', 'heroCtaPrimary')} →
           </Link>
