@@ -4,7 +4,7 @@ import { BannedActions } from '@/components/banned-actions'
 export default function BannedPage() {
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-card text-card-foreground rounded-2xl shadow-sm border border-border p-8 text-center">
+      <div className="max-w-md w-full neu-raised bg-[var(--neu-bg)] text-foreground rounded-2xl p-8 text-center">
         <div className="w-16 h-16 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center mx-auto mb-6">
           <ShieldX className="w-8 h-8 text-red-600 dark:text-red-400" />
         </div>

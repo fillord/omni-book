@@ -317,7 +317,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
       </Card>
 
       {/* Основная информация */}
-      <Card>
+      <Card className="neu-raised bg-[var(--neu-bg)]">
         <CardHeader>
           <CardTitle>{t('settings', 'basicInfo')}</CardTitle>
           <CardDescription>{t('settings', 'basicInfoDesc')}</CardDescription>
@@ -325,10 +325,10 @@ export function SettingsForm({ tenant, readOnly }: Props) {
         <CardContent className="space-y-4">
 
           <Tabs defaultValue="ru" className="w-full mb-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="ru">RU (Основной)</TabsTrigger>
-              <TabsTrigger value="kz">Қазақша</TabsTrigger>
-              <TabsTrigger value="en">English</TabsTrigger>
+            <TabsList className="mb-4 neu-raised bg-[var(--neu-bg)] p-1 gap-1">
+              <TabsTrigger value="ru" className="data-[state=active]:neu-inset data-[state=active]:bg-[var(--neu-bg)] data-[state=active]:shadow-none data-[state=inactive]:neu-raised data-[state=inactive]:bg-[var(--neu-bg)]">RU (Основной)</TabsTrigger>
+              <TabsTrigger value="kz" className="data-[state=active]:neu-inset data-[state=active]:bg-[var(--neu-bg)] data-[state=active]:shadow-none data-[state=inactive]:neu-raised data-[state=inactive]:bg-[var(--neu-bg)]">Қазақша</TabsTrigger>
+              <TabsTrigger value="en" className="data-[state=active]:neu-inset data-[state=active]:bg-[var(--neu-bg)] data-[state=active]:shadow-none data-[state=inactive]:neu-raised data-[state=inactive]:bg-[var(--neu-bg)]">English</TabsTrigger>
             </TabsList>
 
             <TabsContent value="ru" className="space-y-4">
@@ -339,6 +339,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                   {...register("name")}
                   disabled={readOnly}
                   placeholder={t('settings', 'businessNamePlaceholder')}
+                  className="neu-inset bg-[var(--neu-bg)] border-0"
                 />
                 <FieldError msg={fieldErrors.name} />
               </div>
@@ -370,6 +371,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                   {...register("name_kz")}
                   disabled={readOnly}
                   placeholder={t('settings', 'businessNamePlaceholder')}
+                  className="neu-inset bg-[var(--neu-bg)] border-0"
                 />
               </div>
 
@@ -394,6 +396,7 @@ export function SettingsForm({ tenant, readOnly }: Props) {
                   {...register("name_en")}
                   disabled={readOnly}
                   placeholder={t('settings', 'businessNamePlaceholder')}
+                  className="neu-inset bg-[var(--neu-bg)] border-0"
                 />
               </div>
 

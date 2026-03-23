@@ -59,7 +59,7 @@ export function HeroSection() {
           </Link>
           <a
             href="#demo"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl border border-border text-foreground font-semibold text-base hover:bg-muted transition-colors"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl neu-raised bg-[var(--neu-bg)] text-foreground font-semibold text-base transition-all active:neu-inset"
           >
             {t('landing', 'heroCtaSecondary')}
           </a>

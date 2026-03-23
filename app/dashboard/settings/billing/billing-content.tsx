@@ -73,7 +73,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   </span>
                 )}
                 {isPro && !isPending && tenant.planStatus === 'ACTIVE' && (
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-emerald-600 text-xs font-medium">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-emerald-400 text-xs font-medium [filter:drop-shadow(0_0_6px_currentColor)]">
                     <CheckCircle2 size={14} />
                     Активен
                   </span>
@@ -98,7 +98,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
       {/* Upgrade / Renewal Banner */}
       {showUpgradeCard && (
-        <Card className="overflow-hidden relative">
+        <Card className="overflow-hidden relative neu-inset bg-[var(--neu-bg)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-10 -mt-20 pointer-events-none" />
           
           <CardHeader className="pb-4">
@@ -140,7 +140,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger>
-                <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer">
+                <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium cursor-pointer neu-raised bg-[var(--neu-bg)] text-orange-500 active:neu-inset transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [filter:drop-shadow(0_0_8px_theme(colors.orange.400/40%))]">
                   <ShieldCheck size={18} />
                   {isFree ? 'Выбрать PRO' : 'Продлить подписку'}
                 </div>

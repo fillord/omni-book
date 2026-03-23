@@ -60,7 +60,7 @@ export function Navbar() {
           <ClientOnly fallback={<div className="w-16 h-8 bg-muted rounded animate-pulse" />}>
             <Link
               href="/login"
-              className="text-sm px-4 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-foreground transition-all active:neu-inset"
             >
               {t('common', 'login')}
             </Link>

@@ -20,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ServiceForm, formatPrice } from '@/components/service-form'
 import {
@@ -200,19 +199,22 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                       <p className="text-xs text-muted-foreground truncate">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
-                  <Badge variant={s.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
+                  <span className={s.isActive
+                    ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 shrink-0 [filter:drop-shadow(0_0_6px_currentColor)]"
+                    : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground shrink-0"
+                  }>
                     {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
-                  </Badge>
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {s.durationMin} {t('booking', 'minutes')} · {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
                 </p>
                 {s.resources.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-2 leading-relaxed">
                     {s.resources.map((rs) => (
-                      <Badge key={rs.resource.id} variant="secondary" className="text-xs">
+                      <span key={rs.resource.id} className="inline-flex items-center px-3 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-foreground">
                         {getDbTranslation(rs.resource, 'name', locale)}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 )}
@@ -261,22 +263,25 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                     {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2 leading-relaxed">
                       {s.resources.length === 0 ? (
                         <span className="text-xs text-muted-foreground">—</span>
                       ) : (
                         s.resources.map((rs) => (
-                          <Badge key={rs.resource.id} variant="secondary" className="text-xs">
+                          <span key={rs.resource.id} className="inline-flex items-center px-3 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-foreground">
                             {getDbTranslation(rs.resource, 'name', locale)}
-                          </Badge>
+                          </span>
                         ))
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={s.isActive ? 'default' : 'secondary'}>
+                    <span className={s.isActive
+                      ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 [filter:drop-shadow(0_0_6px_currentColor)]"
+                      : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground"
+                    }>
                       {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
-                    </Badge>
+                    </span>
                   </TableCell>
                   {canEdit && (
                     <TableCell className="text-right">
