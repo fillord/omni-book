@@ -71,7 +71,14 @@ Plans:
 **Goal:** Build a comprehensive super-admin panel for platform owners to monitor, manage, and communicate with tenants — delivering a Financial Analytics Dashboard (MRR + plan breakdown), per-tenant drill-down with read-only data views (services, resources, staff), Global Announcement Banners visible across all tenant dashboards, targeted in-app notifications (Bell icon) for individual tenant owners, and an Audit & Activity Log for critical tenant actions — all built with strict Neumorphism UI adherence (var(--neu-bg), .neu-raised, .neu-inset).
 **Requirements:** [GOD-01, GOD-02, GOD-03, GOD-04, GOD-05, GOD-06]
 **Depends on:** Phase 1 (Neumorphism design system)
-**Plans:** 0 plans
+**Plans:** 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Test scaffold + Prisma schema migration (Announcement, Notification, AuditLog models)
+- [ ] 02-02-PLAN.md — Financial Analytics Dashboard (MRR + plan tier breakdown with Recharts)
+- [ ] 02-03-PLAN.md — Tenant Drill-Down (read-only Services/Resources/Staff tabs)
+- [ ] 02-04-PLAN.md — Announcement Banners + In-App Notifications (Bell icon + dashboard wiring)
+- [ ] 02-05-PLAN.md — Audit & Activity Logs (createAuditLog hooks + viewer page)
 
 Requirements:
 - GOD-01: Financial & Platform Analytics Dashboard — MRR display and breakdown of active tenants per plan tier (Free / Pro / Enterprise)
