@@ -63,6 +63,13 @@ export default async function AdminLayout({
             <FileText size={18} />
             Логи действий
           </Link>
+          <Link
+            href="/admin/announcements"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:neu-inset hover:bg-[var(--neu-bg)] transition-all"
+          >
+            <Megaphone size={18} />
+            Объявления
+          </Link>
           {session.user.tenantId && (
             <Link
               href="/dashboard"
