@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-03-24T15:19:21.156Z"
-last_activity: 2026-03-24 — Completed 03-02-PLAN.md (frozen badges+disabled actions on resources/services, EXPIRED lock on staff invite)
+status: completed
+last_updated: "2026-03-24T15:20:14.688Z"
+last_activity: 2026-03-24 — Completed 03-03-PLAN.md (billing expiry display, EXPIRED alert, renewSubscription, activateSubscription, admin activation UI)
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 03-subscription-lifecycle-and-automated-resource-freezing
-Plan: 02 of 3 — COMPLETE (01, 02 done)
-Status: In Progress — Phase 03 plans 01-02 done; isFrozen schema, cron route, frozen UI badges, staff EXPIRED lock shipped
-Last activity: 2026-03-24 — Completed 03-02-PLAN.md (frozen badges+disabled actions on resources/services, EXPIRED lock on staff invite)
+Plan: 03 of 3 — COMPLETE (all 3 done)
+Status: Phase 03 Complete — all subscription lifecycle plans shipped
+Last activity: 2026-03-24 — Completed 03-03-PLAN.md (billing expiry display, EXPIRED alert, renewSubscription, activateSubscription, admin activation UI)
 
 ## Accumulated Context
 
@@ -71,6 +71,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 02-super-admin-god-mode-and-platform-management]: Only one announcement active at a time: createAnnouncement deactivates all existing before creating new — simplifies dashboard query to findFirst
 - [Phase 03-02]: DialogTrigger uses asChild to properly forward disabled prop to inner Button for invite staff when EXPIRED
 - [Phase 03-02]: planStatus passed as optional string (not enum) to StaffManager to avoid cross-layer import coupling
+- [Phase 03-03]: renewSubscription sets PRO+PENDING (not ACTIVE directly) — requires super-admin confirmation, same flow as requestProActivation
+- [Phase 03-03]: activateSubscription uses basePrisma.$transaction for atomic tenant update + bulk unfreeze of resources and services
+- [Phase 03-03]: Two-click confirmation pattern on ActivateSubscriptionForm prevents accidental activation by super-admin
 
 ### Pending Todos
 
