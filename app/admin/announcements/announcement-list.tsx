@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { deactivateAnnouncement, deleteAnnouncement } from '@/lib/actions/announcements'
-import { Trash2, EyeOff } from 'lucide-react'
+import { activateAnnouncement, deactivateAnnouncement, deleteAnnouncement } from '@/lib/actions/announcements'
+import { Trash2, Eye, EyeOff } from 'lucide-react'
 
 interface Announcement {
   id: string
@@ -17,9 +17,13 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
   const router = useRouter()
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
-  const handleDeactivate = async (id: string) => {
+  const handleToggle = async (id: string, isActive: boolean) => {
     setLoadingId(id)
-    await deactivateAnnouncement(id)
+    if (isActive) {
+      await deactivateAnnouncement(id)
+    } else {
+      await activateAnnouncement(id)
+    }
     router.refresh()
     setLoadingId(null)
   }
@@ -40,13 +44,13 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
       {announcements.map((a) => (
         <div
           key={a.id}
-          className={`neu-inset bg-[var(--neu-bg)] rounded-lg p-4 flex items-start justify-between gap-3 ${!a.isActive ? 'opacity-60' : ''}`}
+          className={`neu-inset bg-[var(--neu-bg)] rounded-lg p-4 flex items-start justify-between gap-3 transition-opacity duration-300 ${!a.isActive ? 'opacity-50' : ''}`}
         >
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-semibold text-foreground">{a.title}</p>
               {a.isActive && (
-                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-green-500/20 text-green-600">
+                <span className="neu-raised bg-[var(--neu-bg)] text-emerald-500 text-[10px] font-bold uppercase px-2 py-0.5 rounded-md tracking-wide">
                   Активно
                 </span>
               )}
@@ -57,20 +61,21 @@ export function AnnouncementList({ announcements }: { announcements: Announcemen
             </p>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            {a.isActive && (
-              <button
-                onClick={() => handleDeactivate(a.id)}
-                disabled={loadingId === a.id}
-                className="h-8 w-8 rounded-md neu-raised bg-[var(--neu-bg)] flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50 transition-all"
-                title="Деактивировать"
-              >
-                <EyeOff className="h-4 w-4" />
-              </button>
-            )}
+            <button
+              onClick={() => handleToggle(a.id, a.isActive)}
+              disabled={loadingId === a.id}
+              className="h-8 w-8 rounded-md neu-raised bg-[var(--neu-bg)] flex items-center justify-center disabled:opacity-50 transition-all duration-200 hover:neu-inset active:neu-inset"
+              title={a.isActive ? 'Деактивировать' : 'Активировать'}
+            >
+              {a.isActive
+                ? <EyeOff className="h-4 w-4 text-muted-foreground" />
+                : <Eye className="h-4 w-4 text-emerald-500" />
+              }
+            </button>
             <button
               onClick={() => handleDelete(a.id)}
               disabled={loadingId === a.id}
-              className="h-8 w-8 rounded-md neu-raised bg-[var(--neu-bg)] flex items-center justify-center text-muted-foreground hover:text-destructive disabled:opacity-50 transition-all"
+              className="h-8 w-8 rounded-md neu-raised bg-[var(--neu-bg)] flex items-center justify-center text-muted-foreground hover:text-destructive hover:neu-inset active:neu-inset disabled:opacity-50 transition-all duration-200"
               title="Удалить"
             >
               <Trash2 className="h-4 w-4" />

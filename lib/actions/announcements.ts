@@ -49,6 +49,27 @@ export async function deactivateAnnouncement(id: string) {
   }
 }
 
+export async function activateAnnouncement(id: string) {
+  try {
+    await ensureSuperAdmin()
+    // Deactivate all others first — only one active at a time
+    await basePrisma.announcement.updateMany({
+      where: { isActive: true },
+      data: { isActive: false },
+    })
+    await basePrisma.announcement.update({
+      where: { id },
+      data: { isActive: true },
+    })
+    revalidatePath('/admin')
+    revalidatePath('/admin/announcements')
+    revalidatePath('/dashboard', 'layout')
+    return { success: true }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Error' }
+  }
+}
+
 export async function deleteAnnouncement(id: string) {
   try {
     await ensureSuperAdmin()
