@@ -2,7 +2,7 @@ import { authConfig } from '@/lib/auth/config'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ShieldCheck, Users, LayoutDashboard, LogOut } from 'lucide-react'
+import { ShieldCheck, Users, LayoutDashboard, LogOut, BarChart3 } from 'lucide-react'
 import { SignOutButton } from '@/components/sign-out-button'
 import { AdminThemeProvider } from '@/components/theme-providers'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -41,6 +41,13 @@ export default async function AdminLayout({
           >
             <LayoutDashboard size={18} />
             Обзор
+          </Link>
+          <Link
+            href="/admin/analytics"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:neu-inset hover:bg-[var(--neu-bg)] transition-all"
+          >
+            <BarChart3 size={18} />
+            Аналитика
           </Link>
           <Link
             href="/admin/tenants"
