@@ -31,6 +31,7 @@ import {
 import { UserPlus, Trash2, Users, Shield, ShieldCheck } from 'lucide-react'
 import { getStaffMembers, inviteStaff, removeStaff, updateStaffRole } from '@/lib/actions/staff'
 import { toast } from 'sonner'
+import { BillingLimitAlert } from '@/components/billing-limit-alert'
 
 type StaffMember = {
   id: string
@@ -40,10 +41,12 @@ type StaffMember = {
   createdAt: Date
 }
 
-export function StaffManager() {
+export function StaffManager({ planStatus }: { planStatus?: string }) {
+  const isExpired = planStatus === 'EXPIRED'
   const [members, setMembers] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [limitPlan, setLimitPlan] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   // Form state
@@ -72,7 +75,10 @@ export function StaffManager() {
 
     startTransition(async () => {
       const result = await inviteStaff({ name: name.trim(), email: email.trim(), password, role })
-      if (result.error) {
+      if ('error' in result && result.error === 'LIMIT_REACHED') {
+        setDialogOpen(false)
+        setLimitPlan(result.plan ?? 'FREE')
+      } else if ('error' in result) {
         toast.error(result.error)
       } else {
         toast.success('Сотрудник добавлен')
@@ -120,6 +126,10 @@ export function StaffManager() {
   }
 
   return (
+    <div className="space-y-4">
+      {limitPlan && (
+        <BillingLimitAlert plan={limitPlan} onDismiss={() => setLimitPlan(null)} />
+      )}
     <Card>
       <CardHeader className="flex-row items-center justify-between space-y-0 gap-4 pb-4">
         <div>
@@ -131,8 +141,8 @@ export function StaffManager() {
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger>
-            <Button size="sm" className="gap-1.5">
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-1.5" disabled={isExpired}>
               <UserPlus className="h-4 w-4" />
               Добавить
             </Button>
@@ -179,6 +189,14 @@ export function StaffManager() {
           </DialogContent>
         </Dialog>
       </CardHeader>
+
+      {isExpired && (
+        <div className="px-6 pb-4">
+          <p className="text-sm text-orange-500">
+            Управление персоналом недоступно — подписка истекла. Продлите PRO для восстановления доступа.
+          </p>
+        </div>
+      )}
 
       <CardContent>
         {loading ? (
@@ -241,5 +259,6 @@ export function StaffManager() {
         )}
       </CardContent>
     </Card>
+    </div>
   )
 }
