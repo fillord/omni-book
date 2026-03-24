@@ -47,7 +47,7 @@ Custom service duration input (1-1440 min) replacing fixed dropdown, 19 new nich
 |-------|-----------|----------------|--------|-----------|
 | 0. Infrastructure Validation | v1.0 | 1/1 | Complete | 2026-03-17 |
 | 1. Replace Duration Dropdown | 4/4 | Complete   | 2026-03-22 | 2026-03-19 |
-| 2. Expand Resource Types | v1.2 | 1/1 | Complete | 2026-03-20 |
+| 2. Expand Resource Types | 1/5 | In Progress|  | 2026-03-20 |
 | 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
@@ -71,7 +71,7 @@ Plans:
 **Goal:** Build a comprehensive super-admin panel for platform owners to monitor, manage, and communicate with tenants — delivering a Financial Analytics Dashboard (MRR + plan breakdown), per-tenant drill-down with read-only data views (services, resources, staff), Global Announcement Banners visible across all tenant dashboards, targeted in-app notifications (Bell icon) for individual tenant owners, and an Audit & Activity Log for critical tenant actions — all built with strict Neumorphism UI adherence (var(--neu-bg), .neu-raised, .neu-inset).
 **Requirements:** [GOD-01, GOD-02, GOD-03, GOD-04, GOD-05, GOD-06]
 **Depends on:** Phase 1 (Neumorphism design system)
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — Test scaffold + Prisma schema migration (Announcement, Notification, AuditLog models)
