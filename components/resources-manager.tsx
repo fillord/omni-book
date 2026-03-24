@@ -23,6 +23,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ResourceForm } from '@/components/resource-form'
+import { BillingLimitAlert } from '@/components/billing-limit-alert'
 import {
   createResource,
   updateResource,
@@ -94,6 +95,7 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
 
   // inline error / confirmation
   const [actionError,  setActionError]  = useState<string | null>(null)
+  const [limitPlan,    setLimitPlan]    = useState<string | null>(null)
   const [futureWarning, setFutureWarning] = useState<{ id: string; count: number } | null>(null)
 
   function refresh() {
@@ -113,8 +115,14 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
 
   async function handleCreate(data: CreateResourceInput | UpdateResourceInput, schedule: ScheduleEntry[]) {
     setActionError(null)
+    setLimitPlan(null)
     try {
-      await createResource(data as CreateResourceInput, schedule)
+      const res = await createResource(data as CreateResourceInput, schedule)
+      if ('error' in res && res.error === 'LIMIT_REACHED') {
+        setCreateOpen(false)
+        setLimitPlan(res.plan)
+        return
+      }
       setCreateOpen(false)
       refresh()
       toast.success(`${t('niche', nicheConfig.resourceLabel)} ${t('dashboard', 'resourceCreatedSuffix')}`)
@@ -213,7 +221,10 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
       </div>
 
       {/* Errors */}
-      {actionError && (
+      {limitPlan && (
+        <BillingLimitAlert plan={limitPlan} onDismiss={() => setLimitPlan(null)} />
+      )}
+      {actionError && !limitPlan && (
         <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-2 text-sm text-destructive">
           {actionError}
         </div>
@@ -280,14 +291,24 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{getDbTranslation(r as unknown as { name: string; translations: SafeTranslation }, 'name', locale)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label 
-                        ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label) 
+                      {nicheConfig.resourceTypes.find((rt) => rt.value === r.type)?.label
+                        ? t('niche', nicheConfig.resourceTypes.find((rt) => rt.value === r.type)!.label)
                         : r.type}
                     </p>
                   </div>
-                  <Badge variant={r.isActive ? 'default' : 'secondary'} className="text-xs shrink-0">
-                    {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
-                  </Badge>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Badge variant={r.isActive ? 'default' : 'secondary'} className="text-xs">
+                      {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
+                    </Badge>
+                    {r.isFrozen && (
+                      <span
+                        className="neu-inset bg-[var(--neu-bg)] text-orange-500 text-xs font-medium rounded-full px-2.5 py-1"
+                        title="Разморозьте подписку PRO, чтобы управлять этим объектом"
+                      >
+                        Заморожен
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {attrColumns.map((f) => {
                   const val = getAttrDisplay(r, f, t('common', 'yes'), t('common', 'no'), t)
@@ -309,13 +330,13 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                 )}
                 {canEdit && (
                   <div className="flex gap-1 pt-1">
-                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending || r.isFrozen}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7" onClick={() => handleToggle(r.id)} disabled={isPending}>
                       {r.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(r.id)} disabled={isPending}>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(r.id)} disabled={isPending || r.isFrozen}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>
@@ -368,20 +389,30 @@ export function ResourcesManager({ resources, canEdit, niche }: Props) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={r.isActive ? 'default' : 'secondary'}>
-                      {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={r.isActive ? 'default' : 'secondary'}>
+                        {r.isActive ? t('dashboard', 'active') : t('dashboard', 'inactive')}
+                      </Badge>
+                      {r.isFrozen && (
+                        <span
+                          className="neu-inset bg-[var(--neu-bg)] text-orange-500 text-xs font-medium rounded-full px-2.5 py-1"
+                          title="Разморозьте подписку PRO, чтобы управлять этим объектом"
+                        >
+                          Заморожен
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   {canEdit && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditResource(r) }} disabled={isPending || r.isFrozen}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         <Button size="sm" variant="ghost" title={r.isActive ? t('dashboard', 'deactivate') : t('dashboard', 'activate')} onClick={() => handleToggle(r.id)} disabled={isPending}>
                           {r.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                         </Button>
-                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(r.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(r.id)} disabled={isPending || r.isFrozen}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>

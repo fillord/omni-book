@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ServiceForm, formatPrice } from '@/components/service-form'
+import { BillingLimitAlert } from '@/components/billing-limit-alert'
 import {
   createService,
   updateService,
@@ -58,6 +59,7 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
 
   // error state
   const [actionError, setActionError] = useState<string | null>(null)
+  const [limitPlan,   setLimitPlan]   = useState<string | null>(null)
 
   function refresh() {
     startTransition(() => router.refresh())
@@ -75,8 +77,14 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
 
   async function handleCreate(data: CreateServiceInput | UpdateServiceInput) {
     setActionError(null)
+    setLimitPlan(null)
     try {
-      await createService(data as CreateServiceInput)
+      const res = await createService(data as CreateServiceInput)
+      if ('error' in res && res.error === 'LIMIT_REACHED') {
+        setCreateOpen(false)
+        setLimitPlan(res.plan)
+        return
+      }
       setCreateOpen(false)
       refresh()
       toast.success(t('dashboard', 'serviceCreated'))
@@ -156,7 +164,10 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
       </div>
 
       {/* Errors */}
-      {actionError && (
+      {limitPlan && (
+        <BillingLimitAlert plan={limitPlan} onDismiss={() => setLimitPlan(null)} />
+      )}
+      {actionError && !limitPlan && (
         <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-2 text-sm text-destructive">
           {actionError}
         </div>
@@ -199,12 +210,22 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                       <p className="text-xs text-muted-foreground truncate">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
                     )}
                   </div>
-                  <span className={s.isActive
-                    ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 shrink-0 [filter:drop-shadow(0_0_6px_currentColor)]"
-                    : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground shrink-0"
-                  }>
-                    {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
-                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className={s.isActive
+                      ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 [filter:drop-shadow(0_0_6px_currentColor)]"
+                      : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground"
+                    }>
+                      {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
+                    </span>
+                    {s.isFrozen && (
+                      <span
+                        className="neu-inset bg-[var(--neu-bg)] text-orange-500 text-xs font-medium rounded-full px-2.5 py-1"
+                        title="Разморозьте подписку PRO, чтобы управлять этим объектом"
+                      >
+                        Заморожен
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {s.durationMin} {t('booking', 'minutes')} · {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
@@ -220,13 +241,13 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                 )}
                 {canEdit && (
                   <div className="flex gap-1 pt-1">
-                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending || s.isFrozen}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7" onClick={() => handleToggle(s.id)} disabled={isPending}>
                       {s.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(s.id)} disabled={isPending}>
+                    <Button size="sm" variant="ghost" className="h-7" onClick={() => handleDelete(s.id)} disabled={isPending || s.isFrozen}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>
                   </div>
@@ -276,23 +297,33 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className={s.isActive
-                      ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 [filter:drop-shadow(0_0_6px_currentColor)]"
-                      : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground"
-                    }>
-                      {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={s.isActive
+                        ? "inline-flex items-center px-2.5 py-1 rounded-full bg-[var(--neu-bg)] text-xs font-medium text-emerald-400 [filter:drop-shadow(0_0_6px_currentColor)]"
+                        : "inline-flex items-center px-2.5 py-1 rounded-full neu-raised bg-[var(--neu-bg)] text-xs font-medium text-muted-foreground"
+                      }>
+                        {s.isActive ? t('dashboard', 'activeF') : t('dashboard', 'inactiveF')}
+                      </span>
+                      {s.isFrozen && (
+                        <span
+                          className="neu-inset bg-[var(--neu-bg)] text-orange-500 text-xs font-medium rounded-full px-2.5 py-1"
+                          title="Разморозьте подписку PRO, чтобы управлять этим объектом"
+                        >
+                          Заморожен
+                        </span>
+                      )}
+                    </div>
                   </TableCell>
                   {canEdit && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'edit')} onClick={() => { setActionError(null); setEditService(s) }} disabled={isPending || s.isFrozen}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         <Button size="sm" variant="ghost" title={s.isActive ? t('dashboard', 'deactivate') : t('dashboard', 'activate')} onClick={() => handleToggle(s.id)} disabled={isPending}>
                           {s.isActive ? <PowerOff className="h-3.5 w-3.5 text-amber-600" /> : <Power className="h-3.5 w-3.5 text-green-600" />}
                         </Button>
-                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(s.id)} disabled={isPending}>
+                        <Button size="sm" variant="ghost" title={t('common', 'delete')} onClick={() => handleDelete(s.id)} disabled={isPending || s.isFrozen}>
                           <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
