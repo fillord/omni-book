@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-24T10:44:12Z"
-last_activity: 2026-03-24 — Completed 03-01-PLAN.md (isFrozen schema fields, CANCELED enum, subscription lifecycle cron route)
+last_updated: "2026-03-24T15:19:21.156Z"
+last_activity: 2026-03-24 — Completed 03-02-PLAN.md (frozen badges+disabled actions on resources/services, EXPIRED lock on staff invite)
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 ## Current Position
 
 Phase: 03-subscription-lifecycle-and-automated-resource-freezing
-Plan: 01 of 3 — COMPLETE (01 done)
-Status: In Progress — Phase 03 plan 01 done; isFrozen schema, CANCELED enum, cron lifecycle route shipped
-Last activity: 2026-03-24 — Completed 03-01-PLAN.md (isFrozen schema fields, CANCELED enum, subscription lifecycle cron route)
+Plan: 02 of 3 — COMPLETE (01, 02 done)
+Status: In Progress — Phase 03 plans 01-02 done; isFrozen schema, cron route, frozen UI badges, staff EXPIRED lock shipped
+Last activity: 2026-03-24 — Completed 03-02-PLAN.md (frozen badges+disabled actions on resources/services, EXPIRED lock on staff invite)
 
 ## Accumulated Context
 
@@ -69,6 +69,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 01-neumorphism-refactor]: Explicit bg-[var(--neu-bg)] on component roots required for shadow depth — shorthand tokens (bg-card, bg-background) don't guarantee correct background for Neumorphism shadows
 - [Phase 02-super-admin-god-mode-and-platform-management]: AnnouncementBanner uses useState(false) + useEffect localStorage check to prevent hydration mismatch
 - [Phase 02-super-admin-god-mode-and-platform-management]: Only one announcement active at a time: createAnnouncement deactivates all existing before creating new — simplifies dashboard query to findFirst
+- [Phase 03-02]: DialogTrigger uses asChild to properly forward disabled prop to inner Button for invite staff when EXPIRED
+- [Phase 03-02]: planStatus passed as optional string (not enum) to StaffManager to avoid cross-layer import coupling
 
 ### Pending Todos
 
