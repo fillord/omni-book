@@ -4,6 +4,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { basePrisma } from '@/lib/db'
+import { createAuditLog } from '@/lib/actions/audit-log'
 
 // Ensure type augmentations are loaded
 import '@/lib/auth/types'
@@ -62,6 +63,11 @@ export const authConfig: NextAuthOptions = {
           where: { id: user.id },
           data: { activeSessionId: newSessionId }
         })
+
+        // Audit: login event (only for tenant users, not SUPERADMIN without tenant)
+        if (user.tenantId) {
+          createAuditLog(user.tenantId, 'login', { email: user.email, userId: user.id })
+        }
 
         return {
           id:              user.id,

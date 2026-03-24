@@ -11,6 +11,7 @@ import {
   type CreateServiceInput,
   type UpdateServiceInput,
 } from '@/lib/validations/service'
+import { createAuditLog } from '@/lib/actions/audit-log'
 
 // ---- types -----------------------------------------------------------------
 
@@ -18,6 +19,14 @@ interface TenantPlanInfo {
   maxResources?: number
   maxServices?: number
 }
+
+const PLAN_SERVICE_LIMITS: Record<string, number> = {
+  FREE: 5,
+  PRO: 100,
+  ENTERPRISE: 9999,
+}
+
+export type LimitError = { success: false; error: 'LIMIT_REACHED'; plan: string }
 
 // ---- include shape ---------------------------------------------------------
 
@@ -67,11 +76,20 @@ export async function getServices(): Promise<ServiceWithRelations[]> {
 
 export async function createService(
   data: CreateServiceInput
-): Promise<ServiceWithRelations> {
+): Promise<ServiceWithRelations | LimitError> {
   const session  = await getSession(true)
   const parsed   = createServiceSchema.parse(data)
   const tenantId = session.user.tenantId
   const db       = getTenantDB(tenantId)
+
+  const tenant = await basePrisma.tenant.findUnique({ where: { id: tenantId } })
+  if (!tenant) throw new Error('Бизнес не найден')
+
+  const serviceCount = await db.service.count({ where: { tenantId } })
+  const maxServices = PLAN_SERVICE_LIMITS[tenant.plan] ?? 5
+  if (serviceCount >= maxServices) {
+    return { success: false, error: 'LIMIT_REACHED', plan: tenant.plan }
+  }
 
   // Ensure all resources belong to the current tenant
   if (parsed.resourceIds.length > 0) {
@@ -199,10 +217,12 @@ export async function deleteService(id: string): Promise<void> {
   await findOwned(id, tenantId)
 
   const db = getTenantDB(tenantId)
-  await db.service.update({
-    where: { id },
-    data:  { isActive: false },
-  })
+  const service = await db.service.findUnique({ where: { id }, select: { name: true, tenantId: true } })
+  await db.service.delete({ where: { id } })
+
+  if (service) {
+    createAuditLog(service.tenantId, 'service_deleted', { serviceName: service.name, serviceId: id })
+  }
 
   revalidatePath('/dashboard/services')
 }

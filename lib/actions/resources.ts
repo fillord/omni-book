@@ -11,6 +11,7 @@ import {
   type CreateResourceInput,
   type UpdateResourceInput,
 } from '@/lib/validations/resource'
+import { createAuditLog } from '@/lib/actions/audit-log'
 
 // ---- types -----------------------------------------------------------------
 
@@ -18,6 +19,8 @@ interface TenantPlanInfo {
   maxResources?: number
   maxServices?: number
 }
+
+export type LimitError = { success: false; error: 'LIMIT_REACHED'; plan: string }
 
 const RESOURCE_INCLUDE = {
   schedules: true,
@@ -96,7 +99,7 @@ export async function getResources(): Promise<ResourceWithRelations[]> {
 export async function createResource(
   data: CreateResourceInput,
   scheduleData?: ScheduleEntry[]
-): Promise<ResourceWithRelations> {
+): Promise<ResourceWithRelations | LimitError> {
   const session  = await getSession(true)
   const parsed   = createResourceSchema.parse(data)
   const tenantId = session.user.tenantId
@@ -115,7 +118,7 @@ export async function createResource(
   const maxRes = (tenantObj as unknown as TenantPlanInfo).maxResources || 1
 
   if (currentResourceCount >= maxRes) {
-    throw new Error('Лимит ресурсов исчерпан. Пожалуйста, обновите тарифный план или обратитесь в поддержку.')
+    return { success: false, error: 'LIMIT_REACHED', plan: tenantObj.plan }
   }
 
   const resource = await db.resource.create({
@@ -200,6 +203,7 @@ export async function deleteResource(id: string): Promise<void> {
   await findOwned(id, tenantId)
 
   const db = getTenantDB(tenantId)
+  const resource = await db.resource.findUnique({ where: { id }, select: { name: true, tenantId: true } })
   const futureCount = await db.booking.count({
     where: {
       resourceId: id,
@@ -211,6 +215,10 @@ export async function deleteResource(id: string): Promise<void> {
   if (futureCount > 0) throw new Error(`FUTURE_BOOKINGS:${futureCount}`)
 
   await db.resource.delete({ where: { id } })
+
+  if (resource) {
+    createAuditLog(resource.tenantId, 'resource_deleted', { resourceName: resource.name, resourceId: id })
+  }
 
   revalidatePath('/dashboard/resources')
 }

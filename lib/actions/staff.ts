@@ -4,6 +4,13 @@ import { getServerSession } from 'next-auth/next'
 import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
+import { createAuditLog } from '@/lib/actions/audit-log'
+
+const PLAN_STAFF_LIMITS: Record<string, number> = {
+  FREE: 2,
+  PRO: 25,
+  ENTERPRISE: 9999,
+}
 
 // ---- helpers ---------------------------------------------------------------
 
@@ -38,6 +45,16 @@ export async function getStaffMembers() {
 
 export async function inviteStaff(data: { name: string; email: string; password: string; role: 'STAFF' | 'OWNER' }) {
   const { tenantId } = await requireOwner()
+
+  // Check plan staff limit
+  const tenant = await basePrisma.tenant.findUnique({ where: { id: tenantId } })
+  if (tenant) {
+    const staffCount = await basePrisma.user.count({ where: { tenantId } })
+    const maxStaff = PLAN_STAFF_LIMITS[tenant.plan] ?? 2
+    if (staffCount >= maxStaff) {
+      return { success: false as const, error: 'LIMIT_REACHED' as const, plan: tenant.plan }
+    }
+  }
 
   // Check if email already in use
   const existing = await basePrisma.user.findUnique({ where: { email: data.email } })
@@ -76,6 +93,10 @@ export async function removeStaff(userId: string) {
   if (!user) return { error: 'User not found' }
 
   await basePrisma.user.delete({ where: { id: userId } })
+
+  if (user?.tenantId) {
+    createAuditLog(user.tenantId, 'staff_deleted', { staffName: user.name, staffEmail: user.email, staffId: userId })
+  }
 
   revalidatePath('/dashboard/staff')
   return { success: true }

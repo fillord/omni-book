@@ -5,6 +5,7 @@ import { Plan, PlanStatus } from '@prisma/client'
 import { authConfig } from '@/lib/auth/config'
 import { getServerSession } from 'next-auth'
 import { basePrisma } from '@/lib/db'
+import { createAuditLog } from '@/lib/actions/audit-log'
 
 
 // Безопасная проверка: только админ
@@ -44,6 +45,18 @@ export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus:
       where: { id: tenantId },
       data,
     })
+
+    // Audit: detect plan change direction
+    if (current && current.plan !== plan) {
+      const PLAN_ORDER = { FREE: 0, PRO: 1, ENTERPRISE: 2 } as const
+      const oldOrder = PLAN_ORDER[current.plan as keyof typeof PLAN_ORDER] ?? 0
+      const newOrder = PLAN_ORDER[plan as keyof typeof PLAN_ORDER] ?? 0
+      const eventType = newOrder > oldOrder ? 'plan_upgrade' : 'plan_downgrade'
+      createAuditLog(tenantId, eventType, {
+        oldPlan: current.plan,
+        newPlan: plan,
+      })
+    }
 
     revalidatePath('/admin/tenants')
     return { success: true }
