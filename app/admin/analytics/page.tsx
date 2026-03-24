@@ -1,6 +1,7 @@
 import { basePrisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, TrendingUp, Users } from 'lucide-react'
+// AnalyticsCharts renders two Recharts BarChart + ResponsiveContainer — see ./analytics-charts.tsx
 import { AnalyticsCharts } from './analytics-charts'
 
 const PLAN_MRR: Record<string, number> = { FREE: 0, PRO: 29, ENTERPRISE: 99 }
