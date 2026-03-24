@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-24T09:38:10.144Z"
-last_activity: 2026-03-24 — Completed 02-04-PLAN.md (announcement banner + notification bell system; 42/42 god-mode tests passing)
+last_updated: "2026-03-24T10:44:12Z"
+last_activity: 2026-03-24 — Completed 03-01-PLAN.md (isFrozen schema fields, CANCELED enum, subscription lifecycle cron route)
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 12
+  completed_plans: 10
 ---
 
 # Project State
@@ -23,16 +23,22 @@ See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
 
 ## Current Position
 
-Phase: 02-super-admin-god-mode-and-platform-management
-Plan: 04 of 5 — IN PROGRESS (01-04 complete)
-Status: In Progress — Phase 02 plans 01-04 done; 42/42 god-mode tests pass; announcement banner + notification bell shipped
-Last activity: 2026-03-24 — Completed 02-04-PLAN.md (announcement banner + notification bell system; 42/42 god-mode tests passing)
+Phase: 03-subscription-lifecycle-and-automated-resource-freezing
+Plan: 01 of 3 — COMPLETE (01 done)
+Status: In Progress — Phase 03 plan 01 done; isFrozen schema, CANCELED enum, cron lifecycle route shipped
+Last activity: 2026-03-24 — Completed 03-01-PLAN.md (isFrozen schema fields, CANCELED enum, subscription lifecycle cron route)
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+- [Phase 03-01]: isFrozen @default(false) added to Resource and Service — enables selective freeze on subscription expiry without deleting data
+- [Phase 03-01]: Freeze keeps oldest-by-createdAt resource/service to preserve tenant's most-established data on downgrade
+- [Phase 03-01]: Staff (User) records not frozen — no isFrozen on User model, users retain access
+- [Phase 03-01]: 3-day warning uses 2-4 day fuzzy window to tolerate daily cron scheduling drift
+- [Phase 03-01]: Subscription cron uses GET handler (Vercel Cron GET-only constraint)
 
 Key patterns carrying forward to next milestone:
 - [Phase 02-01]: safeRead helper (fs.existsSync check before readFileSync) prevents test crashes on missing files — tests fail with assertion errors, not throws

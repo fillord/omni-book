@@ -48,7 +48,7 @@ Custom service duration input (1-1440 min) replacing fixed dropdown, 19 new nich
 | 0. Infrastructure Validation | v1.0 | 1/1 | Complete | 2026-03-17 |
 | 1. Replace Duration Dropdown | 4/4 | Complete   | 2026-03-22 | 2026-03-19 |
 | 2. Expand Resource Types | 1/5 | In Progress|  | 2026-03-20 |
-| 3. Dashboard + Auth Surface | v1.0 | 4/4 | Complete | 2026-03-18 |
+| 3. Dashboard + Auth Surface | 1/3 | In Progress|  | 2026-03-18 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
@@ -93,7 +93,7 @@ Requirements:
 **Goal:** Implement a 30-day subscription lifecycle with automated expiry detection via daily cron, resource/service freezing with isFrozen fields, tenant warnings via in-app notifications, frozen state UI in dashboard managers, and super-admin activation with expiry date management and bulk unfreeze — all with Neumorphism design adherence.
 **Requirements:** [SUB-01, SUB-02, SUB-03, SUB-04, SUB-05, SUB-06]
 **Depends on:** Phase 2
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md — Test scaffold + Prisma schema expansion (isFrozen, CANCELED) + Cron lifecycle route
