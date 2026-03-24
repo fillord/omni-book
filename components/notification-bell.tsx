@@ -46,15 +46,13 @@ export function NotificationBell({ tenantId, initialUnreadCount, initialNotifica
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="relative flex items-center justify-center h-9 w-9 rounded-md hover:bg-muted transition-colors">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
+      <DropdownMenuTrigger className="neu-raised relative flex items-center justify-center h-9 w-9 rounded-md bg-[var(--neu-bg)] hover:neu-inset transition-all">
+        <Bell className="h-5 w-5 text-muted-foreground" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center px-1">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 neu-raised bg-[var(--neu-bg)]">
         <div className="flex items-center justify-between px-3 py-2">
