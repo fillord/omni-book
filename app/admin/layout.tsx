@@ -2,7 +2,7 @@ import { authConfig } from '@/lib/auth/config'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ShieldCheck, Users, LayoutDashboard, LogOut, BarChart3 } from 'lucide-react'
+import { ShieldCheck, Users, LayoutDashboard, LogOut, BarChart3, FileText, Megaphone } from 'lucide-react'
 import { SignOutButton } from '@/components/sign-out-button'
 import { AdminThemeProvider } from '@/components/theme-providers'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -55,6 +55,13 @@ export default async function AdminLayout({
           >
             <Users size={18} />
             Компании
+          </Link>
+          <Link
+            href="/admin/audit-logs"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:neu-inset hover:bg-[var(--neu-bg)] transition-all"
+          >
+            <FileText size={18} />
+            Логи действий
           </Link>
           {session.user.tenantId && (
             <Link
