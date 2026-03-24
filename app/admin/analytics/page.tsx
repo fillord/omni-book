@@ -1,6 +1,9 @@
 import { basePrisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, Users } from 'lucide-react'
+import { TrendingUp, Users, Banknote } from 'lucide-react'
+
+const formatKZT = (amount: number) =>
+  new Intl.NumberFormat('ru-KZ', { style: 'currency', currency: 'KZT', maximumFractionDigits: 0 }).format(amount)
 // AnalyticsCharts renders two Recharts BarChart + ResponsiveContainer — see ./analytics-charts.tsx
 import { AnalyticsCharts } from './analytics-charts'
 
@@ -50,12 +53,12 @@ export default async function AdminAnalyticsPage() {
               MRR
             </CardTitle>
             <div className="h-9 w-9 rounded-full neu-raised bg-[var(--neu-bg)] text-neu-accent flex items-center justify-center">
-              <DollarSign className="h-4 w-4" />
+              <Banknote className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-card-foreground">
-              ${mrr.toLocaleString('en-US')}
+              {formatKZT(mrr)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Ежемесячный доход
@@ -95,7 +98,7 @@ export default async function AdminAnalyticsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-card-foreground">
-              ${avgMRR}
+              {formatKZT(avgMRR)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               В среднем на компанию

@@ -5,13 +5,20 @@ import { notFound } from 'next/navigation'
 import { Instagram, MessageCircle, Send } from 'lucide-react'
 import { formatPhone, normalizePhone } from '@/lib/utils/phone'
 import { basePrisma } from '@/lib/db'
-import { getNicheConfig, type NicheConfig, type AttributeField } from '@/lib/niche/config'
+import { getNicheConfig, type AttributeField } from '@/lib/niche/config'
 import { BookingForm } from '@/components/booking-form'
 import { LocaleSwitcher } from '@/components/locale-switcher'
 import { getServerT } from '@/lib/i18n/server'
 import { cookies } from 'next/headers'
 import { getDbTranslation } from '@/lib/i18n/db-translations'
 import { PublicThemeToggle } from '@/components/public-theme-toggle'
+import {
+  PublicSectionsTabs,
+  type PublicTabSection,
+  type ResourceTabItem,
+  type ServiceTabItem,
+  type TabColorConfig,
+} from '@/components/public-sections-tabs'
 
 // ---- Niche color palette (static strings so Tailwind includes them) ---------
 
@@ -26,36 +33,36 @@ type ColorClasses = {
 
 const COLORS: Record<string, ColorClasses> = {
   blue: {
-    accent:      'text-blue-600',
-    light:       'bg-blue-50',
-    border:      'border-blue-200',
-    avatarBg:    'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
-    badge:       'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
-    priceAccent: 'text-blue-600',
+    accent:      'text-blue-500',
+    light:       'bg-[var(--neu-bg)]',
+    border:      'border-[var(--neu-shadow-dark)]',
+    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-blue-500',
+    badge:       'neu-raised bg-[var(--neu-bg)] text-blue-500',
+    priceAccent: 'text-blue-500',
   },
   pink: {
-    accent:      'text-pink-600',
-    light:       'bg-pink-50',
-    border:      'border-pink-200',
-    avatarBg:    'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
-    badge:       'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
-    priceAccent: 'text-pink-600',
+    accent:      'text-pink-500',
+    light:       'bg-[var(--neu-bg)]',
+    border:      'border-[var(--neu-shadow-dark)]',
+    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-pink-500',
+    badge:       'neu-raised bg-[var(--neu-bg)] text-pink-500',
+    priceAccent: 'text-pink-500',
   },
   orange: {
-    accent:      'text-orange-600',
-    light:       'bg-orange-50',
-    border:      'border-orange-200',
-    avatarBg:    'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
-    badge:       'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
-    priceAccent: 'text-orange-600',
+    accent:      'text-orange-500',
+    light:       'bg-[var(--neu-bg)]',
+    border:      'border-[var(--neu-shadow-dark)]',
+    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-orange-500',
+    badge:       'neu-raised bg-[var(--neu-bg)] text-orange-500',
+    priceAccent: 'text-orange-500',
   },
   green: {
-    accent:      'text-green-600',
-    light:       'bg-green-50',
-    border:      'border-green-200',
-    avatarBg:    'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
-    badge:       'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
-    priceAccent: 'text-green-600',
+    accent:      'text-green-500',
+    light:       'bg-[var(--neu-bg)]',
+    border:      'border-[var(--neu-shadow-dark)]',
+    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-green-500',
+    badge:       'neu-raised bg-[var(--neu-bg)] text-green-500',
+    priceAccent: 'text-green-500',
   },
 }
 
@@ -181,6 +188,120 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
   const hasContacts = !!(tenant.phone || tenant.address || tenant.workingHours || tenant.email)
   const hasSocial   = !!(social.instagram || social.whatsapp || social.telegram)
+
+  // ---- Build serialisable tab sections for PublicSectionsTabs -------------
+
+  function buildResourceItem(
+    r: TenantResource,
+    isTable = false,
+  ): ResourceTabItem {
+    const name = getDbTranslation(
+      r as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> },
+      'name', locale,
+    )
+    const description = getDbTranslation(
+      r as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> },
+      'description', locale,
+    )
+    const attrs = parseAttrs(r.attributes)
+    const displayFields = nicheConfig.attributeFields.filter(
+      (f) => f.showInTable && (!f.forTypes || f.forTypes.includes(r.type)),
+    )
+    const badges = displayFields
+      .map((field) => formatAttrForCard(field, attrs[field.key], t))
+      .filter((b): b is string => b !== null)
+    const workDayStr = r.schedules
+      .filter((s) => s.isActive)
+      .sort((a, b) => (a.dayOfWeek === 0 ? 7 : a.dayOfWeek) - (b.dayOfWeek === 0 ? 7 : b.dayOfWeek))
+      .map((s) => SHORT_DAYS[s.dayOfWeek])
+      .join(', ')
+    return {
+      id:           r.id,
+      name,
+      description,
+      avatarInitial: name.charAt(0),
+      isTable,
+      workDays:     workDayStr ? `${t('public', 'workDays')} ${workDayStr}` : '',
+      badges,
+    }
+  }
+
+  type TenantService = NonNullable<typeof tenant>['services'][number]
+  function buildServiceItem(s: TenantService): ServiceTabItem {
+    return {
+      id: s.id,
+      name: getDbTranslation(
+        s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> },
+        'name', locale,
+      ),
+      description: getDbTranslation(
+        s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> },
+        'description', locale,
+      ),
+      priceFormatted: s.price === null || s.price === 0
+        ? t('booking', 'free')
+        : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100),
+      durationLabel: `${s.durationMin} ${t('booking', 'minutes')}`,
+    }
+  }
+
+  const tabSections: PublicTabSection[] = []
+
+  if (sections.includes('specialists') && staffResources.length > 0) {
+    tabSections.push({
+      id:    'specialists',
+      label: t('niche', nicheConfig.resourceLabelPlural),
+      type:  'resources',
+      items: staffResources.map((r) => buildResourceItem(r)),
+    })
+  }
+  if (sections.includes('trainers') && staffResources.length > 0) {
+    tabSections.push({
+      id:    'trainers',
+      label: t('public', 'trainers'),
+      type:  'resources',
+      items: staffResources.map((r) => buildResourceItem(r)),
+    })
+  }
+  if (sections.includes('tables') && tableResources.length > 0) {
+    tabSections.push({
+      id:    'tables',
+      label: t('niche', nicheConfig.resourceLabelPlural),
+      type:  'resources',
+      items: tableResources.map((r) => buildResourceItem(r, true)),
+    })
+  }
+  if (sections.includes('courts') && courtResources.length > 0) {
+    tabSections.push({
+      id:    'courts',
+      label: t('niche', nicheConfig.resourceLabelPlural),
+      type:  'resources',
+      items: courtResources.map((r) => buildResourceItem(r)),
+    })
+  }
+  if (tenant.services.length > 0 && !sections.includes('pricing')) {
+    tabSections.push({
+      id:    'services',
+      label: t('public', 'services'),
+      type:  'services',
+      items: tenant.services.map(buildServiceItem),
+    })
+  }
+  if (sections.includes('pricing') && tenant.services.length > 0) {
+    tabSections.push({
+      id:    'pricing',
+      label: t('public', 'priceList'),
+      type:  'pricing',
+      items: tenant.services.map(buildServiceItem),
+    })
+  }
+
+  const tabColors: TabColorConfig = {
+    accent:      colors.accent,
+    avatarBg:    colors.avatarBg,
+    badge:       colors.badge,
+    priceAccent: colors.priceAccent,
+  }
 
   return (
     <div className="min-h-screen bg-[var(--neu-bg)] text-foreground transition-colors duration-300">
@@ -316,82 +437,13 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 
       <main className="max-w-5xl mx-auto px-4 py-12 space-y-16 bg-[var(--neu-bg)]">
 
-        {/* ── Specialists / Staff ─────────────────────────────────────────── */}
-        {sections.includes('specialists') && staffResources.length > 0 && (
-          <section>
-            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
-            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {staffResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Tables / HoReCa ─────────────────────────────────────────────── */}
-        {sections.includes('tables') && tableResources.length > 0 && (
-          <section>
-            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
-            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {tableResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} isTable shortDays={SHORT_DAYS} t={t} locale={locale} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Courts / Sports ─────────────────────────────────────────────── */}
-        {sections.includes('courts') && courtResources.length > 0 && (
-          <section>
-            <SectionHeading title={t('niche', nicheConfig.resourceLabelPlural)} />
-            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {courtResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Trainers ────────────────────────────────────────────────────── */}
-        {sections.includes('trainers') && staffResources.length > 0 && (
-          <section>
-            <SectionHeading title={t('public', 'trainers')} />
-            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {staffResources.map((r) => (
-                <ResourceCard key={r.id} resource={r} nicheConfig={nicheConfig} colors={colors} shortDays={SHORT_DAYS} t={t} locale={locale} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── Services (horizontal scroll on mobile) ──────────────────────── */}
-        {tenant.services.length > 0 && !sections.includes('pricing') && (
-          <section>
-            <SectionHeading title={t('public', 'services')} />
-            <div className="flex gap-4 overflow-x-auto snap-x scroll-smooth pb-2 -mx-4 px-4">
-              {tenant.services.map((s) => (
-                <div
-                  key={s.id}
-                  className="snap-start shrink-0 w-56 rounded-2xl bg-[var(--neu-bg)] neu-raised p-4 flex flex-col gap-2"
-                >
-                  <p className="font-semibold text-foreground text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
-                  {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
-                    <p className="text-xs text-muted-foreground leading-relaxed">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
-                  )}
-                  <div className="flex items-center justify-between mt-auto pt-2">
-                    <span className={`text-sm font-bold ${colors.priceAccent}`}>
-                      {s.price === null || s.price === 0
-                        ? t('booking', 'free')
-                        : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
-                    </span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
-                      {s.durationMin} {t('booking', 'minutes')}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+        {/* ── Sections: Resources + Services (tab-switched, grid, truncated) ── */}
+        {tabSections.length > 0 && (
+          <PublicSectionsTabs
+            sections={tabSections}
+            colors={tabColors}
+            showAllLabel={t('public', 'showAll')}
+          />
         )}
 
         {/* ── Gallery placeholder (beauty) ────────────────────────────────── */}
@@ -416,33 +468,6 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
             </div>
             <div className="rounded-2xl bg-[var(--neu-bg)] neu-inset p-12 text-center">
               <p className="text-muted-foreground text-sm">{t('public', 'menuPlaceholder')}</p>
-            </div>
-          </section>
-        )}
-
-        {/* ── Pricing / Sports ────────────────────────────────────────────── */}
-        {sections.includes('pricing') && tenant.services.length > 0 && (
-          <section>
-            <SectionHeading title={t('public', 'priceList')} />
-            <div className="rounded-2xl bg-[var(--neu-bg)] neu-raised overflow-hidden divide-y divide-transparent">
-              {tenant.services.map((s) => (
-                <div key={s.id} className="flex items-center justify-between px-5 py-4 bg-[var(--neu-bg)] transition-colors">
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale)}</p>
-                    {getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale) && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale)}</p>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0 pl-4">
-                    <p className={`font-bold text-sm ${colors.priceAccent}`}>
-                      {s.price === null || s.price === 0
-                        ? t('booking', 'free')
-                        : new Intl.NumberFormat('ru-RU', { style: 'currency', currency: s.currency, maximumFractionDigits: 0 }).format(s.price / 100)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{s.durationMin} {t('booking', 'minutes')}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
         )}
@@ -552,84 +577,6 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
 function SectionHeading({ title, className = "mb-6" }: { title: string; className?: string }) {
   return (
     <h2 className={`text-2xl font-bold text-foreground ${className}`}>{title}</h2>
-  )
-}
-
-function ResourceCard({
-  resource,
-  nicheConfig,
-  colors,
-  isTable = false,
-  shortDays,
-  t,
-  locale,
-}: {
-  resource: TenantResource
-  nicheConfig: NicheConfig
-  colors: ColorClasses
-  isTable?: boolean
-  shortDays: Record<number, string>
-  t: Translator
-  locale: string
-}) {
-  const attrs        = parseAttrs(resource.attributes)
-  const displayFields = nicheConfig.attributeFields.filter(
-    (f) => f.showInTable && (!f.forTypes || f.forTypes.includes(resource.type))
-  )
-
-  const resourceName = getDbTranslation(resource, 'name', locale)
-  const resourceDesc = getDbTranslation(resource, 'description', locale)
-
-  const workDays = resource.schedules
-    .filter((s) => s.isActive)
-    .sort((a, b) => (a.dayOfWeek === 0 ? 7 : a.dayOfWeek) - (b.dayOfWeek === 0 ? 7 : b.dayOfWeek))
-    .map((s) => shortDays[s.dayOfWeek])
-    .join(', ')
-
-  return (
-    <div className="group rounded-2xl bg-[var(--neu-bg)] neu-raised p-5 flex flex-col gap-4 transition-all duration-200">
-      {/* Avatar / Icon */}
-      {isTable ? (
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-muted dark:bg-muted">
-          🍽️
-        </div>
-      ) : (
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${colors.avatarBg}`}>
-          {resource.name.charAt(0)}
-        </div>
-      )}
-
-      {/* Name */}
-      <div>
-        <p className="font-semibold text-foreground">{resourceName}</p>
-        {resourceDesc && (
-          <p className="text-sm text-muted-foreground mt-0.5">{resourceDesc}</p>
-        )}
-      </div>
-
-      {/* Attribute badges */}
-      {displayFields.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {displayFields.map((field) => {
-            const label = formatAttrForCard(field, attrs[field.key], t)
-            if (!label) return null
-            return (
-              <span
-                key={field.key}
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.badge}`}
-              >
-                {label}
-              </span>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Work days */}
-      {workDays && (
-        <p className="text-xs text-muted-foreground mt-auto">{t('public', 'workDays')} {workDays}</p>
-      )}
-    </div>
   )
 }
 

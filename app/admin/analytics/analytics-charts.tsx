@@ -69,7 +69,7 @@ function CustomTooltipMRR({
       <p className="text-muted-foreground">
         MRR:{' '}
         <span className="font-medium text-foreground">
-          ${payload[0].value}
+          {new Intl.NumberFormat('ru-KZ', { style: 'currency', currency: 'KZT', maximumFractionDigits: 0 }).format(payload[0].value)}
         </span>
       </p>
     </div>
@@ -162,7 +162,7 @@ export function AnalyticsCharts({ data }: { data: ChartDataItem[] }) {
                 tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(v: number) => `$${v}`}
+                tickFormatter={(v: number) => `₸${v.toLocaleString('ru-KZ')}`}
                 width={48}
               />
               <Tooltip content={<CustomTooltipMRR />} cursor={{ fill: 'var(--color-muted)', opacity: 0.3 }} />
@@ -180,7 +180,7 @@ export function AnalyticsCharts({ data }: { data: ChartDataItem[] }) {
               <div key={entry.name} className="flex items-center gap-1.5">
                 <PlanBar fill={PLAN_COLORS[entry.name] ?? '#94a3b8'} />
                 <span>
-                  {entry.name}: ${entry.mrr}
+                  {entry.name}: ₸{entry.mrr.toLocaleString('ru-KZ')}
                 </span>
               </div>
             ))}
