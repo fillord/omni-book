@@ -87,3 +87,23 @@ Requirements:
 - GOD-04: Targeted In-App Notifications — Bell icon notification system; super-admin sends custom messages to specific individual tenants
 - GOD-05: Audit & Activity Logs — system log table recording tenant logins, plan changes (upgrade/downgrade), and deletion of critical data
 - GOD-06: Neumorphism Design Adherence — all new pages, charts, tables, and modals use var(--neu-bg), .neu-raised for cards/buttons, .neu-inset for inputs/table containers
+
+### Phase 3: Subscription Lifecycle and Automated Resource Freezing
+
+**Goal:** Implement a 30-day subscription lifecycle with automated expiry detection via daily cron, resource/service freezing with isFrozen fields, tenant warnings via in-app notifications, frozen state UI in dashboard managers, and super-admin activation with expiry date management and bulk unfreeze — all with Neumorphism design adherence.
+**Requirements:** [SUB-01, SUB-02, SUB-03, SUB-04, SUB-05, SUB-06]
+**Depends on:** Phase 2
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Test scaffold + Prisma schema expansion (isFrozen, CANCELED) + Cron lifecycle route
+- [ ] 03-02-PLAN.md — Frozen state UI in dashboard managers (resources, services, staff)
+- [ ] 03-03-PLAN.md — Billing page enhancements + renewSubscription + admin activateSubscription + i18n
+
+Requirements:
+- SUB-01: Schema expansion — isFrozen Boolean on Resource and Service models, CANCELED added to PlanStatus enum
+- SUB-02: Automated lifecycle cron — daily /api/cron/subscriptions route with 3-day warning notifications and expiry-triggered downgrade/freeze
+- SUB-03: Frozen state UI — "Заморожен" badges on frozen resources/services, disabled Edit/Delete, staff invite lock when EXPIRED
+- SUB-04: Billing page enhancements — expiry date display, EXPIRED alert block, renewSubscription action with Telegram notification
+- SUB-05: Super-admin activation — activateSubscription action (PRO/ACTIVE, 30-day expiry, bulk unfreeze), admin tenant detail UI
+- SUB-06: Neumorphism design adherence — all new UI uses var(--neu-bg), .neu-raised, .neu-inset patterns
