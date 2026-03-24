@@ -37,6 +37,44 @@ model Tenant {
   resources    Resource[]
   services     Service[]
   users        User[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, read])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  tenantId  String
+  eventType String
+  details   Json     @default("{}")
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([eventType])
+  @@index([createdAt])
 }
 
 model User {
