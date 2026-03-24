@@ -18,6 +18,7 @@ import type { NicheConfig } from '@/lib/niche/config'
 import { useState, useEffect } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { NotificationBell } from '@/components/notification-bell'
 
 // ---- types -----------------------------------------------------------------
 
@@ -30,6 +31,9 @@ type Props = {
   userName:         string
   userEmail:        string
   userRole:         string
+  tenantId?:        string
+  unreadCount?:     number
+  notifications?:   { id: string; message: string; read: boolean; createdAt: Date | string }[]
 }
 
 // ---- static color maps (Tailwind requires static strings) ------------------
@@ -60,7 +64,7 @@ function initials(name: string): string {
 
 // ---- inner content (shared between desktop aside and Sheet) ----------------
 
-function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenantPlanStatus, userName, userEmail, userRole }: Props) {
+function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenantPlanStatus, userName, userEmail, userRole, tenantId, unreadCount, notifications }: Props) {
   const pathname = usePathname()
   const { t }    = useI18n()
   const [mounted, setMounted] = useState(false)
@@ -92,12 +96,19 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
             {initials(userName || userEmail)}
           </AvatarFallback>
         </Avatar>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium truncate leading-tight">{userName || userEmail}</p>
           {userName && (
             <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
           )}
         </div>
+        {tenantId && (
+          <NotificationBell
+            tenantId={tenantId}
+            initialUnreadCount={unreadCount ?? 0}
+            initialNotifications={notifications ?? []}
+          />
+        )}
       </div>
 
       {/* Tenant + niche & plan */}

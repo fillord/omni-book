@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SendNotificationForm } from './send-notification-form'
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = await params
@@ -225,6 +226,12 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ t
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Send Notification */}
+      <div className="neu-raised bg-[var(--neu-bg)] rounded-xl p-6 space-y-3">
+        <h2 className="text-base font-semibold text-foreground">Отправить уведомление</h2>
+        <SendNotificationForm tenantId={tenantId} />
+      </div>
     </div>
   )
 }

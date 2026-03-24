@@ -322,6 +322,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       goodEvening:       'Добрый вечер,',
       goodNight:         'Доброй ночи,',
       bookingsToday:     'записей сегодня',
+      announcement:      'Объявление',
+      dismissBanner:     'Закрыть',
+      notifications:     'Уведомления',
+      noNotifications:   'Нет уведомлений',
+      markAllRead:       'Отметить всё прочитанным',
     },
     status: {
       // Uppercase — used by BookingStatusBadge (t('status', booking.status))
@@ -465,6 +470,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       workDays:          'Дни:',
       experienceYears:   '{n} лет',
       capacity:          'до {n} чел.',
+      showAll:           'Показать все',
     },
     niche: {
       opt_70c52a: 'Спорт и отдых',
@@ -880,6 +886,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       goodEvening:       'Қайырлы кеш,',
       goodNight:         'Қайырлы түн,',
       bookingsToday:     'бүгінгі жазылулар',
+      announcement:      'Хабарландыру',
+      dismissBanner:     'Жабу',
+      notifications:     'Хабарламалар',
+      noNotifications:   'Хабарламалар жоқ',
+      markAllRead:       'Барлығын оқылды деп белгілеу',
     },
     status: {
       PENDING:   'Күтуде',
@@ -1020,6 +1031,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       workDays:          'Күндері:',
       experienceYears:   '{n} жыл',
       capacity:          '{n} адамға дейін',
+      showAll:           'Барлығын көрсету',
     },
     niche: {
       opt_70c52a: 'Спорт және демалыс',
@@ -1435,6 +1447,11 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       goodEvening:       'Good evening,',
       goodNight:         'Good night,',
       bookingsToday:     'bookings today',
+      announcement:      'Announcement',
+      dismissBanner:     'Close',
+      notifications:     'Notifications',
+      noNotifications:   'No notifications',
+      markAllRead:       'Mark all as read',
     },
     status: {
       PENDING:   'Pending',
@@ -1575,6 +1592,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       workDays:          'Days:',
       experienceYears:   '{n} yr',
       capacity:          'up to {n}',
+      showAll:           'Show all',
     },
     niche: {
       opt_70c52a: 'Sports & Leisure',

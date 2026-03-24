@@ -4,6 +4,7 @@ import { authConfig } from '@/lib/auth/config'
 import { basePrisma } from '@/lib/db'
 import { getNicheConfig } from '@/lib/niche/config'
 import { DashboardSidebar } from '@/components/dashboard-sidebar'
+import { AnnouncementBanner } from '@/components/announcement-banner'
 import { Toaster } from '@/components/ui/sonner'
 import { AdminThemeProvider } from '@/components/theme-providers'
 import Link from 'next/link'
@@ -30,9 +31,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
     )
   }
 
-  const tenant = await basePrisma.tenant.findUnique({
-    where:  { id: session.user.tenantId },
-  })
+  const [tenant, announcement, unreadCount, notifications] = await Promise.all([
+    basePrisma.tenant.findUnique({ where: { id: session.user.tenantId } }),
+    basePrisma.announcement.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'desc' } }),
+    basePrisma.notification.count({ where: { tenantId: session.user.tenantId, read: false } }),
+    basePrisma.notification.findMany({
+      where: { tenantId: session.user.tenantId },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    }),
+  ])
 
   const tenantInfo = tenant as unknown as TenantInfo | null
   const tenantPlan = tenantInfo?.plan || 'FREE'
@@ -56,6 +64,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         userName={session.user.name ?? ''}
         userEmail={session.user.email ?? ''}
         userRole={session.user.role ?? ''}
+        tenantId={session.user.tenantId}
+        unreadCount={unreadCount}
+        notifications={notifications}
       />
       <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         {tenantPlanStatus === 'EXPIRED' && (
@@ -82,6 +93,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </div>
             </div>
           </div>
+        )}
+        {announcement && (
+          <AnnouncementBanner
+            id={announcement.id}
+            title={announcement.title}
+            body={announcement.body}
+          />
         )}
         {children}
       </main>
