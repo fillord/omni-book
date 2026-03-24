@@ -16,11 +16,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { requestProActivation } from "@/lib/actions/billing"
+import { requestProActivation, renewSubscription } from "@/lib/actions/billing"
 
 type TenantInfo = {
   plan: string
   planStatus: string
+  subscriptionExpiresAt: Date | null
 }
 
 export function BillingContent({ tenant }: { tenant: TenantInfo }) {
@@ -37,7 +38,9 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
 
   async function handlePaymentConfirm() {
     setLoading(true)
-    const res = await requestProActivation()
+    const res = isExpiredOrCanceled
+      ? await renewSubscription()
+      : await requestProActivation()
     
     setLoading(false)
     setIsOpen(false)
@@ -91,10 +94,29 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                   </span>
                 )}
               </div>
+              {isPro && !isExpiredOrCanceled && tenant.subscriptionExpiresAt && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Подписка активна до: {new Date(tenant.subscriptionExpiresAt).toLocaleDateString('ru-RU', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  })}
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {isExpiredOrCanceled && (
+        <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-5 space-y-2">
+          <div className="flex items-center gap-2 text-orange-500">
+            <AlertTriangle size={20} />
+            <h3 className="font-semibold text-base">Ваша подписка истекла</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ваши данные заморожены. Продлите подписку PRO, чтобы восстановить полный доступ к ресурсам и услугам.
+          </p>
+        </div>
+      )}
 
       {/* Upgrade / Renewal Banner */}
       {showUpgradeCard && (
