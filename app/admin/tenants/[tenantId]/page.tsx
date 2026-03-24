@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SendNotificationForm } from './send-notification-form'
+import { ActivateSubscriptionForm } from './activate-subscription-form'
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = await params
@@ -21,6 +22,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ t
         phone: true,
         createdAt: true,
         niche: true,
+        subscriptionExpiresAt: true,
       },
     }),
     basePrisma.service.findMany({
@@ -226,6 +228,22 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ t
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Activate Subscription (super-admin) */}
+      <div className="neu-raised bg-[var(--neu-bg)] rounded-xl p-6 space-y-3">
+        <h2 className="text-base font-semibold text-foreground">Управление подпиской</h2>
+        {tenant.subscriptionExpiresAt && (
+          <p className="text-sm text-muted-foreground">
+            Подписка до: {new Date(tenant.subscriptionExpiresAt).toLocaleDateString('ru-RU', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            })}
+          </p>
+        )}
+        <p className="text-sm text-muted-foreground">
+          Текущий статус: {statusLabels[tenant.planStatus] ?? tenant.planStatus}
+        </p>
+        <ActivateSubscriptionForm tenantId={tenantId} />
+      </div>
 
       {/* Send Notification */}
       <div className="neu-raised bg-[var(--neu-bg)] rounded-xl p-6 space-y-3">
