@@ -83,6 +83,47 @@ export async function updateTenantMaxResources(tenantId: string, maxResources: n
   }
 }
 
+export async function activateSubscription(tenantId: string) {
+  try {
+    await ensureSuperAdmin()
+
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+
+    await basePrisma.$transaction([
+      basePrisma.tenant.update({
+        where: { id: tenantId },
+        data: {
+          plan: 'PRO',
+          planStatus: 'ACTIVE',
+          subscriptionExpiresAt: expiresAt,
+          maxResources: PLAN_DEFAULT_MAX_RESOURCES.PRO, // 20
+        },
+      }),
+      basePrisma.resource.updateMany({
+        where: { tenantId, isFrozen: true },
+        data: { isFrozen: false },
+      }),
+      basePrisma.service.updateMany({
+        where: { tenantId, isFrozen: true },
+        data: { isFrozen: false },
+      }),
+    ])
+
+    // Audit log (fire-and-forget)
+    createAuditLog(tenantId, 'plan_upgrade', {
+      activatedBy: 'superadmin',
+      newExpiry: expiresAt.toISOString(),
+    })
+
+    revalidatePath(`/admin/tenants/${tenantId}`)
+    revalidatePath('/admin/tenants')
+    revalidatePath('/dashboard/settings/billing')
+    return { success: true }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка активации подписки' }
+  }
+}
+
 export async function banTenant(tenantId: string) {
   try {
     await ensureSuperAdmin()
