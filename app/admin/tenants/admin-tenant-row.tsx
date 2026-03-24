@@ -25,6 +25,7 @@ interface Tenant {
 }
 
 export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
+  const tenantId = tenant.id
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -95,7 +96,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
     >
       <td className="p-4 align-top">
         <Link
-          href={`/admin/tenants/${tenant.id}`}
+          href={`/admin/tenants/${tenantId}`}
           className="font-medium text-foreground hover:text-neu-accent transition-colors underline-offset-2 hover:underline"
         >
           {tenant.name}
