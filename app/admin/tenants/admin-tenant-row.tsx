@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Plan, PlanStatus } from '@prisma/client'
 import { updateTenantPlan, updateTenantMaxResources, banTenant, deleteTenant } from '@/lib/actions/admin'
 
@@ -93,7 +94,12 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
       ].join(' ')}
     >
       <td className="p-4 align-top">
-        <div className="font-medium text-foreground">{tenant.name}</div>
+        <Link
+          href={`/admin/tenants/${tenant.id}`}
+          className="font-medium text-foreground hover:text-neu-accent transition-colors underline-offset-2 hover:underline"
+        >
+          {tenant.name}
+        </Link>
         <div className="text-xs text-muted-foreground mt-0.5">{tenant.email} • {tenant.slug}.omnibook.com</div>
         {error && <div className="text-xs text-destructive mt-1">{error}</div>}
       </td>
@@ -170,7 +176,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
             <button
               onClick={handleBan}
               disabled={loading}
-              className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-amber-500 hover:text-amber-600 disabled:opacity-50 transition-all active:neu-inset font-medium"
+              className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-amber-500 hover:text-amber-600 disabled:opacity-50 transition-all duration-300 ease-in-out active:neu-inset font-medium"
             >
               Забанить
             </button>
@@ -178,7 +184,7 @@ export function AdminTenantRow({ tenant }: { tenant: Tenant }) {
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-destructive hover:text-destructive/80 disabled:opacity-50 transition-all active:neu-inset font-medium"
+            className="text-xs px-3 py-1.5 rounded-md neu-raised bg-[var(--neu-bg)] text-destructive hover:text-destructive/80 disabled:opacity-50 transition-all duration-300 ease-in-out active:neu-inset font-medium"
           >
             Удалить
           </button>
