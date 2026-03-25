@@ -70,8 +70,8 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 4. Cleanup Sweep | 2/2 | Complete   | 2026-03-25 | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
-| 4. Client Data Foundation | v1.4 | 0/2 | Not started | - |
-| 5. Client UI, Outreach & Polish | v1.4 | 0/TBD | Not started | - |
+| 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
+| 5. Client UI, Outreach & Polish | v1.4 | 0/3 | Not started | - |
 
 ## Phase Details
 
@@ -144,8 +144,8 @@ Requirements:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 04-01-PLAN.md — Test scaffold + Prisma Client model schema addition
-- [ ] 04-02-PLAN.md — syncClients upsert action + getClients query action
+- [x] 04-01-PLAN.md — Test scaffold + Prisma Client model schema addition
+- [x] 04-02-PLAN.md — syncClients upsert action + getClients query action
 
 ### Phase 5: Client UI, Outreach & Polish
 
@@ -158,4 +158,9 @@ Plans:
   3. Typing in the search bar immediately filters the client list by name or phone number
   4. Clicking a client row opens a detail page showing that client's full booking history (date, service, resource, price, status)
   5. On the detail page, a "Send Telegram message" action is available and functional for clients with an active Telegram connection, and absent (or disabled) for those without
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Test scaffold + i18n translations + sidebar link
+- [ ] 05-02-PLAN.md — Clients list page + table component with search
+- [ ] 05-03-PLAN.md — Client detail page + Telegram outreach action
