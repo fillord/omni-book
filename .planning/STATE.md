@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 2 of 3
-status: executing
-last_updated: "2026-03-25T16:10:30.000Z"
-last_activity: 2026-03-25 — Plan 05-02 complete (Clients list page + ClientsTable component with search, Neumorphic styling)
+current_plan: 3 of 3
+status: complete
+last_updated: "2026-03-25T16:14:23.982Z"
+last_activity: 2026-03-25 — Plan 05-03 complete (Client detail page + sendTelegramToClient action + ClientDetail component)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 17
-  completed_plans: 16
-  percent: 0
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 5 — Client UI, Outreach & Polish
-Current Plan: 2 of 3
-Status: In progress — Plan 02 complete
-Last activity: 2026-03-25 — Plan 05-02 complete (Clients list page + ClientsTable component with search, Neumorphic styling)
+Current Plan: 3 of 3 (COMPLETE)
+Status: All plans complete — Phase 5 and milestone v1.4 done
+Last activity: 2026-03-25 — Plan 05-03 complete (Client detail page + sendTelegramToClient action + ClientDetail component)
 
-Progress: [█████████░] 94% (16/17 plans complete)
+Progress: [██████████] 100% (17/17 plans complete)
 
 ## Accumulated Context
 
@@ -89,6 +89,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 05-02]: Date serialization: server component converts Date to ISO string before passing to ClientsTable to satisfy Next.js App Router constraint
 - [Phase 05-02]: Client-side search filtering via useMemo — no server round-trip for search, immediate UX
 - [Phase 05-02]: useTransition for syncClients — prevents UI lock during sync operation
+- [Phase 05-03]: sendTelegramToClient fetches telegramChatId from booking (not Client model) — hasTelegram is boolean-only flag; empty message guard before requireAuth() prevents API 400 errors
+- [Phase 05-03]: Telegram send UI section absent (not disabled) for hasTelegram=false clients; cross-tenant access returns 404 via notFound()
 
 ### Pending Todos
 

@@ -57,7 +57,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 ### v1.4 Client Base (Mini-CRM)
 
 - [x] **Phase 4: Client Data Foundation** — Prisma Client model, aggregation logic, sync from existing bookings (completed 2026-03-25)
-- [ ] **Phase 5: Client UI, Outreach & Polish** — Clients table page, detail page, Telegram send action, Neumorphism design, RU/EN/KZ i18n
+- [x] **Phase 5: Client UI, Outreach & Polish** — Clients table page, detail page, Telegram send action, Neumorphism design, RU/EN/KZ i18n (completed 2026-03-25)
 
 ## Progress
 
@@ -71,7 +71,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
-| 5. Client UI, Outreach & Polish | 2/3 | In Progress|  | - |
+| 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
 
 ## Phase Details
 
@@ -158,7 +158,7 @@ Plans:
   3. Typing in the search bar immediately filters the client list by name or phone number
   4. Clicking a client row opens a detail page showing that client's full booking history (date, service, resource, price, status)
   5. On the detail page, a "Send Telegram message" action is available and functional for clients with an active Telegram connection, and absent (or disabled) for those without
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 05-01-PLAN.md — Test scaffold + i18n translations + sidebar link

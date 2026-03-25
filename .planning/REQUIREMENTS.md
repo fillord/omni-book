@@ -23,11 +23,11 @@ Requirements for v1.4 Client Base (Mini-CRM). Each maps to roadmap phases.
 
 ### Client Detail
 
-- [ ] **CRM-09**: Tenant owner can click a client row to open a detail page showing that client's full booking history (date, service, resource, price, status)
+- [x] **CRM-09**: Tenant owner can click a client row to open a detail page showing that client's full booking history (date, service, resource, price, status)
 
 ### Telegram Outreach
 
-- [ ] **CRM-10**: From the client detail page, tenant owner can send a Telegram message to clients who have an active Telegram chat connection
+- [x] **CRM-10**: From the client detail page, tenant owner can send a Telegram message to clients who have an active Telegram chat connection
 
 ### Design & i18n
 
@@ -68,8 +68,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRM-06 | Phase 5 | Complete |
 | CRM-07 | Phase 5 | Complete |
 | CRM-08 | Phase 5 | Complete |
-| CRM-09 | Phase 5 | Pending |
-| CRM-10 | Phase 5 | Pending |
+| CRM-09 | Phase 5 | Complete |
+| CRM-10 | Phase 5 | Complete |
 | CRM-11 | Phase 5 | Complete |
 | CRM-12 | Phase 5 | Complete |
 
