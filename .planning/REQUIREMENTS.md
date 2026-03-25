@@ -18,8 +18,8 @@ Requirements for v1.4 Client Base (Mini-CRM). Each maps to roadmap phases.
 ### Dashboard UI
 
 - [x] **CRM-06**: Tenant owner can navigate to a Clients page via sidebar link ("Клиенты" with Users icon)
-- [ ] **CRM-07**: Clients page displays a Neumorphic data table with columns: Name, Contact (Phone/Email), Total Visits, Total Spent, Last Visit, Telegram Status
-- [ ] **CRM-08**: Clients table has a search bar filtering by client name or phone number
+- [x] **CRM-07**: Clients page displays a Neumorphic data table with columns: Name, Contact (Phone/Email), Total Visits, Total Spent, Last Visit, Telegram Status
+- [x] **CRM-08**: Clients table has a search bar filtering by client name or phone number
 
 ### Client Detail
 
@@ -31,7 +31,7 @@ Requirements for v1.4 Client Base (Mini-CRM). Each maps to roadmap phases.
 
 ### Design & i18n
 
-- [ ] **CRM-11**: All new UI uses `.neu-raised`/`.neu-inset`/`var(--neu-bg)` Neumorphism patterns consistent with v1.3 design system
+- [x] **CRM-11**: All new UI uses `.neu-raised`/`.neu-inset`/`var(--neu-bg)` Neumorphism patterns consistent with v1.3 design system
 - [x] **CRM-12**: All new UI strings are translated in RU/EN/KZ (sidebar label, page headers, column headers, empty states, action labels)
 
 ## Future Requirements
@@ -66,11 +66,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRM-04 | Phase 4 | Complete |
 | CRM-05 | Phase 4 | Complete |
 | CRM-06 | Phase 5 | Complete |
-| CRM-07 | Phase 5 | Pending |
-| CRM-08 | Phase 5 | Pending |
+| CRM-07 | Phase 5 | Complete |
+| CRM-08 | Phase 5 | Complete |
 | CRM-09 | Phase 5 | Pending |
 | CRM-10 | Phase 5 | Pending |
-| CRM-11 | Phase 5 | Pending |
+| CRM-11 | Phase 5 | Complete |
 | CRM-12 | Phase 5 | Complete |
 
 **Coverage:**

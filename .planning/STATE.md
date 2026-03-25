@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 1 of 3
+current_plan: 2 of 3
 status: executing
-last_updated: "2026-03-25T16:06:29.449Z"
-last_activity: 2026-03-25 — Plan 05-01 complete (test scaffold CRM-06 through CRM-12, clients i18n section, sidebar link)
+last_updated: "2026-03-25T16:10:30.000Z"
+last_activity: 2026-03-25 — Plan 05-02 complete (Clients list page + ClientsTable component with search, Neumorphic styling)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 16
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 5 — Client UI, Outreach & Polish
-Current Plan: 1 of 3
-Status: In progress — Plan 01 complete
-Last activity: 2026-03-25 — Plan 05-01 complete (test scaffold CRM-06 through CRM-12, clients i18n section, sidebar link)
+Current Plan: 2 of 3
+Status: In progress — Plan 02 complete
+Last activity: 2026-03-25 — Plan 05-02 complete (Clients list page + ClientsTable component with search, Neumorphic styling)
 
-Progress: [----------] 0% (0/2 phases complete)
+Progress: [█████████░] 94% (16/17 plans complete)
 
 ## Accumulated Context
 
@@ -86,6 +86,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 05-01]: Test scaffold created before implementation — CRM-06 sidebar + CRM-12 translation tests pass immediately; CRM-07 through CRM-11 fail until Plans 02+03 implement the files
 - [Phase 05-01]: Sidebar clients entry uses section: 'clients' translation namespace, consistent with existing section-based i18n pattern
 - [Phase 05-01]: 27 translation keys per locale covers full client UI surface (table columns, search, Telegram outreach, booking history, sync operations)
+- [Phase 05-02]: Date serialization: server component converts Date to ISO string before passing to ClientsTable to satisfy Next.js App Router constraint
+- [Phase 05-02]: Client-side search filtering via useMemo — no server round-trip for search, immediate UX
+- [Phase 05-02]: useTransition for syncClients — prevents UI lock during sync operation
 
 ### Pending Todos
 
