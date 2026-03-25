@@ -1,32 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-last_updated: "2026-03-25T01:56:09.641Z"
-last_activity: 2026-03-24 — Completed 03-03-PLAN.md (billing expiry display, EXPIRED alert, renewSubscription, activateSubscription, admin activation UI)
+milestone: v1.4
+milestone_name: Client Base (Mini-CRM)
+status: in_progress
+last_updated: "2026-03-25T00:00:00.000Z"
+last_activity: 2026-03-25 — Milestone v1.4 started — defining requirements and roadmap
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-20 after v1.2 milestone)
+See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Planning next milestone (v1.3)
+**Current focus:** Defining requirements for v1.4 Client Base (Mini-CRM)
 
 ## Current Position
 
-Phase: 03-subscription-lifecycle-and-automated-resource-freezing
-Plan: 03 of 3 — COMPLETE (all 3 done)
-Status: Phase 03 Complete — all subscription lifecycle plans shipped
-Last activity: 2026-03-24 — Completed 03-03-PLAN.md (billing expiry display, EXPIRED alert, renewSubscription, activateSubscription, admin activation UI)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-25 — Milestone v1.4 started
 
 ## Accumulated Context
 

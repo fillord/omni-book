@@ -10,6 +10,17 @@ omni-book is a multi-tenant SaaS booking platform where tenants (businesses) con
 
 A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
 
+## Current Milestone: v1.4 Client Base (Mini-CRM)
+
+**Goal:** Build a client aggregation layer so business owners can view their actual customer base — who visited, how often, how much they spent, and whether they're reachable via Telegram.
+
+**Target features:**
+- Dedicated `Client` Prisma model linked to `Tenant`, synced from existing bookings
+- Aggregated metrics per client: total visits, total revenue, last visit date, Telegram status
+- Neumorphic clients table page at `app/(dashboard)/[tenantId]/clients/page.tsx` with search
+- Client detail page showing full booking history per client
+- Telegram message action for clients with active chat connection
+
 ## Requirements
 
 ### Validated
@@ -48,7 +59,17 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 - ✓ Beauty specialization converted from select to free-text; horeca/sports gain `attr_specialization` for staff — v1.2 (SPEC-01)
 - ✓ RU/EN/KZ translations for all 19 new resource type labels + `attr_specialization` (60 entries) — v1.2 (I18N-01)
 
+- ✓ Neumorphism Soft UI system (`var(--neu-bg)`, `.neu-raised`, `.neu-inset`) across all surfaces — v1.3 (NEU-01–14)
+- ✓ Super-Admin "God Mode" panel: Financial Analytics, Tenant Drill-Down, Announcement Banners, Notification Bell, Audit Log — v1.3 (GOD-01–06)
+- ✓ Subscription lifecycle: `isFrozen` on Resource/Service, daily cron with 3-day warnings, frozen UI badges, billing EXPIRED alert, super-admin activation with bulk unfreeze — v1.3 (SUB-01–06)
+
 ### Active
+
+- [ ] **CRM-01**: Client model linked to Tenant, synced from existing bookings
+- [ ] **CRM-02**: Aggregated metrics per client (visits, revenue, last visit, Telegram status)
+- [ ] **CRM-03**: Clients table page with Neumorphic design and search
+- [ ] **CRM-04**: Client detail page with full booking history
+- [ ] **CRM-05**: Send Telegram message action from client detail
 
 ### Out of Scope
 
@@ -100,4 +121,4 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | Beauty specialization → free-text (not select) | Removes 6 opaque `opt_xxx` options; staff records with type:'staff' still match forTypes filter | ✓ Good — simpler UX, backward compatible for stored records |
 
 ---
-*Last updated: 2026-03-20 after v1.2 milestone*
+*Last updated: 2026-03-25 after v1.3 milestone close — v1.4 Client Base started*

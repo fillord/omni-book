@@ -1,5 +1,20 @@
 # Milestones
 
+## v1.3 Neumorphism UI, God Mode & Subscription Lifecycle (Shipped: 2026-03-24)
+
+**Phases completed:** 3 phases, 12 plans
+**Timeline:** 2026-03-20 → 2026-03-24 (5 days)
+**Git range:** `95be2ea` → `5b1a867`
+
+**Delivered:** Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel, and 30-day subscription lifecycle with automated resource freezing.
+
+**Key accomplishments:**
+1. **Phase 1 — Neumorphism Soft UI (4 plans):** CSS variable injection with `var(--neu-bg)` token remapping, `.neu-raised`/`.neu-inset` utility classes on all shadcn/ui components, landing page adaptation, 300ms theme transitions — full visual consistency in both light/dark themes
+2. **Phase 2 — Super-Admin God Mode (5 plans):** Financial Analytics Dashboard (MRR + plan tier breakdown), per-tenant drill-down with read-only Services/Resources/Staff views, Global Announcement Banners, targeted In-App Notification Bell, Audit & Activity Log with createAuditLog hooks
+3. **Phase 3 — Subscription Lifecycle (3 plans):** `isFrozen` on Resource/Service models, daily `/api/cron/subscriptions` route with 3-day warning notifications and expiry-triggered freeze/downgrade, frozen state UI badges with disabled actions, billing page expiry display + EXPIRED alert + `renewSubscription` action, super-admin `activateSubscription` with bulk unfreeze
+
+---
+
 ## v1.2 Advanced Customization & Niche Expansion (Shipped: 2026-03-20)
 
 **Phases completed:** 2 phases, 2 plans, 5 tasks
