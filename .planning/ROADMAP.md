@@ -70,7 +70,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
-| 4. Client Data Foundation | v1.4 | 0/TBD | Not started | - |
+| 4. Client Data Foundation | v1.4 | 0/2 | Not started | - |
 | 5. Client UI, Outreach & Polish | v1.4 | 0/TBD | Not started | - |
 
 ## Phase Details
@@ -141,7 +141,11 @@ Requirements:
   3. Each client record correctly reports the sum of `price` across COMPLETED bookings as total revenue
   4. Each client record correctly reports the date of the most recent COMPLETED booking as last visit
   5. Each client record correctly reflects whether any related booking carried a `telegramChatId`
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Test scaffold + Prisma Client model schema addition
+- [ ] 04-02-PLAN.md — syncClients upsert action + getClients query action
 
 ### Phase 5: Client UI, Outreach & Polish
 
