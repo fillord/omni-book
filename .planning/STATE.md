@@ -1,15 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.4
-milestone_name: Client Base (Mini-CRM)
-status: in_progress
-last_updated: "2026-03-25T00:00:00.000Z"
-last_activity: 2026-03-25 — Roadmap created for v1.4 — 2 phases, 12 requirements mapped
+milestone_name: Client Base
+current_plan: 1 of 3
+status: executing
+last_updated: "2026-03-25T10:59:49.853Z"
+last_activity: 2026-03-25 — Plan 04-01 complete (Client model + test scaffold)
 progress:
-  total_phases: 2
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 14
+  completed_plans: 13
+  percent: 0
 ---
 
 # Project State
@@ -24,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 4 — Client Data Foundation
-Plan: Not started
-Status: Roadmap approved, ready to plan Phase 4
-Last activity: 2026-03-25 — v1.4 roadmap created (2 phases)
+Current Plan: 1 of 3
+Status: In progress — Plan 01 complete
+Last activity: 2026-03-25 — Plan 04-01 complete (Client model + test scaffold)
 
 Progress: [----------] 0% (0/2 phases complete)
 
@@ -76,6 +78,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 03-03]: renewSubscription sets PRO+PENDING (not ACTIVE directly) — requires super-admin confirmation, same flow as requestProActivation
 - [Phase 03-03]: activateSubscription uses basePrisma.$transaction for atomic tenant update + bulk unfreeze of resources and services
 - [Phase 03-03]: Two-click confirmation pattern on ActivateSubscriptionForm prevents accidental activation by super-admin
+- [Phase 04-client-data-foundation]: Client identity uses (tenantId, phone) composite key — phone always present on bookings; email is optional
+- [Phase 04-client-data-foundation]: No direct Booking[] relation on Client — Client is materialized aggregate; adding clientId to Booking would be a breaking change
+- [Phase 04-client-data-foundation]: prisma generate run in executor context; prisma db push is a manual step requiring database connection
 
 ### Pending Todos
 
