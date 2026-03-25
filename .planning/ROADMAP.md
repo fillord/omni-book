@@ -71,7 +71,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
-| 5. Client UI, Outreach & Polish | v1.4 | 0/3 | Not started | - |
+| 5. Client UI, Outreach & Polish | 1/3 | In Progress|  | - |
 
 ## Phase Details
 
@@ -158,7 +158,7 @@ Plans:
   3. Typing in the search bar immediately filters the client list by name or phone number
   4. Clicking a client row opens a detail page showing that client's full booking history (date, service, resource, price, status)
   5. On the detail page, a "Send Telegram message" action is available and functional for clients with an active Telegram connection, and absent (or disabled) for those without
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 05-01-PLAN.md — Test scaffold + i18n translations + sidebar link

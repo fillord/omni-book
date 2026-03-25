@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 2 of 3
+current_plan: 1 of 3
 status: executing
-last_updated: "2026-03-25T11:06:16.525Z"
-last_activity: 2026-03-25 — Plan 04-02 complete (syncClients + getClients server actions)
+last_updated: "2026-03-25T16:06:29.449Z"
+last_activity: 2026-03-25 — Plan 05-01 complete (test scaffold CRM-06 through CRM-12, clients i18n section, sidebar link)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 17
+  completed_plans: 15
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 4 — Client Data Foundation (CRM-01 through CRM-05)
+**Current focus:** Phase 5 — Client UI, Outreach & Polish (CRM-06 through CRM-12)
 
 ## Current Position
 
-Phase: 4 — Client Data Foundation
-Current Plan: 2 of 3
-Status: In progress — Plan 02 complete
-Last activity: 2026-03-25 — Plan 04-02 complete (syncClients + getClients server actions)
+Phase: 5 — Client UI, Outreach & Polish
+Current Plan: 1 of 3
+Status: In progress — Plan 01 complete
+Last activity: 2026-03-25 — Plan 05-01 complete (test scaffold CRM-06 through CRM-12, clients i18n section, sidebar link)
 
 Progress: [----------] 0% (0/2 phases complete)
 
@@ -83,6 +83,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 04-client-data-foundation]: prisma generate run in executor context; prisma db push is a manual step requiring database connection
 - [Phase 04-02]: syncClients uses orderBy startsAt desc so clientBookings[0] is most recent — lastVisitAt and name fallback use index 0 without extra sort
 - [Phase 04-02]: email resolved via Array.find across all bookings for first non-null email (not just most recent booking)
+- [Phase 05-01]: Test scaffold created before implementation — CRM-06 sidebar + CRM-12 translation tests pass immediately; CRM-07 through CRM-11 fail until Plans 02+03 implement the files
+- [Phase 05-01]: Sidebar clients entry uses section: 'clients' translation namespace, consistent with existing section-based i18n pattern
+- [Phase 05-01]: 27 translation keys per locale covers full client UI surface (table columns, search, Telegram outreach, booking history, sync operations)
 
 ### Pending Todos
 
