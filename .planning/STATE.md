@@ -4,9 +4,9 @@ milestone: v1.4
 milestone_name: Client Base (Mini-CRM)
 status: in_progress
 last_updated: "2026-03-25T00:00:00.000Z"
-last_activity: 2026-03-25 — Milestone v1.4 started — defining requirements and roadmap
+last_activity: 2026-03-25 — Roadmap created for v1.4 — 2 phases, 12 requirements mapped
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -19,14 +19,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Defining requirements for v1.4 Client Base (Mini-CRM)
+**Current focus:** Phase 4 — Client Data Foundation (CRM-01 through CRM-05)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-25 — Milestone v1.4 started
+Phase: 4 — Client Data Foundation
+Plan: Not started
+Status: Roadmap approved, ready to plan Phase 4
+Last activity: 2026-03-25 — v1.4 roadmap created (2 phases)
+
+Progress: [----------] 0% (0/2 phases complete)
 
 ## Accumulated Context
 
@@ -86,9 +88,9 @@ None.
 ### Roadmap Evolution
 
 - v1.2 complete: Phase 1 (duration input), Phase 2 (resource types expansion) both shipped
+- v1.3 complete: Phase 1 (Neumorphism), Phase 2 (God Mode), Phase 3 (Subscription Lifecycle) all shipped
+- v1.4 roadmap defined: Phase 4 (Client Data Foundation), Phase 5 (Client UI, Outreach & Polish)
 - See ROADMAP.md for full milestone history
-- Phase 1 added: Refactor the UI design of the entire project to a Neumorphism Soft UI style with Light and Dark themes
-- Phase 3 added: Subscription Lifecycle and Automated Resource Freezing
 
 ### Quick Tasks Completed
 

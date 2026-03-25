@@ -65,13 +65,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRM-03 | Phase 4 | Pending |
 | CRM-04 | Phase 4 | Pending |
 | CRM-05 | Phase 4 | Pending |
-| CRM-06 | Phase 4 | Pending |
-| CRM-07 | Phase 4 | Pending |
-| CRM-08 | Phase 4 | Pending |
-| CRM-09 | Phase 4 | Pending |
-| CRM-10 | Phase 4 | Pending |
-| CRM-11 | Phase 4 | Pending |
-| CRM-12 | Phase 4 | Pending |
+| CRM-06 | Phase 5 | Pending |
+| CRM-07 | Phase 5 | Pending |
+| CRM-08 | Phase 5 | Pending |
+| CRM-09 | Phase 5 | Pending |
+| CRM-10 | Phase 5 | Pending |
+| CRM-11 | Phase 5 | Pending |
+| CRM-12 | Phase 5 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 12 total
@@ -80,4 +80,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 — traceability updated after v1.4 roadmap creation (Phase 4 and Phase 5)*

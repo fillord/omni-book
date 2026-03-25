@@ -5,6 +5,8 @@
 - ✅ **v1.0 Dark Mode** — Phases 0-4 (shipped 2026-03-19)
 - ✅ **v1.1 Critical Bug Fixes** — Phases 6-7 (shipped 2026-03-19)
 - ✅ **v1.2 Advanced Customization & Niche Expansion** — Phases 1-2 (shipped 2026-03-20)
+- ✅ **v1.3 Neumorphism UI, God Mode & Subscription Lifecycle** — Phases 1-3 (shipped 2026-03-24)
+- 🔄 **v1.4 Client Base (Mini-CRM)** — Phases 4-5 (in progress)
 
 ## Phases
 
@@ -41,17 +43,37 @@ Custom service duration input (1-1440 min) replacing fixed dropdown, 19 new nich
 
 </details>
 
+<details>
+<summary>✅ v1.3 Neumorphism UI, God Mode & Subscription Lifecycle (Phases 1-3) — SHIPPED 2026-03-24</summary>
+
+Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel, and 30-day subscription lifecycle with automated resource freezing. See v1.3 milestone in `.planning/MILESTONES.md` for full details.
+
+- [x] Phase 1: Neumorphism Soft UI (4/4 plans) — completed 2026-03-22
+- [x] Phase 2: Super-Admin God Mode & Platform Management (5/5 plans) — completed 2026-03-23
+- [x] Phase 3: Subscription Lifecycle and Automated Resource Freezing (3/3 plans) — completed 2026-03-24
+
+</details>
+
+### v1.4 Client Base (Mini-CRM)
+
+- [ ] **Phase 4: Client Data Foundation** — Prisma Client model, aggregation logic, sync from existing bookings
+- [ ] **Phase 5: Client UI, Outreach & Polish** — Clients table page, detail page, Telegram send action, Neumorphism design, RU/EN/KZ i18n
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 0. Infrastructure Validation | v1.0 | 1/1 | Complete | 2026-03-17 |
-| 1. Replace Duration Dropdown | 4/4 | Complete   | 2026-03-22 | 2026-03-19 |
-| 2. Expand Resource Types | 1/5 | In Progress|  | 2026-03-20 |
-| 3. Dashboard + Auth Surface | 3/3 | Complete   | 2026-03-24 | 2026-03-18 |
+| 1. Replace Duration Dropdown | v1.2 | 1/1 | Complete | 2026-03-19 |
+| 2. Expand Resource Types | v1.2 | 1/1 | Complete | 2026-03-20 |
+| 3. Dashboard + Auth Surface | v1.3 | 3/3 | Complete | 2026-03-24 |
 | 4. Cleanup Sweep | v1.0 | 3/3 | Complete | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
+| 4. Client Data Foundation | v1.4 | 0/TBD | Not started | - |
+| 5. Client UI, Outreach & Polish | v1.4 | 0/TBD | Not started | - |
+
+## Phase Details
 
 ### Phase 1: Refactor the UI design of the entire project to a Neumorphism Soft UI style with Light and Dark themes
 
@@ -107,3 +129,29 @@ Requirements:
 - SUB-04: Billing page enhancements — expiry date display, EXPIRED alert block, renewSubscription action with Telegram notification
 - SUB-05: Super-admin activation — activateSubscription action (PRO/ACTIVE, 30-day expiry, bulk unfreeze), admin tenant detail UI
 - SUB-06: Neumorphism design adherence — all new UI uses var(--neu-bg), .neu-raised, .neu-inset patterns
+
+### Phase 4: Client Data Foundation
+
+**Goal:** Tenant owners have a reliable, queryable client record for every unique customer who has completed a booking — with accurate aggregated metrics (visits, revenue, last visit, Telegram status) — so that the UI layer can display real data without runtime computation.
+**Depends on:** Phase 3 (existing booking and subscription data structures)
+**Requirements:** CRM-01, CRM-02, CRM-03, CRM-04, CRM-05
+**Success Criteria** (what must be TRUE):
+  1. Running the sync action against existing bookings creates one `Client` record per unique phone/email under the correct tenant, with no duplicates
+  2. Each client record correctly reports the count of COMPLETED bookings as total visits
+  3. Each client record correctly reports the sum of `price` across COMPLETED bookings as total revenue
+  4. Each client record correctly reports the date of the most recent COMPLETED booking as last visit
+  5. Each client record correctly reflects whether any related booking carried a `telegramChatId`
+**Plans:** TBD
+
+### Phase 5: Client UI, Outreach & Polish
+
+**Goal:** Tenant owners can navigate to a dedicated Clients page, see their full customer base in a searchable Neumorphic table, drill into any client to review their booking history, and send a Telegram message to reachable clients — all in RU/EN/KZ.
+**Depends on:** Phase 4 (Client model and aggregated metrics)
+**Requirements:** CRM-06, CRM-07, CRM-08, CRM-09, CRM-10, CRM-11, CRM-12
+**Success Criteria** (what must be TRUE):
+  1. Tenant owner can reach the Clients page via a "Клиенты" sidebar link without navigating manually to a URL
+  2. The Clients page displays a Neumorphic table with Name, Contact, Total Visits, Total Spent, Last Visit, and Telegram Status columns — all populated from real data
+  3. Typing in the search bar immediately filters the client list by name or phone number
+  4. Clicking a client row opens a detail page showing that client's full booking history (date, service, resource, price, status)
+  5. On the detail page, a "Send Telegram message" action is available and functional for clients with an active Telegram connection, and absent (or disabled) for those without
+**Plans:** TBD
