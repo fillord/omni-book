@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 1 of 3
+current_plan: 2 of 3
 status: executing
-last_updated: "2026-03-25T10:59:49.853Z"
-last_activity: 2026-03-25 — Plan 04-01 complete (Client model + test scaffold)
+last_updated: "2026-03-25T11:02:15Z"
+last_activity: 2026-03-25 — Plan 04-02 complete (syncClients + getClients server actions)
 progress:
   total_phases: 5
   completed_phases: 3
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 4 — Client Data Foundation
-Current Plan: 1 of 3
-Status: In progress — Plan 01 complete
-Last activity: 2026-03-25 — Plan 04-01 complete (Client model + test scaffold)
+Current Plan: 2 of 3
+Status: In progress — Plan 02 complete
+Last activity: 2026-03-25 — Plan 04-02 complete (syncClients + getClients server actions)
 
 Progress: [----------] 0% (0/2 phases complete)
 
@@ -81,6 +81,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 04-client-data-foundation]: Client identity uses (tenantId, phone) composite key — phone always present on bookings; email is optional
 - [Phase 04-client-data-foundation]: No direct Booking[] relation on Client — Client is materialized aggregate; adding clientId to Booking would be a breaking change
 - [Phase 04-client-data-foundation]: prisma generate run in executor context; prisma db push is a manual step requiring database connection
+- [Phase 04-02]: syncClients uses orderBy startsAt desc so clientBookings[0] is most recent — lastVisitAt and name fallback use index 0 without extra sort
+- [Phase 04-02]: email resolved via Array.find across all bookings for first non-null email (not just most recent booking)
 
 ### Pending Todos
 

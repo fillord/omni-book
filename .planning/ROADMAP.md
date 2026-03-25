@@ -56,7 +56,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 
 ### v1.4 Client Base (Mini-CRM)
 
-- [ ] **Phase 4: Client Data Foundation** — Prisma Client model, aggregation logic, sync from existing bookings
+- [x] **Phase 4: Client Data Foundation** — Prisma Client model, aggregation logic, sync from existing bookings (completed 2026-03-25)
 - [ ] **Phase 5: Client UI, Outreach & Polish** — Clients table page, detail page, Telegram send action, Neumorphism design, RU/EN/KZ i18n
 
 ## Progress
@@ -67,7 +67,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 1. Replace Duration Dropdown | v1.2 | 1/1 | Complete | 2026-03-19 |
 | 2. Expand Resource Types | v1.2 | 1/1 | Complete | 2026-03-20 |
 | 3. Dashboard + Auth Surface | v1.3 | 3/3 | Complete | 2026-03-24 |
-| 4. Cleanup Sweep | 1/2 | In Progress|  | 2026-03-18 |
+| 4. Cleanup Sweep | 2/2 | Complete   | 2026-03-25 | 2026-03-18 |
 | 6. Data Display Correctness | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 4. Client Data Foundation | v1.4 | 0/2 | Not started | - |
@@ -141,7 +141,7 @@ Requirements:
   3. Each client record correctly reports the sum of `price` across COMPLETED bookings as total revenue
   4. Each client record correctly reports the date of the most recent COMPLETED booking as last visit
   5. Each client record correctly reflects whether any related booking carried a `telegramChatId`
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 04-01-PLAN.md — Test scaffold + Prisma Client model schema addition

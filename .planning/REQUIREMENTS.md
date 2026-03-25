@@ -10,10 +10,10 @@ Requirements for v1.4 Client Base (Mini-CRM). Each maps to roadmap phases.
 ### Client Data Model
 
 - [x] **CRM-01**: Tenant owner's booking history is aggregated into a `Client` Prisma model per unique phone/email, synced from existing bookings via a seeding action
-- [ ] **CRM-02**: Each client record exposes total completed visits count
-- [ ] **CRM-03**: Each client record exposes total revenue from completed bookings (sum of `price` on COMPLETED bookings)
-- [ ] **CRM-04**: Each client record exposes last visit date (most recent COMPLETED booking date)
-- [ ] **CRM-05**: Each client record shows whether client has an active Telegram connection (`telegramChatId` present on related bookings)
+- [x] **CRM-02**: Each client record exposes total completed visits count
+- [x] **CRM-03**: Each client record exposes total revenue from completed bookings (sum of `price` on COMPLETED bookings)
+- [x] **CRM-04**: Each client record exposes last visit date (most recent COMPLETED booking date)
+- [x] **CRM-05**: Each client record shows whether client has an active Telegram connection (`telegramChatId` present on related bookings)
 
 ### Dashboard UI
 
@@ -61,10 +61,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CRM-01 | Phase 4 | Complete |
-| CRM-02 | Phase 4 | Pending |
-| CRM-03 | Phase 4 | Pending |
-| CRM-04 | Phase 4 | Pending |
-| CRM-05 | Phase 4 | Pending |
+| CRM-02 | Phase 4 | Complete |
+| CRM-03 | Phase 4 | Complete |
+| CRM-04 | Phase 4 | Complete |
+| CRM-05 | Phase 4 | Complete |
 | CRM-06 | Phase 5 | Pending |
 | CRM-07 | Phase 5 | Pending |
 | CRM-08 | Phase 5 | Pending |
