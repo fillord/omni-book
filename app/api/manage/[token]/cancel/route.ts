@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { basePrisma } from "@/lib/db"
 import { sendTelegramMessage } from "@/lib/telegram"
+import { notifyClientCancellation } from "@/lib/notifications/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
@@ -33,8 +34,9 @@ export async function POST(
   const booking = await basePrisma.booking.findUnique({
     where: { manageToken: token },
     include: {
-      tenant: { select: { name: true, telegramChatId: true, timezone: true } },
-      service: { select: { name: true } },
+      tenant:   { select: { name: true, telegramChatId: true, timezone: true } },
+      service:  { select: { name: true } },
+      resource: { select: { name: true } },
     },
   })
 
@@ -75,21 +77,35 @@ export async function POST(
 
   console.log(`[cancel] Booking ${booking.id} CANCELLED by client — token ${token.slice(0, 8)}...`)
 
-  // 5. Notify BUSINESS OWNER (tenant) via Telegram (fire-and-forget)
-  // NOTE: intentionally sends to tenant, NOT to booking.telegramChatId (guest)
+  const appUrl      = process.env.NEXT_PUBLIC_APP_URL || "https://omni-book.site"
+  const fmt         = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
+  const serviceName = booking.service?.name  ?? "—"
+  const tz          = booking.tenant?.timezone ?? "Asia/Almaty"
+
+  // 5a. Notify OWNER via Telegram (fire-and-forget)
   const tenantChatId = booking.tenant?.telegramChatId ?? null
   if (tenantChatId) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omni-book.site"
-    const fmt = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
     const msg = [
       "❌ <b>Запись отменена клиентом</b>",
       `👤 Клиент: ${booking.guestName ?? "—"} (${booking.guestPhone ?? "—"})`,
-      `🛠 Услуга: ${booking.service?.name ?? "—"}`,
+      `🛠 Услуга: ${serviceName}`,
       `📅 Время: ${fmt(booking.startsAt)}`,
       ...(booking.manageToken ? [`🔗 ${appUrl}/manage/${booking.manageToken}`] : []),
     ].join("\n")
     sendTelegramMessage(tenantChatId, msg).catch(console.error)
   }
+
+  // 5b. Notify CLIENT via Telegram + Email (fire-and-forget)
+  notifyClientCancellation({
+    guestName:      booking.guestName,
+    guestEmail:     booking.guestEmail,
+    telegramChatId: booking.telegramChatId,
+    serviceName,
+    resourceName:   booking.resource?.name ?? "—",
+    tenantName:     booking.tenant?.name   ?? "—",
+    tenantTimezone: tz,
+    startsAt:       booking.startsAt,
+  })
 
   return NextResponse.json({ ok: true })
 }

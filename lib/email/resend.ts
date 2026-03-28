@@ -204,6 +204,53 @@ export async function sendNoShowEmail(data: BookingEmailData): Promise<void> {
   })
 }
 
+// ---- Reschedule email (client confirmation) --------------------------------
+
+export interface RescheduleEmailData {
+  guestName: string
+  guestEmail: string
+  tenantName: string
+  serviceName: string
+  newStartsAt: Date | string
+  timezone?: string
+  manageToken?: string | null
+}
+
+export async function sendRescheduleEmail(data: RescheduleEmailData): Promise<void> {
+  if (!resend || !data.guestEmail) return
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
+  const newDateStr = fmtDateTime(data.newStartsAt, data.timezone)
+
+  await resend.emails.send({
+    from: 'Omni-Book <noreply@omni-book.site>',
+    to: data.guestEmail,
+    subject: `Запись перенесена: ${data.serviceName} в ${data.tenantName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+        <h2 style="color:#2563eb">Время записи изменено ✓</h2>
+        <p>Здравствуйте, <strong>${data.guestName}</strong>!</p>
+        <p>Ваша запись в <strong>${data.tenantName}</strong> была успешно перенесена.</p>
+        <table style="border-collapse:collapse;width:100%;margin:16px 0">
+          <tr><td style="padding:6px 0;color:#6b7280">Услуга</td><td style="padding:6px 0;font-weight:600">${data.serviceName}</td></tr>
+          <tr><td style="padding:6px 0;color:#6b7280">Новое время</td><td style="padding:6px 0;font-weight:600">${newDateStr}</td></tr>
+          ${data.manageToken ? `
+          <tr>
+            <td style="padding:6px 0;color:#6b7280">Управление</td>
+            <td style="padding:6px 0">
+              <a href="${appUrl}/manage/${data.manageToken}" style="color:#4299e1;text-decoration:underline">
+                Перенести или отменить
+              </a>
+            </td>
+          </tr>
+          ` : ''}
+        </table>
+        <p style="color:#6b7280;font-size:14px">Если возникнут вопросы — свяжитесь с нами.</p>
+      </div>
+    `,
+  })
+}
+
 // ---- OTP Email -------------------------------------------------------------
 
 export async function sendOtpEmail(toEmail: string, code: string): Promise<void> {

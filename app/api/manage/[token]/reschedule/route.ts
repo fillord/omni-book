@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { basePrisma } from "@/lib/db"
 import { sendTelegramMessage } from "@/lib/telegram"
+import { notifyClientReschedule } from "@/lib/notifications/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
@@ -36,7 +37,8 @@ export async function POST(
       tenant: {
         select: { name: true, phone: true, telegramChatId: true, timezone: true, slug: true },
       },
-      service: { select: { name: true } },
+      service:  { select: { name: true } },
+      resource: { select: { name: true } },
     },
   })
 
@@ -112,21 +114,37 @@ export async function POST(
     return NextResponse.json({ error: "Выбранное время уже занято" }, { status: 409 })
   }
 
-  // 7. Telegram notification to tenant owner (fire-and-forget)
+  const appUrl      = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
+  const fmt         = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
+  const serviceName = booking.service?.name  ?? "—"
+  const tz          = booking.tenant?.timezone ?? "Asia/Almaty"
+  const newDate     = new Date(startsAt)
+
+  // 7a. Notify OWNER via Telegram (fire-and-forget)
   const tenantChatId = booking.tenant?.telegramChatId ?? null
   if (tenantChatId) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
-    const fmt = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
     const msg = [
       "🔄 <b>Перенос записи!</b>",
       `👤 Клиент: ${booking.guestName ?? "—"} (${booking.guestPhone ?? "—"})`,
-      `🛠 Услуга: ${booking.service?.name ?? "—"}`,
+      `🛠 Услуга: ${serviceName}`,
       `📅 Было: ${fmt(booking.startsAt)}`,
-      `📅 Стало: ${fmt(new Date(startsAt))}`,
+      `📅 Стало: ${fmt(newDate)}`,
       ...(booking.manageToken ? [`🔗 ${appUrl}/manage/${booking.manageToken}`] : []),
     ].join("\n")
     sendTelegramMessage(tenantChatId, msg).catch(console.error)
   }
+
+  // 7b. Notify CLIENT via Telegram + Email (fire-and-forget)
+  notifyClientReschedule({
+    guestName:      booking.guestName,
+    guestEmail:     booking.guestEmail,
+    telegramChatId: booking.telegramChatId,
+    serviceName,
+    tenantName:     booking.tenant?.name ?? "—",
+    tenantTimezone: tz,
+    newStartsAt:    newDate,
+    manageToken:    booking.manageToken ?? null,
+  })
 
   return NextResponse.json({ ok: true, booking: { startsAt, endsAt } })
 }
