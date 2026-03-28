@@ -37,6 +37,10 @@ const STATUS_LABELS: Record<string, string> = {
 
 const TERMINAL_STATUSES = ['CANCELLED', 'COMPLETED', 'NO_SHOW']
 
+// Minimum ms between page load and a destructive action being confirmed.
+// Bots execute JS instantly; real users take at least this long.
+const BOT_HONEYPOT_MS = 2000
+
 function getTomorrowDate(): string {
   const tomorrow = new Date()
   tomorrow.setDate(tomorrow.getDate() + 1)
@@ -76,32 +80,40 @@ function formatDate(iso: string, timezone: string) {
 }
 
 export function BookingManagePage({ booking, canManage, token }: BookingManagePageProps) {
-  // Action state — only mutated inside onClick handlers, never in effects
-  const [cancelled, setCancelled] = useState(false)
-  const [cancelling, setCancelling] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  // ── Honeypot ──────────────────────────────────────────────────────────────
+  // Records when the component first mounts (client-side). Any destructive
+  // confirmation that arrives within BOT_HONEYPOT_MS is rejected as a bot.
+  // useRef, not useState — value is set once and never causes a re-render.
+  const mountedAt = useRef(Date.now())
 
-  // Reschedule state
-  const [rescheduleMode, setRescheduleMode] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<string>('')
-  const [slots, setSlots] = useState<Array<{ time: string; startsAt: string; endsAt: string; available: boolean }>>([])
-  const [loadingSlots, setLoadingSlots] = useState(false)
-  const [selectedSlot, setSelectedSlot] = useState<{ startsAt: string; endsAt: string } | null>(null)
-  const [rescheduling, setRescheduling] = useState(false)
-  // After a successful reschedule we store the new startsAt so the card updates
+  function isHuman(): boolean {
+    return Date.now() - mountedAt.current >= BOT_HONEYPOT_MS
+  }
+
+  // ── Cancel state ──────────────────────────────────────────────────────────
+  const [cancelled, setCancelled]           = useState(false)
+  const [cancelling, setCancelling]         = useState(false)
+  // showCancelConfirm: true = "Are you sure?" UI is visible.
+  // The FIRST "Cancel" button only sets this flag — it does NOT call the API.
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+
+  // ── Reschedule state ──────────────────────────────────────────────────────
+  const [rescheduleMode, setRescheduleMode]   = useState(false)
+  const [selectedDate, setSelectedDate]       = useState<string>('')
+  const [slots, setSlots]                     = useState<Array<{ time: string; startsAt: string; endsAt: string; available: boolean }>>([])
+  const [loadingSlots, setLoadingSlots]       = useState(false)
+  const [selectedSlot, setSelectedSlot]       = useState<{ startsAt: string; endsAt: string } | null>(null)
+  const [rescheduling, setRescheduling]       = useState(false)
   const [rescheduledStartsAt, setRescheduledStartsAt] = useState<string | null>(null)
 
-  // Displayed booking date: updates after a successful reschedule
+  // ── Shared ────────────────────────────────────────────────────────────────
+  const [error, setError]   = useState<string | null>(null)
+  const inFlight            = useRef(false)   // prevents double-submit
+
   const displayStartsAt = rescheduledStartsAt ?? booking.startsAt
-  const formattedDate = formatDate(displayStartsAt, booking.tenantTimezone)
+  const formattedDate   = formatDate(displayStartsAt, booking.tenantTimezone)
 
-  // Ref lock — prevents concurrent API calls from a double-click
-  const inFlight = useRef(false)
-
-  // -----------------------------------------------------------------------
-  // Slot fetching — called ONLY from explicit user interactions (entering
-  // reschedule mode, clicking prev/next day). NO useEffect, NO auto-fetch.
-  // -----------------------------------------------------------------------
+  // ── Slot fetching — explicit, no useEffect ────────────────────────────────
   function fetchSlotsForDate(date: string) {
     setLoadingSlots(true)
     setSelectedSlot(null)
@@ -114,10 +126,25 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
       .finally(() => { setLoadingSlots(false) })
   }
 
-  // -----------------------------------------------------------------------
-  // Cancel — called ONLY from the "Отменить запись" onClick handler
-  // -----------------------------------------------------------------------
-  async function handleCancel() {
+  // ── Step 1: show confirmation UI (NO API call yet) ────────────────────────
+  function requestCancel() {
+    setError(null)
+    setShowCancelConfirm(true)
+  }
+
+  function dismissCancel() {
+    setShowCancelConfirm(false)
+    setError(null)
+  }
+
+  // ── Step 2: user clicked "Да, отменить" ───────────────────────────────────
+  // Honeypot guard runs here. Only then is the POST request sent.
+  async function confirmCancel() {
+    if (!isHuman()) {
+      // Arrived too fast — bot detected, silently ignore.
+      setShowCancelConfirm(false)
+      return
+    }
     if (inFlight.current) return
     inFlight.current = true
     setError(null)
@@ -126,16 +153,13 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
       const res = await fetch(`/api/manage/${token}/cancel`, { method: 'POST' })
       if (res.ok) {
         setCancelled(true)
+        setShowCancelConfirm(false)
       } else {
         const data = await res.json().catch(() => ({}))
         const msg: string = data.error ?? ''
-        // If the booking is already cancelled/terminal in the DB, treat it as
-        // a successful cancellation so the UI syncs to the correct state.
-        if (
-          res.status === 422 &&
-          (msg.includes('отменена') || msg.includes('завершена'))
-        ) {
+        if (res.status === 422 && (msg.includes('отменена') || msg.includes('завершена'))) {
           setCancelled(true)
+          setShowCancelConfirm(false)
         } else {
           setError(msg || 'Произошла ошибка. Попробуйте позже.')
         }
@@ -146,12 +170,10 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
     }
   }
 
-  // -----------------------------------------------------------------------
-  // Reschedule — called ONLY from the "Подтвердить перенос" onClick handler.
-  // Updates startsAt/endsAt. Does NOT change booking status.
-  // -----------------------------------------------------------------------
+  // ── Reschedule confirm — also guarded by honeypot ─────────────────────────
   async function handleReschedule() {
     if (!selectedSlot || inFlight.current) return
+    if (!isHuman()) return   // bot honeypot
     inFlight.current = true
     setRescheduling(true)
     setError(null)
@@ -162,7 +184,6 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
         body: JSON.stringify({ startsAt: selectedSlot.startsAt, endsAt: selectedSlot.endsAt }),
       })
       if (res.ok) {
-        // Update the displayed date to the new slot time
         setRescheduledStartsAt(selectedSlot.startsAt)
         setRescheduleMode(false)
       } else {
@@ -181,12 +202,14 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
     setSlots([])
     setSelectedSlot(null)
     setError(null)
+    setShowCancelConfirm(false)
     setRescheduleMode(true)
-    fetchSlotsForDate(tomorrow)  // explicit call — no useEffect
+    fetchSlotsForDate(tomorrow)
   }
 
-  const isTerminal = TERMINAL_STATUSES.includes(booking.status)
-  const today = getTodayDate()
+  // ── Derived values ────────────────────────────────────────────────────────
+  const isTerminal  = TERMINAL_STATUSES.includes(booking.status)
+  const today       = getTodayDate()
   const rescheduled = rescheduledStartsAt !== null
 
   const formattedSelectedDate = selectedDate
@@ -205,6 +228,7 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
 
   const availableSlots = slots.filter(s => s.available)
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="bg-[var(--neu-bg)] min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-4">
@@ -215,7 +239,7 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
           <p className="text-sm text-muted-foreground mt-1">Управление записью</p>
         </div>
 
-        {/* Current Booking card — always visible */}
+        {/* Booking info card — always visible */}
         <div className="neu-raised bg-[var(--neu-bg)] rounded-2xl p-5 space-y-4">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             Текущая запись
@@ -249,9 +273,7 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
             <span className="text-sm font-medium neu-raised bg-[var(--neu-bg)] px-3 py-1 rounded-lg text-foreground">
               {cancelled
                 ? STATUS_LABELS['CANCELLED']
-                : rescheduled
-                  ? STATUS_LABELS[booking.status] ?? booking.status
-                  : STATUS_LABELS[booking.status] ?? booking.status}
+                : STATUS_LABELS[booking.status] ?? booking.status}
             </span>
           </div>
         </div>
@@ -259,24 +281,31 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
         {/* Actions card */}
         <div className="neu-raised bg-[var(--neu-bg)] rounded-2xl p-5">
           {cancelled ? (
+            /* ── Already cancelled ── */
             <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 text-center space-y-1">
               <p className="text-green-600 font-medium">Запись отменена</p>
               <p className="text-sm text-muted-foreground">Ваша запись успешно отменена.</p>
             </div>
+
           ) : rescheduled ? (
+            /* ── Already rescheduled ── */
             <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 text-center space-y-1">
               <p className="text-green-600 font-medium">Запись перенесена</p>
               {rescheduledSlotDisplay && (
                 <p className="text-sm text-muted-foreground capitalize">{rescheduledSlotDisplay}</p>
               )}
             </div>
+
           ) : isTerminal ? (
+            /* ── Terminal status from DB ── */
             <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 text-center">
               <p className="text-sm text-muted-foreground">
                 {STATUS_LABELS[booking.status] ?? booking.status}
               </p>
             </div>
+
           ) : rescheduleMode ? (
+            /* ── Reschedule flow ── */
             <div className="space-y-4">
               <Button
                 type="button"
@@ -294,14 +323,11 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
                     type="button"
                     variant="ghost"
                     className="flex-none px-3"
+                    disabled={selectedDate <= today}
                     onClick={() => {
                       const prev = addDays(selectedDate, -1)
-                      if (prev >= today) {
-                        setSelectedDate(prev)
-                        fetchSlotsForDate(prev)
-                      }
+                      if (prev >= today) { setSelectedDate(prev); fetchSlotsForDate(prev) }
                     }}
-                    disabled={selectedDate <= today}
                   >
                     ‹
                   </Button>
@@ -314,8 +340,7 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
                     className="flex-none px-3"
                     onClick={() => {
                       const next = addDays(selectedDate, 1)
-                      setSelectedDate(next)
-                      fetchSlotsForDate(next)
+                      setSelectedDate(next); fetchSlotsForDate(next)
                     }}
                   >
                     ›
@@ -353,6 +378,7 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
                 )}
               </div>
 
+              {/* Reschedule confirm — honeypot runs inside handleReschedule */}
               {selectedSlot && (
                 <Button
                   type="button"
@@ -365,52 +391,79 @@ export function BookingManagePage({ booking, canManage, token }: BookingManagePa
                 </Button>
               )}
 
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive text-center">{error}</p>}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {canManage ? (
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={handleCancel}
-                    disabled={cancelling}
-                  >
-                    {cancelling ? 'Отмена...' : 'Отменить запись'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="default"
-                    className="flex-1"
-                    onClick={openRescheduleMode}
-                  >
-                    Перенести
-                  </Button>
-                </div>
-              ) : (
-                <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 space-y-2">
-                  <p className="text-sm text-muted-foreground text-center">
-                    Для отмены или переноса, пожалуйста, свяжитесь с нами напрямую
-                  </p>
-                  {booking.tenantPhone && (
-                    <div className="text-center">
-                      <a
-                        href={`tel:${booking.tenantPhone}`}
-                        className="text-sm font-medium text-foreground hover:underline"
-                      >
-                        {booking.tenantPhone}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
 
-              {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
+          ) : showCancelConfirm ? (
+            /* ── Step 2: "Are you sure?" — actual POST only fires here ── */
+            <div className="space-y-3">
+              <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 text-center space-y-1">
+                <p className="text-sm font-semibold text-foreground">Вы уверены?</p>
+                <p className="text-xs text-muted-foreground">Отменить запись нельзя будет отменить.</p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={confirmCancel}
+                  disabled={cancelling}
+                >
+                  {cancelling ? 'Отмена...' : 'Да, отменить'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex-1"
+                  onClick={dismissCancel}
+                  disabled={cancelling}
+                >
+                  Нет, оставить
+                </Button>
+              </div>
+              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+            </div>
+
+          ) : canManage ? (
+            /* ── Step 1: main action buttons — no API call ── */
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                {/* type="button" — never a submit, never triggers on Enter/form */}
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={requestCancel}
+                >
+                  Отменить запись
+                </Button>
+                <Button
+                  type="button"
+                  variant="default"
+                  className="flex-1"
+                  onClick={openRescheduleMode}
+                >
+                  Перенести
+                </Button>
+              </div>
+              {error && <p className="text-sm text-destructive text-center">{error}</p>}
+            </div>
+
+          ) : (
+            /* ── Cannot manage (within 4h cutoff) ── */
+            <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-4 space-y-2">
+              <p className="text-sm text-muted-foreground text-center">
+                Для отмены или переноса, пожалуйста, свяжитесь с нами напрямую
+              </p>
+              {booking.tenantPhone && (
+                <div className="text-center">
+                  <a
+                    href={`tel:${booking.tenantPhone}`}
+                    className="text-sm font-medium text-foreground hover:underline"
+                  >
+                    {booking.tenantPhone}
+                  </a>
+                </div>
               )}
             </div>
           )}
