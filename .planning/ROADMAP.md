@@ -72,6 +72,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
 | 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
+| 6. Tokenized Booking Management | v1.4 | 0/4 | In Progress | - |
 
 ## Phase Details
 
@@ -164,3 +165,25 @@ Plans:
 - [ ] 05-01-PLAN.md — Test scaffold + i18n translations + sidebar link
 - [ ] 05-02-PLAN.md — Clients list page + table component with search
 - [ ] 05-03-PLAN.md — Client detail page + Telegram outreach action
+
+### Phase 6: Implement tokenized booking management for clients (cancel/reschedule) via email and Telegram links
+
+**Goal:** Clients receive a unique, tokenized management link in their booking confirmation (email and Telegram). Clicking the link opens a public page at /manage/[token] where they can cancel or reschedule their booking subject to a 4-hour cutoff rule. The tenant owner is notified via Telegram when a reschedule occurs. No login required.
+**Requirements:** [TOK-01, TOK-02, TOK-03, TOK-04, TOK-05, TOK-06, TOK-07]
+**Depends on:** Phase 5
+**Plans:** 4 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Test scaffold + Prisma schema (manageToken field) + token generation in createBooking
+- [ ] 06-02-PLAN.md — Public /manage/[token] page + Cancel API route + 4-hour rule UI
+- [ ] 06-03-PLAN.md — Reschedule API route + RescheduleCalendar UI + Telegram owner notification
+- [ ] 06-04-PLAN.md — Update email/Telegram confirmation templates + i18n keys
+
+Requirements:
+- TOK-01: manageToken field — unique URL-safe token on Booking model, generated at booking creation
+- TOK-02: Public management page — /manage/[token] renders booking details with Neumorphism UI, no auth
+- TOK-03: 4-hour cutoff rule — cancel/reschedule disabled within 4 hours of booking start, Russian message + business phone shown
+- TOK-04: Cancel flow — sets booking status to CANCELLED, server-side 4-hour re-check, confirmation UI
+- TOK-05: Reschedule flow — slot picker for same service/resource, updates startsAt/endsAt in place, collision detection
+- TOK-06: Telegram notification — tenant owner notified via Telegram with old/new time on reschedule
+- TOK-07: Confirmation template updates — email and Telegram booking confirmations include management link
