@@ -68,7 +68,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 2. Expand Resource Types | v1.2 | 1/1 | Complete | 2026-03-20 |
 | 3. Dashboard + Auth Surface | v1.3 | 3/3 | Complete | 2026-03-24 |
 | 4. Cleanup Sweep | 2/2 | Complete   | 2026-03-25 | 2026-03-18 |
-| 6. Data Display Correctness | 2/4 | In Progress|  | 2026-03-19 |
+| 6. Data Display Correctness | 4/4 | Complete   | 2026-03-28 | 2026-03-19 |
 | 7. Mobile UI Fixes | v1.1 | 1/1 | Complete | 2026-03-19 |
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
 | 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
@@ -171,7 +171,7 @@ Plans:
 **Goal:** Clients receive a unique, tokenized management link in their booking confirmation (email and Telegram). Clicking the link opens a public page at /manage/[token] where they can cancel or reschedule their booking subject to a 4-hour cutoff rule. The tenant owner is notified via Telegram when a reschedule occurs. No login required.
 **Requirements:** [TOK-01, TOK-02, TOK-03, TOK-04, TOK-05, TOK-06, TOK-07]
 **Depends on:** Phase 5
-**Plans:** 2/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] 06-01-PLAN.md — Test scaffold + Prisma schema (manageToken field) + token generation in createBooking

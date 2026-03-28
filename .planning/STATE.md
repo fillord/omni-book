@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Tokenized Booking Management
-current_plan: 3 of 4 (COMPLETE)
-status: in_progress
-last_updated: "2026-03-28T12:16:00Z"
-last_activity: 2026-03-28 — Plan 06-03 complete (reschedule API route with Serializable conflict detection, BookingManagePage slot picker calendar)
+current_plan: 4 of 4 (COMPLETE)
+status: complete
+last_updated: "2026-03-28T12:26:00Z"
+last_activity: 2026-03-28 — Plan 06-04 complete (email+Telegram management link, i18n manage section in ru/kz/en)
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 21
-  completed_plans: 19
-  percent: 90
+  completed_plans: 21
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ Current Plan: 3 of 4 (COMPLETE)
 Status: Phase 6 in progress — Plans 01-03 done, Plan 04 remaining
 Last activity: 2026-03-28 — Plan 06-03 complete (reschedule API route with Serializable conflict detection, BookingManagePage slot picker calendar)
 
-Progress: [█████████░] 90% (20/21 plans complete)
+Progress: [██████████] 100% (21/21 plans complete)
 
 ## Accumulated Context
 
@@ -102,6 +102,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 06-03]: Reschedule updates booking in-place (same id, new startsAt/endsAt) in Serializable transaction — no new booking created
 - [Phase 06-03]: SELECT FOR UPDATE on Resource row prevents concurrent reschedule race conditions
 - [Phase 06-03]: Collision check excludes current booking by id — allows re-selecting effectively the same slot
+- [Phase 06-04]: Management link in Telegram goes to business OWNER notification — owner can access management page directly from notification
+- [Phase 06-04]: Email management row and Telegram link are conditionally included only when manageToken truthy — backwards compatible with existing null tokens
+- [Phase 06-04]: i18n manage section with 24 keys per locale (ru/kz/en) — covers all UI strings for management page
 
 ### Pending Todos
 
