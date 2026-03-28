@@ -1,15 +1,41 @@
 import { NextRequest, NextResponse } from "next/server"
 import { basePrisma } from "@/lib/db"
+import { sendTelegramMessage } from "@/lib/telegram"
+import { format } from "date-fns"
+import { ru } from "date-fns/locale"
+
+// Explicit GET handler — some crawlers / email clients / Telegram link previews
+// send GET requests to URLs found in messages. Return 405 so they never trigger
+// a cancellation side-effect.
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 })
+}
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
 
+  // Hard-lockdown diagnostics — log EVERY incoming request immediately, before any DB work
+  const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown"
+  console.log(`[DEBUG] CANCEL REQUEST at ${new Date().toISOString()} from IP: ${ip}`)
+  const caller = {
+    ip,
+    userAgent: req.headers.get("user-agent") ?? "unknown",
+    referer:   req.headers.get("referer") ?? "none",
+    origin:    req.headers.get("origin") ?? "none",
+    method:    req.method,
+  }
+  console.log(`[cancel] POST /api/manage/${token.slice(0, 8)}... from`, caller)
+
   // 1. Look up booking by manageToken
   const booking = await basePrisma.booking.findUnique({
     where: { manageToken: token },
+    include: {
+      tenant: { select: { name: true, telegramChatId: true, timezone: true } },
+      service: { select: { name: true } },
+    },
   })
 
   if (!booking) {
@@ -34,11 +60,36 @@ export async function POST(
     )
   }
 
-  // 4. Update booking status to CANCELLED (double L — matches Prisma enum)
+  // 4. Update booking status to CANCELLED
+  console.log("!!! CANCEL TRIGGERED BY:", {
+    functionName: "POST /api/manage/[token]/cancel",
+    bookingId: booking.id,
+    status: "CANCELLED",
+    caller,
+    stack: new Error().stack,
+  })
   await basePrisma.booking.update({
     where: { id: booking.id },
     data: { status: "CANCELLED" },
   })
+
+  console.log(`[cancel] Booking ${booking.id} CANCELLED by client — token ${token.slice(0, 8)}...`)
+
+  // 5. Notify BUSINESS OWNER (tenant) via Telegram (fire-and-forget)
+  // NOTE: intentionally sends to tenant, NOT to booking.telegramChatId (guest)
+  const tenantChatId = booking.tenant?.telegramChatId ?? null
+  if (tenantChatId) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://omni-book.site"
+    const fmt = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
+    const msg = [
+      "❌ <b>Запись отменена клиентом</b>",
+      `👤 Клиент: ${booking.guestName ?? "—"} (${booking.guestPhone ?? "—"})`,
+      `🛠 Услуга: ${booking.service?.name ?? "—"}`,
+      `📅 Время: ${fmt(booking.startsAt)}`,
+      ...(booking.manageToken ? [`🔗 ${appUrl}/manage/${booking.manageToken}`] : []),
+    ].join("\n")
+    sendTelegramMessage(tenantChatId, msg).catch(console.error)
+  }
 
   return NextResponse.json({ ok: true })
 }

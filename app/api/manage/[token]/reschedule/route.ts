@@ -5,6 +5,11 @@ import { sendTelegramMessage } from "@/lib/telegram"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 
+// Explicit GET guard — prevents link previewers from triggering side effects
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 })
+}
+
 const bodySchema = z.object({
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime(),
@@ -29,7 +34,7 @@ export async function POST(
     where: { manageToken: token },
     include: {
       tenant: {
-        select: { name: true, phone: true, telegramChatId: true, timezone: true },
+        select: { name: true, phone: true, telegramChatId: true, timezone: true, slug: true },
       },
       service: { select: { name: true } },
     },
@@ -108,15 +113,17 @@ export async function POST(
   }
 
   // 7. Telegram notification to tenant owner (fire-and-forget)
-  const tenantChatId = (booking.tenant as unknown as { telegramChatId?: string | null })?.telegramChatId
+  const tenantChatId = booking.tenant?.telegramChatId ?? null
   if (tenantChatId) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
     const fmt = (d: Date) => format(d, "d MMMM yyyy, HH:mm", { locale: ru })
     const msg = [
       "🔄 <b>Перенос записи!</b>",
-      `👤 Клиент: ${booking.guestName} (${booking.guestPhone})`,
-      `🛠 Услуга: ${booking.service?.name ?? ""}`,
+      `👤 Клиент: ${booking.guestName ?? "—"} (${booking.guestPhone ?? "—"})`,
+      `🛠 Услуга: ${booking.service?.name ?? "—"}`,
       `📅 Было: ${fmt(booking.startsAt)}`,
       `📅 Стало: ${fmt(new Date(startsAt))}`,
+      ...(booking.manageToken ? [`🔗 ${appUrl}/manage/${booking.manageToken}`] : []),
     ].join("\n")
     sendTelegramMessage(tenantChatId, msg).catch(console.error)
   }

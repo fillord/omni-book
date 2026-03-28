@@ -10,6 +10,7 @@ import {
   sendConfirmationEmail,
   sendNoShowEmail,
 } from '@/lib/email/resend'
+import { sendTelegramMessage } from '@/lib/telegram'
 
 // ---- Allowed status transitions --------------------------------------------
 
@@ -92,6 +93,17 @@ export async function PATCH(
     return NextResponse.json({ error: msg }, { status: 422 })
   }
 
+  if (newStatus === 'CANCELLED') {
+    console.log("!!! CANCEL TRIGGERED BY:", {
+      functionName: "PATCH /api/bookings/[id]/status",
+      bookingId: id,
+      status: "CANCELLED",
+      callerUserId: session.user.id,
+      callerRole: session.user.role,
+      stack: new Error().stack,
+    })
+  }
+
   const result = await basePrisma.booking.update({
     where: { id },
     data:  { status: newStatus },
@@ -129,6 +141,33 @@ export async function PATCH(
         break
       default:
         break
+    }
+  }
+
+  // Fire-and-forget Telegram notification to client (if they connected via deep link)
+  if (booking.telegramChatId) {
+    const tz      = result.tenant.timezone ?? 'Asia/Almaty'
+    const dateStr = booking.startsAt.toLocaleString('ru-RU', {
+      timeZone: tz,
+      day:      '2-digit',
+      month:    'long',
+      year:     'numeric',
+      hour:     '2-digit',
+      minute:   '2-digit',
+    })
+    const tenantName = result.tenant.name
+
+    const telegramMessages: Partial<Record<BookingStatus, string>> = {
+      CANCELLED: `❌ Ваша запись на ${dateStr} в ${tenantName} была отменена. Если это ошибка, пожалуйста, свяжитесь с администратором.`,
+      NO_SHOW:   `⚠️ К сожалению, мы отметили, что вы не пришли на запись в ${tenantName}. Пожалуйста, старайтесь предупреждать нас об отмене заранее!`,
+      COMPLETED: `✅ Спасибо за визит в ${tenantName}! Будем рады видеть вас снова.`,
+    }
+
+    const msg = telegramMessages[newStatus]
+    if (msg) {
+      sendTelegramMessage(booking.telegramChatId, msg).catch((err) =>
+        console.error(`[Telegram] Failed to notify client for booking ${id}:`, err)
+      )
     }
   }
 
