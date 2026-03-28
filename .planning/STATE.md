@@ -105,6 +105,7 @@ None.
 - v1.2 complete: Phase 1 (duration input), Phase 2 (resource types expansion) both shipped
 - v1.3 complete: Phase 1 (Neumorphism), Phase 2 (God Mode), Phase 3 (Subscription Lifecycle) all shipped
 - v1.4 roadmap defined: Phase 4 (Client Data Foundation), Phase 5 (Client UI, Outreach & Polish)
+- Phase 6 added: Implement tokenized booking management for clients (cancel/reschedule) via email and Telegram links
 - See ROADMAP.md for full milestone history
 
 ### Quick Tasks Completed
