@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Tokenized Booking Management
-current_plan: 1 of 4 (COMPLETE)
+current_plan: 2 of 4 (COMPLETE)
 status: in_progress
-last_updated: "2026-03-28T12:38:00Z"
-last_activity: 2026-03-28 — Plan 06-01 complete (manageToken foundation + test scaffold for tokenized booking management)
+last_updated: "2026-03-28T12:11:00Z"
+last_activity: 2026-03-28 — Plan 06-02 complete (public /manage/[token] page, BookingManagePage UI, cancel API route)
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 21
-  completed_plans: 18
-  percent: 86
+  completed_plans: 19
+  percent: 90
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 6 — Tokenized Booking Management (cancel/reschedule via email and Telegram links)
-Current Plan: 1 of 4 (COMPLETE)
-Status: Phase 6 in progress — Plan 01 done, Plans 02-04 remaining
-Last activity: 2026-03-28 — Plan 06-01 complete (manageToken foundation + test scaffold for tokenized booking management)
+Current Plan: 2 of 4 (COMPLETE)
+Status: Phase 6 in progress — Plans 01-02 done, Plans 03-04 remaining
+Last activity: 2026-03-28 — Plan 06-02 complete (public /manage/[token] page, BookingManagePage UI, cancel API route)
 
-Progress: [████████░░] 86% (18/21 plans complete)
+Progress: [█████████░] 90% (19/21 plans complete)
 
 ## Accumulated Context
 
@@ -95,6 +95,10 @@ Key patterns carrying forward to next milestone:
 - [Phase 06-01]: @unique constraint on manageToken for indexed fast token lookups in public API routes
 - [Phase 06-01]: crypto.randomUUID() used for token generation — built-in Node.js, no extra dependency, v4 UUID is URL-safe
 - [Phase 06-01]: prisma generate run in executor context; prisma db push is a manual step requiring live DB connection before deployment
+- [Phase 06-02]: basePrisma used for both /manage/[token] page and cancel API route — cross-tenant public lookup, no tenant scoping needed
+- [Phase 06-02]: 4-hour rule enforced both server-side (page canManage flag) and in cancel API (prevents stale UI exploitation)
+- [Phase 06-02]: Reschedule button shown as disabled placeholder in BookingManagePage — Plan 03 will enable it
+- [Phase 06-02]: Date formatting uses Intl.DateTimeFormat with tenant timezone for correct local time display on public page
 
 ### Pending Todos
 
