@@ -19,7 +19,7 @@ describe("TOK-01: manageToken on Booking model", () => {
   });
 
   it("prisma/schema.prisma contains @unique after manageToken (uniqueness constraint)", () => {
-    expect(schema).toMatch(/manageToken[^\\n]*@unique/);
+    expect(schema).toMatch(/manageToken[^\n]*@unique/);
   });
 
   it("lib/booking/engine.ts contains manageToken (token generation in createBooking)", () => {

@@ -3,6 +3,7 @@
  * All functions receive explicit tenantId — never read from global state.
  */
 
+import crypto from "crypto"
 import { fromZonedTime, toZonedTime } from "date-fns-tz"
 import { basePrisma, getTenantDB } from "@/lib/db"
 
@@ -61,6 +62,14 @@ export class BookingWindowError extends Error {
   constructor(days: number) {
     super(`Запись возможна только на ${days} дней вперед.`)
     this.name = "BookingWindowError"
+  }
+}
+
+export class FrozenError extends Error {
+  readonly statusCode = 422
+  constructor() {
+    super("Эта услуга или ресурс временно недоступны для онлайн-записи.")
+    this.name = "FrozenError"
   }
 }
 
@@ -143,7 +152,7 @@ export async function getAvailableSlots(
     db.tenant.findUnique({ where: { id: tenantId } }),
     db.resource.findUnique({
       where: { id: resourceId },
-      select: { id: true, tenantId: true, lunchStart: true, lunchEnd: true },
+      select: { id: true, tenantId: true, lunchStart: true, lunchEnd: true, isFrozen: true },
     }),
     db.schedule.findFirst({
       where: {
@@ -154,13 +163,14 @@ export async function getAvailableSlots(
     }),
     db.service.findUnique({
       where: { id: serviceId },
-      select: { durationMin: true, tenantId: true },
+      select: { durationMin: true, tenantId: true, isFrozen: true },
     }),
   ])
 
   if (!tenant) throw new ResourceNotFoundError()
   if (!resource) throw new ResourceNotFoundError()
   if (!service || service.tenantId !== tenantId) throw new ServiceNotFoundError()
+  if (resource.isFrozen || service.isFrozen) throw new FrozenError()
   if (!schedule) throw new DayOffError()
 
   const timezone = tenant.timezone
@@ -286,14 +296,15 @@ export async function createBooking(params: CreateBookingParams) {
         SELECT id FROM "Resource" WHERE id = ${resourceId} FOR UPDATE
       `
 
-      // Re-verify resource and service belong to tenant
+      // Re-verify resource and service belong to tenant and are not frozen
       const [resource, service] = await Promise.all([
-        tx.resource.findFirst({ where: { id: resourceId, tenantId } }),
-        tx.service.findFirst({ where: { id: serviceId, tenantId } }),
+        tx.resource.findFirst({ where: { id: resourceId, tenantId }, select: { id: true, isFrozen: true } }),
+        tx.service.findFirst({ where: { id: serviceId, tenantId }, select: { id: true, durationMin: true, isFrozen: true } }),
       ])
 
       if (!resource) throw new ResourceNotFoundError()
       if (!service)  throw new ServiceNotFoundError()
+      if (resource.isFrozen || service.isFrozen) throw new FrozenError()
 
       // Anti-spam: max active bookings per phone per tenant
       const activeCount = await tx.booking.count({
@@ -323,6 +334,8 @@ export async function createBooking(params: CreateBookingParams) {
 
       if (collision) throw new BookingConflictError()
 
+      const manageToken = crypto.randomUUID()
+
       return tx.booking.create({
         data: {
           tenantId,
@@ -334,6 +347,7 @@ export async function createBooking(params: CreateBookingParams) {
           startsAt:   startsAtDate,
           endsAt:     endsAtDate,
           status:     "CONFIRMED",
+          manageToken,
         },
       })
     },
