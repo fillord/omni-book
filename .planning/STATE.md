@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Client Base
-current_plan: 3 of 3 (COMPLETE)
-status: completed
-last_updated: "2026-03-25T16:18:28.724Z"
-last_activity: 2026-03-25 — Plan 05-03 complete (Client detail page + sendTelegramToClient action + ClientDetail component)
+milestone: v1.5
+milestone_name: Tokenized Booking Management
+current_plan: 1 of 4 (COMPLETE)
+status: in_progress
+last_updated: "2026-03-28T12:38:00Z"
+last_activity: 2026-03-28 — Plan 06-01 complete (manageToken foundation + test scaffold for tokenized booking management)
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
-  total_plans: 17
-  completed_plans: 17
-  percent: 100
+  total_plans: 21
+  completed_plans: 18
+  percent: 86
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 ## Current Position
 
-Phase: 5 — Client UI, Outreach & Polish
-Current Plan: 3 of 3 (COMPLETE)
-Status: All plans complete — Phase 5 and milestone v1.4 done
-Last activity: 2026-03-25 — Plan 05-03 complete (Client detail page + sendTelegramToClient action + ClientDetail component)
+Phase: 6 — Tokenized Booking Management (cancel/reschedule via email and Telegram links)
+Current Plan: 1 of 4 (COMPLETE)
+Status: Phase 6 in progress — Plan 01 done, Plans 02-04 remaining
+Last activity: 2026-03-28 — Plan 06-01 complete (manageToken foundation + test scaffold for tokenized booking management)
 
-Progress: [██████████] 100% (17/17 plans complete)
+Progress: [████████░░] 86% (18/21 plans complete)
 
 ## Accumulated Context
 
@@ -91,6 +91,10 @@ Key patterns carrying forward to next milestone:
 - [Phase 05-02]: useTransition for syncClients — prevents UI lock during sync operation
 - [Phase 05-03]: sendTelegramToClient fetches telegramChatId from booking (not Client model) — hasTelegram is boolean-only flag; empty message guard before requireAuth() prevents API 400 errors
 - [Phase 05-03]: Telegram send UI section absent (not disabled) for hasTelegram=false clients; cross-tenant access returns 404 via notFound()
+- [Phase 06-01]: manageToken is String? (nullable) — existing bookings lack tokens, avoids migration failure on non-empty database
+- [Phase 06-01]: @unique constraint on manageToken for indexed fast token lookups in public API routes
+- [Phase 06-01]: crypto.randomUUID() used for token generation — built-in Node.js, no extra dependency, v4 UUID is URL-safe
+- [Phase 06-01]: prisma generate run in executor context; prisma db push is a manual step requiring live DB connection before deployment
 
 ### Pending Todos
 
