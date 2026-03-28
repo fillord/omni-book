@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Tokenized Booking Management
-current_plan: 4 of 4 (COMPLETE)
-status: complete
-last_updated: "2026-03-28T12:26:00Z"
-last_activity: 2026-03-28 — Plan 06-04 complete (email+Telegram management link, i18n manage section in ru/kz/en)
+milestone: v1.4
+milestone_name: Client Base
+current_plan: 3 of 4 (COMPLETE)
+status: executing
+last_updated: "2026-03-28T12:43:44.057Z"
+last_activity: 2026-03-28 — Plan 06-03 complete (reschedule API route with Serializable conflict detection, BookingManagePage slot picker calendar)
 progress:
   total_phases: 6
   completed_phases: 6
