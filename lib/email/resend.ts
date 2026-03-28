@@ -12,6 +12,7 @@ export interface BookingEmailData {
   resourceName: string
   startsAt: Date | string
   timezone?: string
+  manageToken?: string | null  // Token for public booking management page
 }
 
 function fmtDateTime(d: Date | string, tz = 'Europe/Moscow'): string {
@@ -41,6 +42,16 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<v
           <tr><td style="padding:6px 0;color:#6b7280">Услуга</td><td style="padding:6px 0;font-weight:600">${data.serviceName}</td></tr>
           <tr><td style="padding:6px 0;color:#6b7280">Специалист</td><td style="padding:6px 0">${data.resourceName}</td></tr>
           <tr><td style="padding:6px 0;color:#6b7280">Время</td><td style="padding:6px 0">${fmtDateTime(data.startsAt, data.timezone)}</td></tr>
+          ${data.manageToken ? `
+          <tr>
+            <td style="padding:6px 0;color:#6b7280">Управление записью</td>
+            <td style="padding:6px 0">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'}/manage/${data.manageToken}" style="color:#4299e1;text-decoration:underline">
+                Отменить или перенести
+              </a>
+            </td>
+          </tr>
+          ` : ''}
         </table>
         <p style="color:#6b7280;font-size:14px">Если возникнут вопросы — свяжитесь с нами.</p>
       </div>

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { BookingStatus } from '@prisma/client'
 import { basePrisma, getTenantDB } from '@/lib/db'
 import { resolveTenant, isTenantError } from '@/lib/tenant'
-import { createBooking, BookingConflictError, BookingLimitError, BookingWindowError, PastDateError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
+import { createBooking, BookingConflictError, BookingLimitError, BookingWindowError, FrozenError, PastDateError, ResourceNotFoundError, ServiceNotFoundError } from '@/lib/booking/engine'
 import { sendBookingConfirmation } from '@/lib/email/resend'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { normalizePhone } from '@/lib/utils/phone'
@@ -161,6 +161,7 @@ export async function POST(req: NextRequest) {
         serviceName:  service?.name ?? '',
         resourceName: resource?.name ?? '',
         startsAt:     booking.startsAt,
+        manageToken:  booking.manageToken,
       }).catch(console.error)
     }
 
@@ -170,18 +171,23 @@ export async function POST(req: NextRequest) {
       const startsAt = new Date(booking.startsAt)
       const dateStr = format(startsAt, 'd MMMM yyyy', { locale: ru })
       const timeStr = format(startsAt, 'HH:mm')
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
       const msg = [
         '🔔 <b>Новая запись!</b>',
         `👤 Клиент: ${booking.guestName}`,
         `📅 Дата: ${dateStr}`,
         `⏰ Время: ${timeStr}`,
         `🛠 Услуга: ${service?.name ?? 'Не указана'}`,
+        ...(booking.manageToken ? [`🔗 Управление: ${appUrl}/manage/${booking.manageToken}`] : []),
       ].join('\n')
       sendTelegramMessage(chatId, msg).catch(console.error)
     }
 
     return NextResponse.json({ booking }, { status: 201 })
   } catch (err) {
+    if (err instanceof FrozenError) {
+      return NextResponse.json({ error: err.message }, { status: 422 })
+    }
     if (err instanceof BookingLimitError) {
       return NextResponse.json({ error: err.message }, { status: 429 })
     }
