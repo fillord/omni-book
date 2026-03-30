@@ -187,3 +187,16 @@ Requirements:
 - TOK-05: Reschedule flow — slot picker for same service/resource, updates startsAt/endsAt in place, collision detection
 - TOK-06: Telegram notification — tenant owner notified via Telegram with old/new time on reschedule
 - TOK-07: Confirmation template updates — email and Telegram booking confirmations include management link
+
+### Phase 7: Bookings Dashboard CRM Overhaul and Manual Booking Creation
+
+**Goal:** Redesign /dashboard/bookings from a raw database table into a CRM scheduling view with day-grouping, default CANCELLED filter exclusion, Neumorphism booking cards with bold time display, and a manual booking creation feature via admin slide-over Sheet with Server Action and collision-detection transaction.
+**Requirements:** [CRM-B01, CRM-B02, CRM-B03, CRM-B04, CRM-B05, CRM-B06, CRM-B07, CRM-B08, CRM-B09, CRM-B10, CRM-B11, CRM-B12]
+**Depends on:** Phase 6
+**Plans:** 4 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Test scaffold (CRM-B01 through CRM-B12 static assertions)
+- [ ] 07-02-PLAN.md — createManualBooking Server Action + Zod schema + page data extension
+- [ ] 07-03-PLAN.md — Dashboard CRM overhaul (day-grouping, default filter, Neumorphism cards)
+- [ ] 07-04-PLAN.md — ManualBookingSheet component + dashboard wiring + i18n translations
