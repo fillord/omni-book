@@ -17,9 +17,10 @@ type ServiceOption = {
   resources: { resourceId: string }[]
 }
 
+// Matches SlotResult from lib/booking/engine.ts
 type Slot = {
-  start: string
-  end: string
+  startsAt: string
+  endsAt: string
 }
 
 type ManualBookingSheetProps = {
@@ -50,6 +51,7 @@ export function ManualBookingSheet({
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const [clientName, setClientName] = useState('')
   const [clientPhone, setClientPhone] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
 
   // UI state
   const [slots, setSlots] = useState<Slot[]>([])
@@ -118,6 +120,7 @@ export function ManualBookingSheet({
     setSelectedSlot(null)
     setClientName('')
     setClientPhone('')
+    setClientEmail('')
     setSlots([])
   }
 
@@ -132,10 +135,11 @@ export function ManualBookingSheet({
         date: selectedDate,
         resourceId: selectedResourceId,
         serviceId: selectedServiceId,
-        startsAt: selectedSlot.start,
-        endsAt: selectedSlot.end,
+        startsAt: selectedSlot.startsAt,
+        endsAt: selectedSlot.endsAt,
         clientName,
         clientPhone,
+        clientEmail,
       })
 
       if (result.success) {
@@ -153,14 +157,11 @@ export function ManualBookingSheet({
     }
   }
 
-  // Format slot time display (HH:MM)
+  // Format slot time display (HH:MM) from UTC ISO string
   function formatSlotTime(isoString: string): string {
-    try {
-      const d = new Date(isoString)
-      return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-    } catch {
-      return isoString
-    }
+    const d = new Date(isoString)
+    if (isNaN(d.getTime())) return isoString
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   return (
@@ -251,11 +252,11 @@ export function ManualBookingSheet({
             {!slotsLoading && slots.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {slots.map((slot) => {
-                  const timeLabel = formatSlotTime(slot.start)
-                  const isSelected = selectedSlot?.start === slot.start
+                  const timeLabel = formatSlotTime(slot.startsAt)
+                  const isSelected = selectedSlot?.startsAt === slot.startsAt
                   return (
                     <button
-                      key={slot.start}
+                      key={slot.startsAt}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
                       aria-label={`Select ${timeLabel}`}
@@ -301,6 +302,20 @@ export function ManualBookingSheet({
               value={clientPhone}
               onChange={(e) => setClientPhone(e.target.value)}
               required
+              className="neu-inset rounded-xl bg-[var(--neu-bg)] border-0 px-3 py-2 text-sm"
+            />
+          </div>
+
+          {/* Client Email (optional) */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="booking-client-email" className="text-sm font-medium text-foreground">
+              Почта клиента <span className="text-muted-foreground font-normal">(необязательно)</span>
+            </label>
+            <input
+              id="booking-client-email"
+              type="email"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
               className="neu-inset rounded-xl bg-[var(--neu-bg)] border-0 px-3 py-2 text-sm"
             />
           </div>

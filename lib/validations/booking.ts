@@ -8,6 +8,7 @@ export const manualBookingSchema = z.object({
   endsAt: z.string().min(1, 'End time required'),
   clientName: z.string().min(1, 'Client name required').max(100),
   clientPhone: z.string().min(7, 'Phone required'),
+  clientEmail: z.string().email().optional().or(z.literal('')),
 })
 
 export type ManualBookingInput = z.infer<typeof manualBookingSchema>

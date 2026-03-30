@@ -41,6 +41,7 @@ export async function createManualBooking(data: ManualBookingInput) {
             serviceId: parsed.serviceId,
             guestName: parsed.clientName,
             guestPhone: normalizedPhone,
+            guestEmail: parsed.clientEmail || null,
             startsAt: new Date(parsed.startsAt),
             endsAt: new Date(parsed.endsAt),
             status: 'CONFIRMED',
