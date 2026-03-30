@@ -197,6 +197,6 @@ Requirements:
 
 Plans:
 - [x] 07-01-PLAN.md — Test scaffold (CRM-B01 through CRM-B12 static assertions)
-- [ ] 07-02-PLAN.md — createManualBooking Server Action + Zod schema + page data extension
-- [ ] 07-03-PLAN.md — Dashboard CRM overhaul (day-grouping, default filter, Neumorphism cards)
+- [x] 07-02-PLAN.md — createManualBooking Server Action + Zod schema + page data extension
+- [x] 07-03-PLAN.md — Dashboard CRM overhaul (day-grouping, default filter, Neumorphism cards)
 - [ ] 07-04-PLAN.md — ManualBookingSheet component + dashboard wiring + i18n translations

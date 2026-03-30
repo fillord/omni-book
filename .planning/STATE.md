@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-03-30T09:03:13.585Z"
+last_updated: "2026-03-30T09:07:53.137Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 25
-  completed_plans: 22
+  completed_plans: 24
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 07 (bookings-dashboard-crm-overhaul-and-manual-booking-creation) — EXECUTING
-Plan: 2 of 4
+Plan: 4 of 4
 Current Plan: 1
 Status: Ready to execute
 Last activity: 2026-03-30
@@ -109,6 +109,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 06-04]: i18n manage section with 24 keys per locale (ru/kz/en) — covers all UI strings for management page
 - [Phase 07]: Wave 0 test-first: wrote failing test scaffold for all 12 CRM-B requirements before any production file exists
 - [Phase 07]: CRM-B07 assertion: manageToken explicitly null (not randomUUID) for manual bookings — no token generation
+- [Phase 07]: manageToken: null for admin bookings — explicit null prevents inadvertent self-manage link generation
+- [Phase 07]: Do NOT call engine's createBooking() for admin bookings — bypasses MAX_ACTIVE_BOOKINGS_PER_PHONE limit intentionally
 
 ### Pending Todos
 
