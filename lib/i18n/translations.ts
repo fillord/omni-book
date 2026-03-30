@@ -332,6 +332,19 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       supportEmail:      'Email',
       supportTelegram:   'Telegram',
       supportWhatsapp:   'WhatsApp',
+      // Phase 7: Manual booking + CRM view
+      newBooking:        '➕ Новая запись',
+      manualBookingTitle:'Создать запись',
+      bookingCreated:    'Запись создана',
+      manualDate:        'Выберите дату',
+      manualResource:    'Выберите ресурс',
+      manualService:     'Выберите услугу',
+      manualTime:        'Выберите время',
+      clientName:        'Имя клиента',
+      clientPhone:       'Телефон клиента',
+      saveBooking:       'Сохранить запись',
+      showCancelled:     'Отмененные',
+      noSlotsAvailable:  'Нет доступного времени',
     },
     status: {
       // Uppercase — used by BookingStatusBadge (t('status', booking.status))
@@ -968,6 +981,20 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       supportEmail:      'Email',
       supportTelegram:   'Telegram',
       supportWhatsapp:   'WhatsApp',
+      // Phase 7: Manual booking + CRM view
+      // Phase 7: Manual booking + CRM view
+      newBooking:        '➕ Жаңа жазба',
+      manualBookingTitle:'Жазба жасау',
+      bookingCreated:    'Жазба жасалды',
+      manualDate:        'Күнді таңдаңыз',
+      manualResource:    'Ресурсты таңдаңыз',
+      manualService:     'Қызметті таңдаңыз',
+      manualTime:        'Уақытты таңдаңыз',
+      clientName:        'Клиент аты',
+      clientPhone:       'Клиент телефоны',
+      saveBooking:       'Жазбаны сақтау',
+      showCancelled:     'Болдырмаған',
+      noSlotsAvailable:  'Бос уақыт жоқ',
     },
     status: {
       PENDING:   'Күтуде',
@@ -1601,6 +1628,20 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       supportEmail:      'Email',
       supportTelegram:   'Telegram',
       supportWhatsapp:   'WhatsApp',
+      // Phase 7: Manual booking + CRM view
+      // Phase 7: Manual booking + CRM view
+      newBooking:        '➕ New Booking',
+      manualBookingTitle:'Create Booking',
+      bookingCreated:    'Booking created',
+      manualDate:        'Select date',
+      manualResource:    'Select resource',
+      manualService:     'Select service',
+      manualTime:        'Select time',
+      clientName:        'Client name',
+      clientPhone:       'Client phone',
+      saveBooking:       'Save booking',
+      showCancelled:     'Cancelled',
+      noSlotsAvailable:  'No slots available',
     },
     status: {
       PENDING:   'Pending',

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { BookingStatusBadge, type BookingStatusValue } from '@/components/booking-status-badge'
 import { BookingCalendar, type CalendarData, getMonday } from '@/components/booking-calendar'
 import { useI18n } from '@/lib/i18n/context'
+import { ManualBookingSheet } from '@/components/manual-booking-sheet'
 
 // ---- types -----------------------------------------------------------------
 
@@ -144,6 +145,9 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
   const { t } = useI18n()
   // Tab
   const [tab, setTab] = useState<'table' | 'calendar'>('table')
+
+  // Manual booking sheet
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // Filters
   const [selectedStatuses, setSelectedStatuses] = useState<BookingStatusValue[]>([])
@@ -318,32 +322,45 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
   return (
     <div className="space-y-4">
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1 rounded-lg neu-inset bg-[var(--neu-bg)] p-1 w-fit">
-        <button
-          onClick={() => setTab('table')}
-          className={[
-            'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-            tab === 'table'
-              ? 'neu-raised bg-[var(--neu-bg)] font-medium'
-              : 'text-muted-foreground hover:text-foreground',
-          ].join(' ')}
-        >
-          <Table2 className="h-4 w-4" />
-          {t('dashboard', 'table')}
-        </button>
-        <button
-          onClick={() => setTab('calendar')}
-          className={[
-            'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-            tab === 'calendar'
-              ? 'neu-raised bg-[var(--neu-bg)] font-medium'
-              : 'text-muted-foreground hover:text-foreground',
-          ].join(' ')}
-        >
-          <CalendarDays className="h-4 w-4" />
-          {t('dashboard', 'calendar')}
-        </button>
+      {/* Header row: Tabs + New Booking button */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        {/* Tabs */}
+        <div className="flex items-center gap-1 rounded-lg neu-inset bg-[var(--neu-bg)] p-1 w-fit">
+          <button
+            onClick={() => setTab('table')}
+            className={[
+              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+              tab === 'table'
+                ? 'neu-raised bg-[var(--neu-bg)] font-medium'
+                : 'text-muted-foreground hover:text-foreground',
+            ].join(' ')}
+          >
+            <Table2 className="h-4 w-4" />
+            {t('dashboard', 'table')}
+          </button>
+          <button
+            onClick={() => setTab('calendar')}
+            className={[
+              'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+              tab === 'calendar'
+                ? 'neu-raised bg-[var(--neu-bg)] font-medium'
+                : 'text-muted-foreground hover:text-foreground',
+            ].join(' ')}
+          >
+            <CalendarDays className="h-4 w-4" />
+            {t('dashboard', 'calendar')}
+          </button>
+        </div>
+
+        {/* New Booking button */}
+        {canEdit && (
+          <Button
+            onClick={() => setSheetOpen(true)}
+            className="neu-raised rounded-xl"
+          >
+            {t('dashboard', 'newBooking') ?? '➕ Новая запись'}
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -572,6 +589,18 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
           onStatusChange={handleStatusChange}
           canEdit={canEdit}
           loading={calendarLoading}
+        />
+      )}
+
+      {/* Manual Booking Sheet */}
+      {canEdit && services && (
+        <ManualBookingSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          tenantSlug={tenantSlug}
+          resources={resources}
+          services={services}
+          onSuccess={() => fetchTable()}
         />
       )}
     </div>
