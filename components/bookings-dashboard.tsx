@@ -5,16 +5,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { CalendarDays, Table2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
+import { toZonedTime } from 'date-fns-tz'
 import { formatPhone } from '@/lib/utils/phone'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { BookingStatusBadge, type BookingStatusValue } from '@/components/booking-status-badge'
 import { BookingCalendar, type CalendarData, getMonday } from '@/components/booking-calendar'
 import { useI18n } from '@/lib/i18n/context'
@@ -114,6 +109,33 @@ function formatDateTimeRu(utcStr: string, timezone: string): { date: string; tim
     minute: '2-digit',
   }).format(d)
   return { date, time }
+}
+
+// ---- day-grouping helpers --------------------------------------------------
+
+function groupBookingsByDay(bookings: BookingRow[], timezone: string): [string, BookingRow[]][] {
+  const groups = new Map<string, BookingRow[]>()
+  for (const b of bookings) {
+    const localDate = toZonedTime(new Date(b.startsAt), timezone)
+    const key = format(localDate, 'yyyy-MM-dd')
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(b)
+  }
+  // Sort groups by date key ascending (today first, then future)
+  return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+}
+
+function getDayLabel(dateKey: string, timezone: string): string {
+  const d = toZonedTime(new Date(dateKey + 'T12:00:00'), timezone)
+  const now = toZonedTime(new Date(), timezone)
+  const todayKey = format(now, 'yyyy-MM-dd')
+  const tomorrowDate = new Date(now)
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowKey = format(tomorrowDate, 'yyyy-MM-dd')
+  const dayMonth = format(d, 'd MMMM', { locale: ru })
+  if (dateKey === todayKey) return `Сегодня, ${dayMonth}`
+  if (dateKey === tomorrowKey) return `Завтра, ${dayMonth}`
+  return dayMonth
 }
 
 // ---- component -------------------------------------------------------------
@@ -430,118 +452,81 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
 
           {!tableLoading && tableData && tableData.data.length > 0 && (
             <>
-              {/* Mobile cards */}
-              <div className="sm:hidden space-y-2">
-                {tableData.data.map((booking) => {
-                  const { date, time } = formatDateTimeRu(booking.startsAt, timezone)
-                  const clientName = booking.user?.name ?? booking.guestName
-                  const allowed = TRANSITIONS[booking.status] ?? []
+              {/* Day-grouped booking sections */}
+              <div className="space-y-1">
+                {groupBookingsByDay(tableData.data, timezone).map(([dateKey, dayBookings]) => {
+                  // Sort bookings within the day by start time ascending (API returns desc)
+                  const sorted = [...dayBookings].sort((a, b) => a.startsAt.localeCompare(b.startsAt))
                   return (
-                    <div key={booking.id} className="rounded-lg neu-raised bg-[var(--neu-bg)] p-3 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-medium text-sm">{clientName ?? '—'}</p>
-                          {booking.guestPhone && (
-                            <p className="text-xs text-muted-foreground font-mono">{formatPhone(booking.guestPhone)}</p>
-                          )}
-                        </div>
-                        <BookingStatusBadge status={booking.status} />
+                    <div key={dateKey}>
+                      {/* Sticky day header */}
+                      <div className="sticky top-0 z-10 bg-[var(--neu-bg)] py-2 px-4 border-t border-border/30">
+                        <span className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
+                          {getDayLabel(dateKey, timezone)}
+                        </span>
                       </div>
-                      <div className="text-xs text-muted-foreground space-y-0.5">
-                        <p>{booking.service?.name ?? '—'} · {booking.resource.name}</p>
-                        <p>{date} в {time}</p>
-                      </div>
-                      {canEdit && allowed.length > 0 && (
-                        <div className="flex gap-1 flex-wrap pt-1">
-                          {allowed.map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => handleStatusChange(booking.id, s)}
-                              className="rounded-md neu-raised bg-[var(--neu-bg)] px-2.5 py-1 text-xs transition-colors"
+
+                      {/* Booking rows as neu-raised cards */}
+                      <div className="space-y-2 px-1 pb-2">
+                        {sorted.map((booking) => {
+                          const localTime = toZonedTime(new Date(booking.startsAt), timezone)
+                          const time = format(localTime, 'HH:mm')
+                          const clientName = booking.user?.name ?? booking.guestName
+                          const allowed = TRANSITIONS[booking.status] ?? []
+
+                          return (
+                            <div
+                              key={booking.id}
+                              className="neu-raised rounded-xl bg-[var(--neu-bg)] px-4 py-2 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                             >
-                              {t('status', ACTION_LABELS[s])}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                              {/* Time — dominant visual element */}
+                              <span className="font-semibold text-lg tabular-nums w-14 shrink-0">{time}</span>
+
+                              {/* Client name */}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm min-w-0 truncate">{clientName ?? '—'}</p>
+                                {booking.guestPhone && (
+                                  <p className="text-xs text-muted-foreground font-mono">{formatPhone(booking.guestPhone)}</p>
+                                )}
+                              </div>
+
+                              {/* Service */}
+                              <span className="text-sm text-muted-foreground hidden md:block flex-1 min-w-0 truncate">
+                                {booking.service?.name ?? '—'}
+                              </span>
+
+                              {/* Resource */}
+                              <span className="text-sm text-muted-foreground hidden lg:block flex-1 min-w-0 truncate">
+                                {booking.resource.name}
+                              </span>
+
+                              {/* Status badge */}
+                              <BookingStatusBadge status={booking.status} />
+
+                              {/* Status change actions */}
+                              {canEdit && allowed.length > 0 && (
+                                <div className="flex gap-1 flex-wrap shrink-0">
+                                  {allowed.map((s) => (
+                                    <Button
+                                      key={s}
+                                      size="sm"
+                                      variant={s === 'CANCELLED' || s === 'NO_SHOW' ? 'outline' : 'ghost'}
+                                      className="h-7 text-xs"
+                                      onClick={() => handleStatusChange(booking.id, s)}
+                                    >
+                                      {t('status', ACTION_LABELS[s])}
+                                    </Button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
                   )
                 })}
               </div>
-
-              {/* Desktop table */}
-              <Table className="hidden sm:table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('dashboard', 'dateTime')}</TableHead>
-                    <TableHead>{t('booking', 'client')}</TableHead>
-                    <TableHead>{t('booking', 'service')}</TableHead>
-                    <TableHead>{t('form', 'resource')}</TableHead>
-                    <TableHead>{t('dashboard', 'status')}</TableHead>
-                    {canEdit && <TableHead className="text-right">{t('dashboard', 'actions')}</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tableData.data.map((booking) => {
-                    const { date, time } = formatDateTimeRu(booking.startsAt, timezone)
-                    const clientName = booking.user?.name ?? booking.guestName
-                    const allowed = TRANSITIONS[booking.status] ?? []
-
-                    return (
-                      <TableRow key={booking.id}>
-                        <TableCell className="whitespace-nowrap">
-                          <div className="font-medium">{date}</div>
-                          <div className="text-xs text-muted-foreground">{time}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{clientName ?? '—'}</div>
-                          {booking.guestPhone && (
-                            <div className="text-xs text-muted-foreground font-mono">
-                              {formatPhone(booking.guestPhone)}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div>{booking.service?.name ?? '—'}</div>
-                          {booking.service && (
-                            <div className="text-xs text-muted-foreground">
-                              {booking.service.durationMin} мин
-                              {booking.service.price != null && (
-                                <> · {formatPrice(booking.service.price, booking.service.currency)}</>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div>{booking.resource.name}</div>
-                        </TableCell>
-                        <TableCell>
-                          <BookingStatusBadge status={booking.status} />
-                        </TableCell>
-                        {canEdit && (
-                          <TableCell className="text-right">
-                            {allowed.length > 0 && (
-                              <div className="flex justify-end gap-1 flex-wrap">
-                                {allowed.map((s) => (
-                                  <Button
-                                    key={s}
-                                    size="sm"
-                                    variant={s === 'CANCELLED' || s === 'NO_SHOW' ? 'outline' : 'ghost'}
-                                    className="h-7 text-xs"
-                                    onClick={() => handleStatusChange(booking.id, s)}
-                                  >
-                                    {t('status', ACTION_LABELS[s])}
-                                  </Button>
-                                ))}
-                              </div>
-                            )}
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
 
               {/* Pagination */}
               <div className="flex items-center justify-between text-sm text-muted-foreground">
