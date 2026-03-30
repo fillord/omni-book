@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 3 of 4 (COMPLETE)
+current_plan: 1
 status: executing
-last_updated: "2026-03-28T12:43:44.057Z"
-last_activity: 2026-03-28 — Plan 06-03 complete (reschedule API route with Serializable conflict detection, BookingManagePage slot picker calendar)
+last_updated: "2026-03-30T09:03:13.585Z"
+last_activity: 2026-03-30
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 25
+  completed_plans: 22
   percent: 100
 ---
 
@@ -21,14 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 5 — Client UI, Outreach & Polish (CRM-06 through CRM-12)
+**Current focus:** Phase 07 — bookings-dashboard-crm-overhaul-and-manual-booking-creation
 
 ## Current Position
 
-Phase: 6 — Tokenized Booking Management (cancel/reschedule via email and Telegram links)
-Current Plan: 3 of 4 (COMPLETE)
-Status: Phase 6 in progress — Plans 01-03 done, Plan 04 remaining
-Last activity: 2026-03-28 — Plan 06-03 complete (reschedule API route with Serializable conflict detection, BookingManagePage slot picker calendar)
+Phase: 07 (bookings-dashboard-crm-overhaul-and-manual-booking-creation) — EXECUTING
+Plan: 2 of 4
+Current Plan: 1
+Status: Ready to execute
+Last activity: 2026-03-30
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -45,6 +46,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 03-01]: Subscription cron uses GET handler (Vercel Cron GET-only constraint)
 
 Key patterns carrying forward to next milestone:
+
 - [Phase 02-01]: safeRead helper (fs.existsSync check before readFileSync) prevents test crashes on missing files — tests fail with assertion errors, not throws
 - [Phase 02-01]: Announcement model is global (no tenantId) — platform-wide banners shown to all tenants
 - [Phase 02-01]: AuditLog/Notification use Cascade delete — tenant deletion cleans up all associated records
@@ -105,6 +107,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 06-04]: Management link in Telegram goes to business OWNER notification — owner can access management page directly from notification
 - [Phase 06-04]: Email management row and Telegram link are conditionally included only when manageToken truthy — backwards compatible with existing null tokens
 - [Phase 06-04]: i18n manage section with 24 keys per locale (ru/kz/en) — covers all UI strings for management page
+- [Phase 07]: Wave 0 test-first: wrote failing test scaffold for all 12 CRM-B requirements before any production file exists
+- [Phase 07]: CRM-B07 assertion: manageToken explicitly null (not randomUUID) for manual bookings — no token generation
 
 ### Pending Todos
 
@@ -118,6 +122,7 @@ None.
 
 - v1.2 complete: Phase 1 (duration input), Phase 2 (resource types expansion) both shipped
 - v1.3 complete: Phase 1 (Neumorphism), Phase 2 (God Mode), Phase 3 (Subscription Lifecycle) all shipped
+- Phase 7 added: Bookings Dashboard CRM Overhaul and Manual Booking Creation
 - v1.4 roadmap defined: Phase 4 (Client Data Foundation), Phase 5 (Client UI, Outreach & Polish)
 - Phase 6 added: Implement tokenized booking management for clients (cancel/reschedule) via email and Telegram links
 - See ROADMAP.md for full milestone history
