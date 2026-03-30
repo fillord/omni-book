@@ -7,6 +7,7 @@
 - ✅ **v1.2 Advanced Customization & Niche Expansion** — Phases 1-2 (shipped 2026-03-20)
 - ✅ **v1.3 Neumorphism UI, God Mode & Subscription Lifecycle** — Phases 1-3 (shipped 2026-03-24)
 - 🔄 **v1.4 Client Base (Mini-CRM)** — Phases 4-5 (in progress)
+- ⏳ **v1.5 Payments Integration** — Phase 9 (planned)
 
 ## Phases
 
@@ -200,3 +201,28 @@ Plans:
 - [x] 07-02-PLAN.md — createManualBooking Server Action + Zod schema + page data extension
 - [x] 07-03-PLAN.md — Dashboard CRM overhaul (day-grouping, default filter, Neumorphism cards)
 - [ ] 07-04-PLAN.md — ManualBookingSheet component + dashboard wiring + i18n translations
+
+### Phase 9: Online Payment with Deposit via Paylink.kz (Kaspi)
+
+**Goal:** Allow tenants to require a deposit (prepayment) from clients when booking online. When a client books via the public link, the booking is created with `status: PENDING`. The client is redirected to a Paylink.kz checkout. Upon successful payment (confirmed via Webhook), the booking status updates to `CONFIRMED`. If unpaid within a configurable timeout (default 30 minutes), the booking is automatically cancelled via cron.
+**Requirements:** [PAY-01, PAY-02, PAY-03, PAY-04, PAY-05, PAY-06, PAY-07, PAY-08]
+**Depends on:** Phase 7 (booking creation flow, booking status model)
+**Plans:** 0 plans
+
+Requirements:
+- PAY-01: Tenant deposit configuration — per-tenant toggle (requireDeposit: Boolean) and depositAmount (Int, in tenge tiyn) in Tenant/settings model; configurable in dashboard billing/settings page
+- PAY-02: Booking creation with PENDING status — when requireDeposit is enabled, createBooking creates the record as PENDING instead of CONFIRMED and returns a Paylink checkout URL
+- PAY-03: Paylink.kz checkout redirect — public booking form redirects client to Paylink checkout URL after booking creation
+- PAY-04: Paylink webhook handler — POST /api/webhooks/paylink verifies HMAC signature, updates booking status to CONFIRMED on successful payment event
+- PAY-05: Payment timeout cron — extend /api/cron/subscriptions (or new route) to cancel PENDING bookings older than configurable timeout (default 30 min)
+- PAY-06: Slot blocking for PENDING — PENDING bookings block the slot from new bookings (same as CONFIRMED) during the payment window
+- PAY-07: Client payment UX — public booking page shows "Оплатите для подтверждения" state with countdown timer; /manage/[token] shows payment status
+- PAY-08: Neumorphism design adherence — all new UI (payment status, deposit toggle) uses var(--neu-bg), .neu-raised, .neu-inset patterns
+
+Canonical refs:
+- `app/api/bookings/route.ts` — booking creation logic to extend
+- `app/api/cron/subscriptions/route.ts` — cron pattern to follow
+- `lib/subscription-lifecycle.ts` — lifecycle pattern reference
+- `components/booking-form.tsx` — public booking form to extend
+- `components/tenant-public-page.tsx` — public page to extend
+- `app/manage/[token]/` — token management page to extend
