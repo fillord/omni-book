@@ -4,7 +4,7 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-03-30T09:07:53.137Z"
+last_updated: "2026-03-30T09:07:57.489Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 7
@@ -111,6 +111,7 @@ Key patterns carrying forward to next milestone:
 - [Phase 07]: CRM-B07 assertion: manageToken explicitly null (not randomUUID) for manual bookings — no token generation
 - [Phase 07]: manageToken: null for admin bookings — explicit null prevents inadvertent self-manage link generation
 - [Phase 07]: Do NOT call engine's createBooking() for admin bookings — bypasses MAX_ACTIVE_BOOKINGS_PER_PHONE limit intentionally
+- [Phase 07]: Use Map<string,BookingRow[]> + string key comparison for timezone-safe day grouping in BookingsDashboard
 
 ### Pending Todos
 
