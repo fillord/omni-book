@@ -195,11 +195,11 @@ export async function getAvailableSlots(
   const dayStart = zonedDatetime(date, schedule.startTime, timezone)
   const dayEnd   = zonedDatetime(date, schedule.endTime, timezone)
 
-  // Fetch all active bookings for this resource on that day
+  // Fetch all non-cancelled bookings for this resource on that day
   const existingBookings = await db.booking.findMany({
     where: {
       resourceId,
-      status: { in: ["CONFIRMED", "PENDING"] },
+      status: { not: "CANCELLED" },
       AND: [
         { startsAt: { lt: dayEnd } },
         { endsAt:   { gt: dayStart } },

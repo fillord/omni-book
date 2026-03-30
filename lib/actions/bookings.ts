@@ -1,9 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { format } from 'date-fns'
+import { ru } from 'date-fns/locale'
 import { basePrisma } from '@/lib/db'
 import { requireAuth, requireRole } from '@/lib/auth/guards'
 import { normalizePhone } from '@/lib/utils/phone'
+import { sendBookingConfirmation } from '@/lib/email/resend'
+import { sendTelegramMessage } from '@/lib/telegram'
 import { manualBookingSchema, type ManualBookingInput } from '@/lib/validations/booking'
 
 export async function createManualBooking(data: ManualBookingInput) {
@@ -51,6 +55,53 @@ export async function createManualBooking(data: ManualBookingInput) {
       },
       { isolationLevel: 'Serializable' }
     )
+
+    // Fetch tenant + service + resource names for notifications
+    const [tenant, service, resource] = await Promise.all([
+      basePrisma.tenant.findUnique({
+        where: { id: tenantId },
+        select: { name: true, telegramChatId: true },
+      }),
+      basePrisma.service.findFirst({
+        where: { id: parsed.serviceId, tenantId },
+        select: { name: true },
+      }),
+      basePrisma.resource.findFirst({
+        where: { id: parsed.resourceId, tenantId },
+        select: { name: true },
+      }),
+    ])
+
+    // Fire-and-forget confirmation email (only if client email provided)
+    if (result.guestEmail && result.guestName && tenant) {
+      sendBookingConfirmation({
+        guestName:    result.guestName,
+        guestEmail:   result.guestEmail,
+        tenantName:   tenant.name,
+        serviceName:  service?.name ?? '',
+        resourceName: resource?.name ?? '',
+        startsAt:     result.startsAt,
+        manageToken:  result.manageToken,
+      }).catch(console.error)
+    }
+
+    // Fire-and-forget Telegram notification to business owner
+    const chatId = tenant?.telegramChatId ?? null
+    if (chatId) {
+      const startsAtDate = new Date(result.startsAt)
+      const dateStr = format(startsAtDate, 'd MMMM yyyy', { locale: ru })
+      const timeStr = format(startsAtDate, 'HH:mm')
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
+      const msg = [
+        '🔔 <b>Новая запись (от администратора)!</b>',
+        `👤 Клиент: ${result.guestName}`,
+        `📅 Дата: ${dateStr}`,
+        `⏰ Время: ${timeStr}`,
+        `🛠 Услуга: ${service?.name ?? 'Не указана'}`,
+        ...(result.manageToken ? [`🔗 Управление: ${appUrl}/manage/${result.manageToken}`] : []),
+      ].join('\n')
+      sendTelegramMessage(chatId, msg).catch(console.error)
+    }
 
     revalidatePath('/dashboard/bookings')
     return { success: true, bookingId: result.id }

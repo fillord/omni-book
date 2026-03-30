@@ -123,7 +123,7 @@ function groupBookingsByDay(bookings: BookingRow[], timezone: string): [string, 
     groups.get(key)!.push(b)
   }
   // Sort groups by date key ascending (today first, then future)
-  return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+  return Array.from(groups.entries()).sort(([a], [b]) => b.localeCompare(a))
 }
 
 function getDayLabel(dateKey: string, timezone: string): string {
