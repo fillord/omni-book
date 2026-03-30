@@ -42,11 +42,19 @@ export type BookingRow = {
 
 export type ResourceOption = { id: string; name: string; type: string }
 
+type ServiceOption = {
+  id: string
+  name: string
+  durationMin: number
+  resources: { resourceId: string }[]
+}
+
 type Props = {
   tenantSlug: string
   timezone: string
   canEdit: boolean
   resources: ResourceOption[]
+  services?: ServiceOption[]
 }
 
 // ---- status labels for filter buttons --------------------------------------
@@ -110,13 +118,14 @@ function formatDateTimeRu(utcStr: string, timezone: string): { date: string; tim
 
 // ---- component -------------------------------------------------------------
 
-export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: Props) {
+export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, services }: Props) {
   const { t } = useI18n()
   // Tab
   const [tab, setTab] = useState<'table' | 'calendar'>('table')
 
   // Filters
   const [selectedStatuses, setSelectedStatuses] = useState<BookingStatusValue[]>([])
+  const [showCancelled, setShowCancelled] = useState(false)
   const [resourceId, setResourceId] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -151,7 +160,18 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
         page: String(page),
         limit: String(LIMIT),
       })
-      if (selectedStatuses.length > 0) params.set('status', selectedStatuses.join(','))
+      // Compute effective statuses — CANCELLED excluded by default unless showCancelled is true
+      let effectiveStatuses = selectedStatuses
+      if (!showCancelled) {
+        if (selectedStatuses.length === 0) {
+          // All selected (no filter) — explicitly exclude CANCELLED
+          effectiveStatuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'NO_SHOW']
+        } else {
+          // Filter out CANCELLED from the selection
+          effectiveStatuses = selectedStatuses.filter((s) => s !== 'CANCELLED')
+        }
+      }
+      if (effectiveStatuses.length > 0) params.set('status', effectiveStatuses.join(','))
       if (resourceId) params.set('resourceId', resourceId)
       if (dateFrom) params.set('dateFrom', dateFrom)
       if (dateTo) params.set('dateTo', dateTo)
@@ -165,7 +185,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
     } finally {
       setTableLoading(false)
     }
-  }, [tenantSlug, page, selectedStatuses, resourceId, dateFrom, dateTo])
+  }, [tenantSlug, page, selectedStatuses, showCancelled, resourceId, dateFrom, dateTo])
 
   // ---- fetch calendar data --------------------------------------------------
 
@@ -306,14 +326,15 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-end">
-        {/* Status chips */}
+        {/* Status chips (non-CANCELLED statuses) */}
         <div className="flex flex-wrap gap-1">
-          {ALL_STATUSES.map((s) => (
+          {ALL_STATUSES.filter((s) => s !== 'CANCELLED').map((s) => (
             <button
               key={s}
               onClick={() => toggleStatus(s)}
+              aria-pressed={selectedStatuses.includes(s)}
               className={[
-                'rounded-full px-2.5 py-0.5 text-xs transition-colors',
+                'rounded-xl px-3 py-1 text-sm transition-colors',
                 selectedStatuses.includes(s)
                   ? 'neu-inset bg-[var(--neu-bg)] text-neu-accent font-medium'
                   : 'neu-raised bg-[var(--neu-bg)] text-muted-foreground',
@@ -322,6 +343,19 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources }: 
               {t('status', STATUS_FILTER_LABELS[s])}
             </button>
           ))}
+          {/* Cancelled toggle chip */}
+          <button
+            onClick={() => { setShowCancelled((prev) => !prev); setPage(1) }}
+            aria-pressed={showCancelled}
+            className={[
+              'rounded-xl px-3 py-1 text-sm cursor-pointer transition-colors',
+              showCancelled
+                ? 'neu-inset bg-[var(--neu-bg)] text-neu-accent font-medium'
+                : 'neu-raised bg-[var(--neu-bg)] text-muted-foreground',
+            ].join(' ')}
+          >
+            {t('dashboard', 'showCancelled') ?? 'Отменено'}
+          </button>
         </div>
 
         {/* Resource filter */}
