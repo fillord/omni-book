@@ -230,6 +230,6 @@ Canonical refs:
 
 Plans:
 - [x] 09-01-PLAN.md — Test scaffold + Prisma schema extension + Kaspi adapter mock + engine interface
-- [ ] 09-02-PLAN.md — Booking route deposit branch + webhook handler + cron + vercel.json
+- [x] 09-02-PLAN.md — Booking route deposit branch + webhook handler + cron + vercel.json
 - [x] 09-03-PLAN.md — Tenant deposit settings UI + Server Action + i18n keys
 - [ ] 09-04-PLAN.md — WaitingForPaymentScreen countdown UI + deposit notice + visual verification

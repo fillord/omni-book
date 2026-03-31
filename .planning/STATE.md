@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-03-31T08:27:32.083Z"
+last_updated: "2026-03-31T08:28:55.107Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 29
-  completed_plans: 26
+  completed_plans: 27
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 09 (online-payment-with-deposit-via-paylink-kz-kaspi) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Current Plan: 1
 Status: Ready to execute
 Last activity: 2026-03-31
@@ -114,6 +114,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 07]: Use Map<string,BookingRow[]> + string key comparison for timezone-safe day grouping in BookingsDashboard
 - [Phase 09-03]: Used requireAuth + requireRole pattern for Server Action PRO+ gate, consistent with billing.ts
 - [Phase 09-03]: payment i18n section added as top-level namespace (not nested under booking) for payment-specific keys
+- [Phase 09-online-payment-with-deposit-via-paylink-kz-kaspi]: Kaspi webhook sends email+Telegram after PENDING->CONFIRMED only; deposit branch exits before notification block to prevent premature notifications
+- [Phase 09-online-payment-with-deposit-via-paylink-kz-kaspi]: vercel.json now has 3 cron entries; Vercel free tier supports 2 — user may need Pro upgrade or fold pending-payments into subscriptions cron
 
 ### Pending Todos
 
