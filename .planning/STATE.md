@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-03-30T09:07:57.489Z"
-last_activity: 2026-03-30
+last_updated: "2026-03-31T08:27:32.083Z"
+last_activity: 2026-03-31
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 6
-  total_plans: 25
-  completed_plans: 24
+  total_plans: 29
+  completed_plans: 26
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 07 — bookings-dashboard-crm-overhaul-and-manual-booking-creation
+**Current focus:** Phase 09 — online-payment-with-deposit-via-paylink-kz-kaspi
 
 ## Current Position
 
-Phase: 07 (bookings-dashboard-crm-overhaul-and-manual-booking-creation) — EXECUTING
-Plan: 4 of 4
+Phase: 09 (online-payment-with-deposit-via-paylink-kz-kaspi) — EXECUTING
+Plan: 2 of 4
 Current Plan: 1
 Status: Ready to execute
-Last activity: 2026-03-30
+Last activity: 2026-03-31
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -112,6 +112,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 07]: manageToken: null for admin bookings — explicit null prevents inadvertent self-manage link generation
 - [Phase 07]: Do NOT call engine's createBooking() for admin bookings — bypasses MAX_ACTIVE_BOOKINGS_PER_PHONE limit intentionally
 - [Phase 07]: Use Map<string,BookingRow[]> + string key comparison for timezone-safe day grouping in BookingsDashboard
+- [Phase 09-03]: Used requireAuth + requireRole pattern for Server Action PRO+ gate, consistent with billing.ts
+- [Phase 09-03]: payment i18n section added as top-level namespace (not nested under booking) for payment-specific keys
 
 ### Pending Todos
 
