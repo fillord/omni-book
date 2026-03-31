@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/subscriptions",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/pending-payments",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
