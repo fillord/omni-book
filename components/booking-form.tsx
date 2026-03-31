@@ -40,6 +40,9 @@ type Props = {
   nicheColor?:   string
   /** Rolling booking window: max days ahead for booking */
   bookingWindowDays?: number
+  // Phase 9: deposit config
+  requireDeposit?: boolean
+  depositAmount?: number   // tiyn (minor units) — divide by 100 for tenge display
 }
 
 type Step = 'service' | 'resource' | 'datetime' | 'confirm'
@@ -297,6 +300,76 @@ function SuccessScreen({
   )
 }
 
+// ---- WaitingForPaymentScreen -----------------------------------------------
+
+function WaitingForPaymentScreen({ bookingId, onReset }: { bookingId: string; onReset: () => void }) {
+  const { t } = useI18n()
+  const [secondsLeft, setSecondsLeft] = useState(10 * 60) // 10 minutes
+  const [expired, setExpired] = useState(false)
+
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      setExpired(true)
+      return
+    }
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          setExpired(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [secondsLeft])
+
+  const minutes = Math.floor(secondsLeft / 60)
+  const seconds = secondsLeft % 60
+  const timeDisplay = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+
+  if (expired) {
+    return (
+      <div className="text-center space-y-4 p-6 rounded-2xl bg-[var(--neu-bg)] neu-raised">
+        <div className="text-4xl">&#9200;</div>
+        <h3 className="text-lg font-semibold text-foreground">
+          {t('payment', 'paymentExpired')}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {t('payment', 'paymentExpiredSub')}
+        </p>
+        <button
+          onClick={onReset}
+          className="mt-4 px-6 py-2 rounded-xl bg-[var(--neu-bg)] neu-raised text-sm font-medium hover:opacity-80 transition-opacity"
+        >
+          {t('booking', 'bookAgain')}
+        </button>
+      </div>
+    )
+  }
+
+  // suppress unused var warning — bookingId reserved for future polling
+  void bookingId
+
+  return (
+    <div className="text-center space-y-4 p-6 rounded-2xl bg-[var(--neu-bg)] neu-raised">
+      <div className="text-4xl">&#128179;</div>
+      <h3 className="text-lg font-semibold text-foreground">
+        {t('payment', 'waitingForPayment')}
+      </h3>
+      <p className="text-sm text-muted-foreground">
+        {t('payment', 'waitingInstructions')}
+      </p>
+      <div className="text-3xl font-mono font-bold text-foreground neu-inset inline-block px-6 py-3 rounded-xl bg-[var(--neu-bg)]">
+        {timeDisplay}
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t('payment', 'paymentCountdown')}
+      </p>
+    </div>
+  )
+}
+
 // ---- BookingForm -----------------------------------------------------------
 
 export function BookingForm({
@@ -307,6 +380,8 @@ export function BookingForm({
   resourceLabel,
   nicheColor,
   bookingWindowDays = 14,
+  requireDeposit,
+  depositAmount,
 }: Props) {
   const { t, locale } = useI18n()
   const colors = BOOKING_COLORS[nicheColor ?? 'blue'] ?? FALLBACK_COLORS
@@ -332,10 +407,11 @@ export function BookingForm({
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [dayOff,       setDayOff]       = useState(false)
 
-  const [loading,   setLoading]   = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
-  const [successId, setSuccessId] = useState<string | null>(null)
-  const [slideDir,  setSlideDir]  = useState<'left' | 'right'>('left')
+  const [loading,          setLoading]          = useState(false)
+  const [error,            setError]            = useState<string | null>(null)
+  const [successId,        setSuccessId]        = useState<string | null>(null)
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null)
+  const [slideDir,         setSlideDir]         = useState<'left' | 'right'>('left')
 
   function goForward(nextStep: Step) {
     setSlideDir('left')
@@ -423,6 +499,11 @@ export function BookingForm({
         setError(data.error ?? t('booking', 'genericError'))
         return
       }
+      // Phase 9: deposit branch — show waiting-for-payment screen instead of success
+      if (data.invoiceCreated) {
+        setPendingPaymentId(data.booking.id)
+        return
+      }
       setSuccessId(data.booking.id)
     } catch {
       setError(t('booking', 'networkError'))
@@ -442,6 +523,16 @@ export function BookingForm({
     setGuestEmail('')
     setError(null)
     setSuccessId(null)
+    setPendingPaymentId(null)
+  }
+
+  if (pendingPaymentId) {
+    return (
+      <WaitingForPaymentScreen
+        bookingId={pendingPaymentId}
+        onReset={handleReset}
+      />
+    )
   }
 
   if (successId && selectedService && selectedResource) {
@@ -748,6 +839,18 @@ export function BookingForm({
           {error && (
             <div className="rounded-xl border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300 px-4 py-3 text-sm text-red-700">
               {error}
+            </div>
+          )}
+
+          {requireDeposit && depositAmount && depositAmount > 0 && (
+            <div className="p-3 rounded-xl bg-[var(--neu-bg)] neu-inset text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {t('payment', 'depositRequired')}:
+              </span>{' '}
+              {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'KZT', maximumFractionDigits: 0 }).format(depositAmount / 100)}
+              <p className="mt-1 text-xs">
+                {t('payment', 'depositNotice')}
+              </p>
             </div>
           )}
 
