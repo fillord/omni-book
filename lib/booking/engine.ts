@@ -102,6 +102,10 @@ export interface CreateBookingParams {
   guestName: string
   guestPhone: string
   guestEmail?: string | null
+  // Phase 9: payment support
+  status?: 'CONFIRMED' | 'PENDING'
+  paymentExpiresAt?: Date | null
+  paymentInvoiceId?: string | null
 }
 
 // ---- Constants -------------------------------------------------------------
@@ -264,7 +268,7 @@ export async function getAvailableSlots(
  * Throws BookingConflictError on overlap.
  */
 export async function createBooking(params: CreateBookingParams) {
-  const { tenantId, resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail } = params
+  const { tenantId, resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail, status: requestedStatus, paymentExpiresAt, paymentInvoiceId } = params
 
   const startsAtDate = new Date(startsAt)
   if (isNaN(startsAtDate.getTime())) {
@@ -346,8 +350,10 @@ export async function createBooking(params: CreateBookingParams) {
           guestEmail: guestEmail?.trim() || null,
           startsAt:   startsAtDate,
           endsAt:     endsAtDate,
-          status:     "CONFIRMED",
+          status:     requestedStatus ?? "CONFIRMED",
           manageToken,
+          paymentInvoiceId: paymentInvoiceId ?? null,
+          paymentExpiresAt: paymentExpiresAt ?? null,
         },
       })
     },
