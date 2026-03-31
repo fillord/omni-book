@@ -7,6 +7,7 @@ import { createBooking, BookingConflictError, BookingLimitError, BookingWindowEr
 import { sendBookingConfirmation } from '@/lib/email/resend'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { normalizePhone } from '@/lib/utils/phone'
+import { createKaspiInvoice } from '@/lib/payments/kaspi'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -133,6 +134,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Fetch tenant deposit config before creating booking
+    const tenantDeposit = await basePrisma.tenant.findUnique({
+      where: { id: tenant.id },
+      select: { requireDeposit: true, depositAmount: true, kaspiMerchantId: true, kaspiApiKey: true },
+    })
+    const requireDeposit = tenantDeposit?.requireDeposit ?? false
+    const depositAmount = tenantDeposit?.depositAmount ?? 0
+
+    const bookingStatus = requireDeposit && depositAmount > 0 ? 'PENDING' as const : 'CONFIRMED' as const
+    const paymentExpiresAt = requireDeposit && depositAmount > 0
+      ? new Date(Date.now() + 10 * 60 * 1000)  // 10 minutes per PAY-06
+      : null
+
     const booking = await createBooking({
       tenantId: tenant.id,
       resourceId,
@@ -141,8 +155,29 @@ export async function POST(req: NextRequest) {
       guestName,
       guestPhone: normalizePhone(guestPhone),
       guestEmail,
+      status: bookingStatus,
+      paymentExpiresAt,
     })
     console.log(`✅ Booking created: ${booking.id} for ${booking.guestName} at ${booking.startsAt}`)
+
+    // --- Deposit payment branch ---
+    if (requireDeposit && depositAmount > 0 && booking.status === 'PENDING') {
+      const invoice = await createKaspiInvoice(
+        booking.guestPhone!,
+        depositAmount,
+        booking.id,
+        { kaspiMerchantId: tenantDeposit?.kaspiMerchantId, kaspiApiKey: tenantDeposit?.kaspiApiKey }
+      )
+
+      // Update booking with invoice ID (fire-and-forget — invoice ID is for tracking only)
+      basePrisma.booking.update({
+        where: { id: booking.id },
+        data: { paymentInvoiceId: invoice.invoiceId },
+      }).catch(console.error)
+
+      console.log(`[Payment] Invoice created for booking ${booking.id}: ${invoice.invoiceId}`)
+      return NextResponse.json({ booking, invoiceCreated: true, invoiceId: invoice.invoiceId }, { status: 201 })
+    }
 
     // Fetch service/resource names for notifications (email + Telegram).
     // Uses basePrisma with explicit tenantId — avoids the tenant extension's
