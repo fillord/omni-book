@@ -493,6 +493,8 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               resourceLabel={t('niche', nicheConfig.resourceLabel)}
               nicheColor={nicheConfig.color}
               bookingWindowDays={(tenant as unknown as { bookingWindowDays: number }).bookingWindowDays ?? 14}
+              requireDeposit={(tenant as unknown as { requireDeposit: boolean }).requireDeposit ?? false}
+              depositAmount={(tenant as unknown as { depositAmount: number | null }).depositAmount ?? 0}
             />
           )}
         </section>
