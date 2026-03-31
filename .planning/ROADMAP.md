@@ -202,27 +202,34 @@ Plans:
 - [x] 07-03-PLAN.md — Dashboard CRM overhaul (day-grouping, default filter, Neumorphism cards)
 - [ ] 07-04-PLAN.md — ManualBookingSheet component + dashboard wiring + i18n translations
 
-### Phase 9: Online Payment with Deposit via Paylink.kz (Kaspi)
+### Phase 9: Online Deposit Payments via Kaspi Pay (Direct Invoice)
 
-**Goal:** Allow tenants to require a deposit (prepayment) from clients when booking online. When a client books via the public link, the booking is created with `status: PENDING`. The client is redirected to a Paylink.kz checkout. Upon successful payment (confirmed via Webhook), the booking status updates to `CONFIRMED`. If unpaid within a configurable timeout (default 30 minutes), the booking is automatically cancelled via cron.
+**Goal:** Allow tenants to require a deposit from clients when booking online using Kaspi Pay's direct invoicing API. When a client books, the server creates a PENDING booking and pushes a payment invoice directly to the client's Kaspi mobile app. The UI shows a "waiting for payment" screen with a countdown — no external redirect. On webhook confirmation, the booking becomes CONFIRMED with email/Telegram notifications sent. Unpaid bookings are auto-cancelled after 10 minutes via cron.
 **Requirements:** [PAY-01, PAY-02, PAY-03, PAY-04, PAY-05, PAY-06, PAY-07, PAY-08]
 **Depends on:** Phase 7 (booking creation flow, booking status model)
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Requirements:
-- PAY-01: Tenant deposit configuration — per-tenant toggle (requireDeposit: Boolean) and depositAmount (Int, in tenge tiyn) in Tenant/settings model; configurable in dashboard billing/settings page
-- PAY-02: Booking creation with PENDING status — when requireDeposit is enabled, createBooking creates the record as PENDING instead of CONFIRMED and returns a Paylink checkout URL
-- PAY-03: Paylink.kz checkout redirect — public booking form redirects client to Paylink checkout URL after booking creation
-- PAY-04: Paylink webhook handler — POST /api/webhooks/paylink verifies HMAC signature, updates booking status to CONFIRMED on successful payment event
-- PAY-05: Payment timeout cron — extend /api/cron/subscriptions (or new route) to cancel PENDING bookings older than configurable timeout (default 30 min)
-- PAY-06: Slot blocking for PENDING — PENDING bookings block the slot from new bookings (same as CONFIRMED) during the payment window
-- PAY-07: Client payment UX — public booking page shows "Оплатите для подтверждения" state with countdown timer; /manage/[token] shows payment status
-- PAY-08: Neumorphism design adherence — all new UI (payment status, deposit toggle) uses var(--neu-bg), .neu-raised, .neu-inset patterns
+- PAY-01: Tenant deposit configuration — `requireDeposit Boolean`, `depositAmount Int` (tenge tiyn), `kaspiMerchantId String?`, `kaspiApiKey String?` on Tenant model; configurable in billing/settings page (PRO+ gate)
+- PAY-02: Kaspi adapter — `lib/payments/kaspi.ts` with `createKaspiInvoice(phone, amount, bookingId, tenantKeys)` and `verifyKaspiWebhook(payload)`. Phase 9 ships mock implementations; real API wired in Phase 9b/10.
+- PAY-03: Booking creation with PENDING + invoice push — POST /api/bookings calls adapter, stamps `paymentInvoiceId` and `paymentExpiresAt` on booking, returns `{ booking, invoiceCreated: true }`
+- PAY-04: Waiting-for-payment UI — booking form shows Neumorphic "waiting" screen: "Мы выставили счет в ваше приложение Kaspi. Оплатите в течение 10 минут." with countdown timer. Client pays inside Kaspi app — no redirect.
+- PAY-05: Kaspi webhook handler — POST /api/webhooks/kaspi verifies signature (mock for now), updates booking to CONFIRMED, triggers email + Telegram confirmation notifications
+- PAY-06: Payment timeout cron — `app/api/cron/pending-payments/route.ts` at `*/5 * * * *`, cancels PENDING bookings where `paymentExpiresAt < now`
+- PAY-07: Slot blocking for PENDING — already implemented in collision query (no change needed)
+- PAY-08: Neumorphism design adherence — all new UI uses `var(--neu-bg)`, `.neu-raised`, `.neu-inset` patterns
 
 Canonical refs:
 - `app/api/bookings/route.ts` — booking creation logic to extend
-- `app/api/cron/subscriptions/route.ts` — cron pattern to follow
-- `lib/subscription-lifecycle.ts` — lifecycle pattern reference
-- `components/booking-form.tsx` — public booking form to extend
-- `components/tenant-public-page.tsx` — public page to extend
-- `app/manage/[token]/` — token management page to extend
+- `app/api/cron/subscriptions/route.ts` — cron auth pattern to follow
+- `lib/subscription-lifecycle.ts` — lifecycle function pattern
+- `components/booking-form.tsx` — public booking form to extend (waiting screen)
+- `components/tenant-public-page.tsx` — passes tenant deposit config as props
+- `app/api/webhooks/meta/route.ts` — webhook handler pattern
+- `vercel.json` — add pending-payments cron entry
+
+Plans:
+- [ ] 09-01-PLAN.md — Test scaffold + Prisma schema extension + Kaspi adapter mock + engine interface
+- [ ] 09-02-PLAN.md — Booking route deposit branch + webhook handler + cron + vercel.json
+- [ ] 09-03-PLAN.md — Tenant deposit settings UI + Server Action + i18n keys
+- [ ] 09-04-PLAN.md — WaitingForPaymentScreen countdown UI + deposit notice + visual verification
