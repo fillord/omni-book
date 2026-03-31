@@ -2,9 +2,19 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Check, CreditCard, Clock, CheckCircle2, ShieldCheck, Zap, XCircle, AlertTriangle } from "lucide-react"
+import { 
+  Check, 
+  CreditCard, 
+  Clock, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Zap, 
+  XCircle, 
+  AlertTriangle,
+  Copy 
+} from "lucide-react"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,11 +27,17 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { requestProActivation, renewSubscription } from "@/lib/actions/billing"
+import { updatePaymentSettings } from "@/lib/actions/payment-settings"
 
 type TenantInfo = {
   plan: string
   planStatus: string
   subscriptionExpiresAt: Date | null
+  // Phase 9: deposit config
+  requireDeposit: boolean
+  depositAmount: number    // stored in tiyn, display in tenge
+  kaspiMerchantId: string | null
+  kaspiApiKey: string | null
 }
 
 export function BillingContent({ tenant }: { tenant: TenantInfo }) {
@@ -29,6 +45,13 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Phase 9: deposit config state
+  const [requireDeposit, setRequireDeposit] = useState(tenant.requireDeposit)
+  const [depositAmountTenge, setDepositAmountTenge] = useState(tenant.depositAmount / 100)  // tiyn -> tenge for display
+  const [kaspiMerchantId, setKaspiMerchantId] = useState(tenant.kaspiMerchantId ?? '')
+  const [kaspiApiKey, setKaspiApiKey] = useState(tenant.kaspiApiKey ?? '')
+  const [savingDeposit, setSavingDeposit] = useState(false)
 
   const isFree = tenant.plan === "FREE"
   const isPending = tenant.planStatus === "PENDING"
@@ -57,9 +80,26 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
     router.refresh()
   }
 
+  async function handleSaveDeposit() {
+    setSavingDeposit(true)
+    const res = await updatePaymentSettings({
+      requireDeposit,
+      depositAmount: depositAmountTenge,  // tenge — Server Action converts to tiyn
+      kaspiMerchantId: kaspiMerchantId || undefined,
+      kaspiApiKey: kaspiApiKey || undefined,
+    })
+    setSavingDeposit(false)
+    if (res?.error) {
+      toast.error(res.error)
+      return
+    }
+    toast.success('Настройки депозита сохранены')
+    router.refresh()
+  }
+
   return (
     <div className="space-y-8">
-      {/* Current Plan Card - ИСПРАВЛЕНА ДЛЯ ТЕМНОЙ ТЕМЫ */}
+      {/* Current Plan Card */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
@@ -176,7 +216,6 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                 </DialogHeader>
                 
                 <div className="py-6 space-y-6">
-                  {/* ИСПРАВЛЕН БЛОК С ЦЕНОЙ ВНУТРИ ПОПАПА (С !IMPORTANT) */}
                   <div className="bg-[var(--neu-bg)] neu-inset p-4 rounded-lg text-center space-y-2">
                     <p className="text-sm text-muted-foreground">Сумма к оплате:</p>
                     <p className="text-3xl font-bold text-foreground">10 000 ₸</p>
@@ -189,24 +228,38 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                       </div>
                       <div className="flex flex-col gap-1">
                         <h4 className="font-semibold text-foreground">
-                          Перевод Kaspi Bank
+                          Перевод на карту
                         </h4>
                         <p className="text-sm text-foreground">
-                          Отправьте перевод на номер:
+                          Отправьте перевод на указанный ниже номер карты:
                         </p>
-                        <p className="text-lg font-mono font-medium text-indigo-600 dark:text-indigo-400">
-                          +7 (707) 343-64-23
-                        </p>
-                        <p className="text-xs text-muted-foreground">
+                        
+                        {/* ИНТЕРАКТИВНЫЙ БЛОК КОПИРОВАНИЯ НОМЕРА */}
+                        <div 
+                          onClick={() => {
+                            navigator.clipboard.writeText("4400430389830552")
+                            toast.success("Номер скопирован! 📋")
+                          }}
+                          className="flex items-center gap-2 mt-1 cursor-pointer group w-fit hover:opacity-70 transition-opacity active:scale-95"
+                          title="Нажмите, чтобы скопировать"
+                        >
+                          <p className="text-lg font-mono font-medium text-indigo-600 dark:text-indigo-400">
+                            4400 4303 8983 0552
+                          </p>
+                          <Copy className="w-4 h-4 text-indigo-600/50 dark:text-indigo-400/50 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+                        </div>
+                        {/* КОНЕЦ ИНТЕРАКТИВНОГО БЛОКА */}
+
+                        <p className="text-xs text-muted-foreground mt-1">
                           Получатель: Нұрсұлтан Г.
                         </p>
                       </div>
                     </div>
                   </div>
   
-                  {/* ИСПРАВЛЕН БЛОК "ВНИМАНИЕ" (С !IMPORTANT) */}
                   <div className="bg-[var(--neu-bg)] neu-inset rounded p-3 text-foreground text-sm">
-                    <strong>Внимание:</strong> После перевода обязательно нажмите кнопку ниже, чтобы мы проверили платеж.
+                    <strong>Внимание:</strong> 
+                    После перевода нажмите кнопку «Я оплатил» и дождитесь подтверждения. Активация может занять до 15 минут. Если у вас возникнут вопросы, пожалуйста, свяжитесь с нашей поддержкой.
                   </div>
                 </div>
 
@@ -231,6 +284,76 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Phase 9: Deposit / Payment configuration — PRO+ only */}
+      {isPro && (
+        <Card className="bg-[var(--neu-bg)] neu-raised">
+          <CardHeader>
+            <CardTitle>Оплата / Депозит</CardTitle>
+            <CardDescription>Настройте обязательную предоплату при онлайн-записи</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="requireDeposit"
+                checked={requireDeposit}
+                onChange={(e) => setRequireDeposit(e.target.checked)}
+                className="h-4 w-4 rounded"
+              />
+              <label htmlFor="requireDeposit" className="text-sm font-medium">
+                Требовать депозит при онлайн-записи
+              </label>
+            </div>
+
+            {requireDeposit && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Размер депозита (тенге)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={depositAmountTenge}
+                    onChange={(e) => setDepositAmountTenge(Number(e.target.value))}
+                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
+                    placeholder="1000"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Kaspi Merchant ID</label>
+                  <input
+                    type="text"
+                    value={kaspiMerchantId}
+                    onChange={(e) => setKaspiMerchantId(e.target.value)}
+                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
+                    placeholder="Merchant ID"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Kaspi API Key</label>
+                  <input
+                    type="password"
+                    value={kaspiApiKey}
+                    onChange={(e) => setKaspiApiKey(e.target.value)}
+                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
+                    placeholder="API Key"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleSaveDeposit}
+                  disabled={savingDeposit}
+                  className="neu-raised"
+                >
+                  {savingDeposit ? 'Сохранение...' : 'Сохранить настройки депозита'}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       )}
