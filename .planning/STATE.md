@@ -142,3 +142,4 @@ None.
 | 260323-106 | Add couch resource type to Zod validation | 2026-03-23 | a0801f6 | [260323-106-add-couch-resource-type](./quick/260323-106-add-couch-resource-type/) |
 | 260323-1el | Add 18 niche resource types to RESOURCE_TYPES (horeca/sports/medicine/beauty) | 2026-03-23 | af3e28c | [260323-1el-bulk-resource-types-update](./quick/260323-1el-bulk-resource-types-update/) |
 | 260401-bx1 | Fix 3 UI bugs: invisible toggle in service form, obsolete deposit fields in billing, sidebar double-highlight | 2026-04-01 | 548bf47 | [260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic](./quick/260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic/) |
+| 260401-c61 | Fix invisible toggle OFF state in service-form.tsx with visible bg-gray-300 dark:bg-gray-600 and thumb border | 2026-04-01 | e05eff5 | [260401-c61-fix-invisible-toggle-off-state-in-servic](./quick/260401-c61-fix-invisible-toggle-off-state-in-servic/) |
