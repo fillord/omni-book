@@ -33,9 +33,6 @@ type TenantInfo = {
   plan: string
   planStatus: string
   subscriptionExpiresAt: Date | null
-  // Phase 9: deposit config
-  requireDeposit: boolean
-  depositAmount: number    // stored in tiyn, display in tenge
   kaspiMerchantId: string | null
   kaspiApiKey: string | null
 }
@@ -46,9 +43,6 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Phase 9: deposit config state
-  const [requireDeposit, setRequireDeposit] = useState(tenant.requireDeposit)
-  const [depositAmountTenge, setDepositAmountTenge] = useState(tenant.depositAmount / 100)  // tiyn -> tenge for display
   const [kaspiMerchantId, setKaspiMerchantId] = useState(tenant.kaspiMerchantId ?? '')
   const [kaspiApiKey, setKaspiApiKey] = useState(tenant.kaspiApiKey ?? '')
   const [savingDeposit, setSavingDeposit] = useState(false)
@@ -83,8 +77,6 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   async function handleSaveDeposit() {
     setSavingDeposit(true)
     const res = await updatePaymentSettings({
-      requireDeposit,
-      depositAmount: depositAmountTenge,  // tenge — Server Action converts to tiyn
       kaspiMerchantId: kaspiMerchantId || undefined,
       kaspiApiKey: kaspiApiKey || undefined,
     })
@@ -93,7 +85,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
       toast.error(res.error)
       return
     }
-    toast.success('Настройки депозита сохранены')
+    toast.success('Настройки оплаты сохранены')
     router.refresh()
   }
 
@@ -288,72 +280,43 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
         </Card>
       )}
 
-      {/* Phase 9: Deposit / Payment configuration — PRO+ only */}
+      {/* Kaspi payment configuration — PRO+ only */}
       {isPro && (
         <Card className="bg-[var(--neu-bg)] neu-raised">
           <CardHeader>
-            <CardTitle>Оплата / Депозит</CardTitle>
-            <CardDescription>Настройте обязательную предоплату при онлайн-записи</CardDescription>
+            <CardTitle>Настройки оплаты</CardTitle>
+            <CardDescription>Подключите Kaspi для приёма онлайн-оплаты</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Kaspi Merchant ID</label>
               <input
-                type="checkbox"
-                id="requireDeposit"
-                checked={requireDeposit}
-                onChange={(e) => setRequireDeposit(e.target.checked)}
-                className="h-4 w-4 rounded"
+                type="text"
+                value={kaspiMerchantId}
+                onChange={(e) => setKaspiMerchantId(e.target.value)}
+                className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
+                placeholder="Merchant ID"
               />
-              <label htmlFor="requireDeposit" className="text-sm font-medium">
-                Требовать депозит при онлайн-записи
-              </label>
             </div>
 
-            {requireDeposit && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Размер депозита (тенге)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={depositAmountTenge}
-                    onChange={(e) => setDepositAmountTenge(Number(e.target.value))}
-                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
-                    placeholder="1000"
-                  />
-                </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Kaspi API Key</label>
+              <input
+                type="password"
+                value={kaspiApiKey}
+                onChange={(e) => setKaspiApiKey(e.target.value)}
+                className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
+                placeholder="API Key"
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Kaspi Merchant ID</label>
-                  <input
-                    type="text"
-                    value={kaspiMerchantId}
-                    onChange={(e) => setKaspiMerchantId(e.target.value)}
-                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
-                    placeholder="Merchant ID"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Kaspi API Key</label>
-                  <input
-                    type="password"
-                    value={kaspiApiKey}
-                    onChange={(e) => setKaspiApiKey(e.target.value)}
-                    className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
-                    placeholder="API Key"
-                  />
-                </div>
-
-                <Button
-                  onClick={handleSaveDeposit}
-                  disabled={savingDeposit}
-                  className="neu-raised"
-                >
-                  {savingDeposit ? 'Сохранение...' : 'Сохранить настройки депозита'}
-                </Button>
-              </>
-            )}
+            <Button
+              onClick={handleSaveDeposit}
+              disabled={savingDeposit}
+              className="neu-raised"
+            >
+              {savingDeposit ? 'Сохранение...' : 'Сохранить настройки оплаты'}
+            </Button>
           </CardContent>
         </Card>
       )}

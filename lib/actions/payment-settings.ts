@@ -5,8 +5,6 @@ import { requireAuth, requireRole } from '@/lib/auth/guards'
 import { basePrisma } from '@/lib/db'
 
 export async function updatePaymentSettings(data: {
-  requireDeposit: boolean
-  depositAmount: number   // tenge (UI value — convert to tiyn here)
   kaspiMerchantId?: string
   kaspiApiKey?: string
 }) {
@@ -32,8 +30,6 @@ export async function updatePaymentSettings(data: {
     await basePrisma.tenant.update({
       where: { id: tenantId },
       data: {
-        requireDeposit: data.requireDeposit,
-        depositAmount: Math.round(data.depositAmount * 100),  // tenge -> tiyn
         kaspiMerchantId: data.kaspiMerchantId?.trim() || null,
         kaspiApiKey: data.kaspiApiKey?.trim() || null,
       },
