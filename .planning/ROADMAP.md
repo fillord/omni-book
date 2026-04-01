@@ -70,7 +70,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 3. Dashboard + Auth Surface | v1.3 | 3/3 | Complete | 2026-03-24 |
 | 4. Cleanup Sweep | 2/2 | Complete   | 2026-03-25 | 2026-03-18 |
 | 6. Data Display Correctness | 4/4 | Complete   | 2026-03-28 | 2026-03-19 |
-| 7. Mobile UI Fixes | v1.1 | 3/4 | In Progress|  |
+| 7. Mobile UI Fixes | v1.1 | 4/4 | Complete   | 2026-04-01 |
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
 | 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
 | 6. Tokenized Booking Management | v1.4 | 0/4 | In Progress | - |
@@ -194,7 +194,7 @@ Requirements:
 **Goal:** Redesign /dashboard/bookings from a raw database table into a CRM scheduling view with day-grouping, default CANCELLED filter exclusion, Neumorphism booking cards with bold time display, and a manual booking creation feature via admin slide-over Sheet with Server Action and collision-detection transaction.
 **Requirements:** [CRM-B01, CRM-B02, CRM-B03, CRM-B04, CRM-B05, CRM-B06, CRM-B07, CRM-B08, CRM-B09, CRM-B10, CRM-B11, CRM-B12]
 **Depends on:** Phase 6
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 07-01-PLAN.md — Test scaffold (CRM-B01 through CRM-B12 static assertions)
