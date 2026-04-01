@@ -141,3 +141,4 @@ None.
 | 260319-vxw | Fix 6 failing cleanup-surface.test.ts tests | 2026-03-19 | 03a7ab4 | [260319-vxw-fix-6-failing-cleanup-surface-test-ts-te](./quick/260319-vxw-fix-6-failing-cleanup-surface-test-ts-te/) |
 | 260323-106 | Add couch resource type to Zod validation | 2026-03-23 | a0801f6 | [260323-106-add-couch-resource-type](./quick/260323-106-add-couch-resource-type/) |
 | 260323-1el | Add 18 niche resource types to RESOURCE_TYPES (horeca/sports/medicine/beauty) | 2026-03-23 | af3e28c | [260323-1el-bulk-resource-types-update](./quick/260323-1el-bulk-resource-types-update/) |
+| 260401-bx1 | Fix 3 UI bugs: invisible toggle in service form, obsolete deposit fields in billing, sidebar double-highlight | 2026-04-01 | 548bf47 | [260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic](./quick/260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic/) |
