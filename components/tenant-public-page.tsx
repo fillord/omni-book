@@ -33,36 +33,36 @@ type ColorClasses = {
 
 const COLORS: Record<string, ColorClasses> = {
   blue: {
-    accent:      'text-blue-500',
-    light:       'bg-[var(--neu-bg)]',
-    border:      'border-[var(--neu-shadow-dark)]',
-    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-blue-500',
-    badge:       'neu-raised bg-[var(--neu-bg)] text-blue-500',
-    priceAccent: 'text-blue-500',
+    accent:      'text-blue-600',
+    light:       'bg-blue-50',
+    border:      'border-blue-200',
+    avatarBg:    'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+    badge:       'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+    priceAccent: 'text-blue-600',
   },
   pink: {
-    accent:      'text-pink-500',
-    light:       'bg-[var(--neu-bg)]',
-    border:      'border-[var(--neu-shadow-dark)]',
-    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-pink-500',
-    badge:       'neu-raised bg-[var(--neu-bg)] text-pink-500',
-    priceAccent: 'text-pink-500',
+    accent:      'text-pink-600',
+    light:       'bg-pink-50',
+    border:      'border-pink-200',
+    avatarBg:    'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+    badge:       'bg-pink-100 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300',
+    priceAccent: 'text-pink-600',
   },
   orange: {
-    accent:      'text-orange-500',
-    light:       'bg-[var(--neu-bg)]',
-    border:      'border-[var(--neu-shadow-dark)]',
-    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-orange-500',
-    badge:       'neu-raised bg-[var(--neu-bg)] text-orange-500',
-    priceAccent: 'text-orange-500',
+    accent:      'text-orange-600',
+    light:       'bg-orange-50',
+    border:      'border-orange-200',
+    avatarBg:    'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+    badge:       'bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300',
+    priceAccent: 'text-orange-600',
   },
   green: {
-    accent:      'text-green-500',
-    light:       'bg-[var(--neu-bg)]',
-    border:      'border-[var(--neu-shadow-dark)]',
-    avatarBg:    'neu-raised bg-[var(--neu-bg)] text-green-500',
-    badge:       'neu-raised bg-[var(--neu-bg)] text-green-500',
-    priceAccent: 'text-green-500',
+    accent:      'text-green-600',
+    light:       'bg-green-50',
+    border:      'border-green-200',
+    avatarBg:    'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+    badge:       'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+    priceAccent: 'text-green-600',
   },
 }
 
@@ -123,11 +123,11 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
       where: { slug },
       include: {
         services: {
-          where:   { isActive: true },
+          where:   { isActive: true, isFrozen: false },
           orderBy: { name: 'asc' },
         },
         resources: {
-          where:   { isActive: true },
+          where:   { isActive: true, isFrozen: false },
           orderBy: { name: 'asc' },
           include: {
             services:  { select: { serviceId: true } },
@@ -158,12 +158,14 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
   )
 
   const bookingServices = tenant.services.map((s) => ({
-    id:          s.id,
-    name:        getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale),
-    description: getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale),
-    durationMin: s.durationMin,
-    price:       s.price,
-    currency:    s.currency,
+    id:             s.id,
+    name:           getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'name', locale),
+    description:    getDbTranslation(s as unknown as { name: string; description: string | null; translations: Record<string, Record<string, string>> }, 'description', locale),
+    durationMin:    s.durationMin,
+    price:          s.price,
+    currency:       s.currency,
+    requireDeposit: (s as unknown as { requireDeposit: boolean }).requireDeposit ?? false,
+    depositAmount:  (s as unknown as { depositAmount: number | null }).depositAmount ?? null,
   }))
 
   const bookingResources = bookableResources.map((r) => {
@@ -480,10 +482,22 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
           </p>
 
           {!canBook ? (
-            <div className="py-12 text-center">
-              <p className="text-lg font-medium text-muted-foreground">{t('public', 'soonOpening')}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{t('public', 'ownerSetup')}</p>
-            </div>
+            (tenant as unknown as { planStatus: string }).planStatus === 'EXPIRED' ? (
+              <div className="py-12 text-center space-y-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-muted dark:bg-muted mb-2">
+                  <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <p className="text-base font-medium text-foreground">{t('public', 'bookingFrozen')}</p>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">{t('public', 'bookingFrozenHint')}</p>
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-lg font-medium text-muted-foreground">{t('public', 'soonOpening')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('public', 'ownerSetup')}</p>
+              </div>
+            )
           ) : (
             <BookingForm
               tenantSlug={tenant.slug}
@@ -493,8 +507,6 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               resourceLabel={t('niche', nicheConfig.resourceLabel)}
               nicheColor={nicheConfig.color}
               bookingWindowDays={(tenant as unknown as { bookingWindowDays: number }).bookingWindowDays ?? 14}
-              requireDeposit={(tenant as unknown as { requireDeposit: boolean }).requireDeposit ?? false}
-              depositAmount={(tenant as unknown as { depositAmount: number | null }).depositAmount ?? 0}
             />
           )}
         </section>

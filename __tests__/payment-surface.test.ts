@@ -154,8 +154,8 @@ describe("PAY-06: Payment timeout cron for expired pending bookings", () => {
 describe("PAY-07: PENDING bookings block slots in collision query (existing)", () => {
   it('lib/booking/engine.ts collision check includes both CONFIRMED and PENDING statuses', () => {
     const engine = safeRead("lib/booking/engine.ts")
-    // Verify that status in clause includes PENDING alongside CONFIRMED
-    expect(engine).toMatch(/"CONFIRMED".*"PENDING"|"PENDING".*"CONFIRMED"/)
+    // Verify that status in clause includes PENDING alongside CONFIRMED (single or double quotes)
+    expect(engine).toMatch(/['"]CONFIRMED['"].*['"]PENDING['"]|['"]PENDING['"].*['"]CONFIRMED['"]/)
   })
 })
 
