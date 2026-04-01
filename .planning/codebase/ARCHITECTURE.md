@@ -1,245 +1,170 @@
 # Architecture
 
-**Analysis Date:** 2026-03-17
+**Analysis Date:** 2026-04-01
 
 ## Pattern Overview
 
-**Overall:** Multi-tenant SaaS with Next.js App Router, layered server/client separation, tenant-scoped data access via AsyncLocalStorage context.
-
-**Key Characteristics:**
-- Multi-tenant isolation enforced at database level (tenant scoping via Prisma middleware)
-- Subdomain-based tenant routing with header propagation through middleware
-- Server-first architecture: API routes, server actions, and server components for auth/data access
-- Role-based access control (CUSTOMER, STAFF, OWNER, SUPERADMIN) at middleware and action levels
-- Explicit tenantId parameter passing in business logic functions—no global state reliance
+**Multi-tenant SaaS** built on Next.js App Router. Architecture centers on:
+1. **Tenant isolation via Prisma extension** — `getTenantPrisma` auto-injects `tenantId` into every qualifying query
+2. **Server Actions as mutation layer** — dashboard CRUD uses `'use server'` actions instead of API routes
+3. **Explicit parameter passing** — no AsyncLocalStorage or global state; `tenantId` is always passed explicitly
+4. **Middleware-based routing & auth** — Edge-compatible JWT checks; subdomain → tenant slug header injection
 
 ## Layers
 
-**Presentation Layer (React):**
-- Purpose: Tenant-facing booking UI, dashboard admin UI, public landing pages
-- Location: `app/(tenant)/*`, `app/dashboard/*`, `app/(marketing)/*`, `components/*`
-- Contains: Page components, client-side forms, dashboard widgets, booking flows
-- Depends on: Server actions in `lib/actions/*` for data mutations, API routes for client-side fetches
-- Used by: Browser clients via routing
+```
+Browser / Client
+     │
+     ├── Client Components (React state, interactivity)
+     │        └── components/*.tsx, components/ui/*, components/dashboard/*, components/landing/*
+     │
+     ├── Server Components (data fetching, page rendering)
+     │        └── app/**/page.tsx, app/**/layout.tsx
+     │
+     ├── Server Actions (mutations, form submissions)
+     │        └── lib/actions/*.ts  ['use server']
+     │
+     ├── API Routes (webhooks, booking API, public endpoints)
+     │        └── app/api/**/*.ts
+     │
+     └── Middleware (auth guards, subdomain routing)
+              └── middleware.ts  [Edge Runtime]
 
-**API Layer (Route Handlers):**
-- Purpose: RESTful endpoints for public booking flows, platform-level operations, webhooks
-- Location: `app/api/*`
-- Contains: Next.js route handlers (GET, POST, PUT, DELETE) handling request parsing, tenant resolution, error mapping
-- Depends on: Business logic in `lib/booking/`, `lib/email/`, `lib/db`, validation schemas in `lib/validations/`
-- Used by: External clients, mobile apps, webhook consumers, browser forms
+Business Logic
+     ├── lib/booking/engine.ts       — slot generation, atomic booking creation
+     ├── lib/payment-lifecycle.ts    — payment state machine
+     ├── lib/subscription-lifecycle.ts — subscription state machine
+     ├── lib/tenant/prisma-tenant.ts — Prisma tenant scoping extension
+     └── lib/auth/guards.ts          — requireAuth(), requireRole()
 
-**Server Actions Layer:**
-- Purpose: Thin RPC-like functions called from server components and client components for data mutations
-- Location: `lib/actions/*`
-- Contains: Exported async functions marked with `'use server'`, authentication guards, DB mutations via `getTenantDB()`
-- Depends on: Auth guards (`lib/auth/guards`), tenant context via `getTenantId()`
-- Used by: React components via `<form action={...}>` or client-side calls
+Data
+     └── PostgreSQL via Prisma ORM
+```
 
-**Business Logic Layer:**
-- Purpose: Core domain logic: booking slot generation, availability checks, email delivery
-- Location: `lib/booking/`, `lib/email/`, `lib/auth/`, `lib/utils/`
-- Contains: Pure functions receiving explicit parameters (no global state), custom error classes with statusCode
-- Depends on: Database client `getTenantDB()` for data access
-- Used by: Route handlers, server actions, other logic modules
+## Tenant Isolation
 
-**Data Access Layer:**
-- Purpose: Tenant-scoped database client factory, Prisma singleton management
-- Location: `lib/db/index.ts`
-- Contains: `basePrisma` singleton, `getTenantDB(tenantId)` factory returning tenant-scoped Prisma client
-- Depends on: Prisma client, tenant Prisma middleware extension
-- Used by: Business logic, route handlers, server actions
+Core mechanism: `lib/tenant/prisma-tenant.ts`
 
-**Tenant Context Layer:**
-- Purpose: AsyncLocalStorage-based tenant isolation for concurrent request safety
-- Location: `lib/tenant/context.ts`
-- Contains: `setTenantContext()`, `getTenantId()`, `requireTenantId()` using Node.js AsyncLocalStorage
-- Depends on: Nothing external—pure async context management
-- Used by: Route handlers wrapping business logic, server actions
+```typescript
+// All feature code uses this instead of basePrisma directly
+export function getTenantDB(tenantId: string) {
+  return getTenantPrisma(basePrisma, tenantId)
+}
+```
 
-**Authentication Layer:**
-- Purpose: NextAuth.js JWT-based session management, OTP, IP verification, concurrent session control
-- Location: `lib/auth/*`
-- Contains: Auth config, credential/Google providers, guards, OTP generation, session validation
-- Depends on: `basePrisma` for user lookup, bcryptjs for password hashing
-- Used by: Middleware for route protection, server actions for authorization checks
+`getTenantPrisma` uses Prisma `$extends/$allOperations` to:
+- **WHERE ops** (`findMany`, `update`, `delete`, etc.): injects `tenantId` into `where`
+- **DATA ops** (`create`, `createMany`): injects `tenantId` into `data`
+- **UNIQUE ops** (`findUnique`): post-validates result ownership (Prisma unique constraints disallow extra WHERE fields)
 
-## Data Flow
+Scoped models: `User`, `Resource`, `Service`, `Booking`
+Unscoped models: `Tenant` (and others) pass through unchanged.
 
-**Tenant Resolution → Scoped Context → Business Logic:**
+## Tenant Resolution (API Routes)
 
-1. Middleware (`middleware.ts`) extracts tenant slug from subdomain or query param, sets `x-tenant-slug` header
-2. Route handler (e.g., `/api/bookings/slots`) calls `resolveTenant(request)` which fetches tenant from `basePrisma`
-3. Route handler wraps business logic in `setTenantContext(tenantId, callback)` to establish async context
-4. Business logic (e.g., `getAvailableSlots()`) receives explicit tenantId parameter, never reads global state
-5. Business logic calls `getTenantDB(tenantId)` to get tenant-scoped Prisma client for queries
-6. Response returned to client with tenant-specific data
+`lib/tenant/resolve.ts` resolves tenant from request in order:
+1. `x-tenant-slug` header (set by middleware from subdomain)
+2. `tenantSlug` query param (dev fallback)
 
-**Booking Creation Flow:**
+Middleware (`middleware.ts`) sets `x-tenant-slug` by extracting subdomain from `Host` header.
 
-1. Tenant public page (`/[slug]`) renders booking form component
-2. Form submission calls `POST /api/bookings` with tenantSlug, resourceId, serviceId, date, customer info
-3. Route handler: resolves tenant, validates input with Zod schema, calls `createBooking()` from engine
-4. Engine: generates slots, checks conflicts in tenant-scoped DB, creates booking record atomically
-5. On success: sends confirmation email via Resend, posts message to Telegram
-6. On conflict/error: returns 409 or 422 with localized error message (Russian)
+## Authentication Architecture
 
-**Admin/Dashboard Data Mutations:**
+`middleware.ts` (Edge-compatible, JWT-only, no DB):
+- `PROTECTED_PREFIXES = ['/dashboard']` → requires any authenticated role
+- `ADMIN_PREFIXES = ['/admin']` → requires `SUPERADMIN`
+- `OWNER_API_PREFIXES = ['/api/resources', '/api/tenants']` → requires `OWNER` or `SUPERADMIN`
+- `AUTH_ONLY_PATHS = ['/login', '/register']` → redirect to dashboard if already signed in
 
-1. Authenticated user loads dashboard (`/dashboard/*`)
-2. Dashboard layout (`app/dashboard/layout.tsx`) fetches tenant info, checks session role
-3. Admin form (e.g., service manager) submits via server action (e.g., `createService()` in `lib/actions/services.ts`)
-4. Server action: calls `requireAuth()` guard, checks session.user.tenantId, calls `getTenantDB(tenantId)`
-5. Server action performs mutation, calls `revalidatePath()` to invalidate Next.js cache
-6. Browser receives response, component re-renders with fresh data
+Roles: `OWNER`, `STAFF`, `SUPERADMIN`
 
-**State Management:**
+Server-side guards (`lib/auth/guards.ts`):
+```typescript
+requireAuth()          // throws UnauthorizedError (401) if no session
+requireRole(session, ['OWNER', 'STAFF'])  // throws ForbiddenError (403)
+```
 
-- **Session State:** JWT token stored in secure HTTP-only cookie, validated by middleware and auth guards
-- **Per-Tenant State:** Stored in Postgres via Prisma, isolated at schema level (every table has tenantId foreign key except Tenant itself)
-- **Request State:** Tenant context via AsyncLocalStorage—lives for duration of request/async chain
-- **UI State:** React component state (forms, filters) in browser—no Redux/Zustand needed for current scope
-- **Cache:** Next.js App Router with `revalidatePath()` for on-demand ISR
+IP change detection: if user's IP changes between sessions, OTP re-verification is triggered.
 
-## Key Abstractions
+## Data Flow — Public Booking
 
-**Tenant Scoping:**
-- Purpose: Ensure every query, mutation, and computation is scoped to the correct tenant
-- Examples: `getTenantDB(tenantId)` returns Prisma client with automatic tenantId injection via middleware extension (`lib/tenant/prisma-tenant.ts`)
-- Pattern: Function receives `tenantId` as explicit parameter, never infers from global/session context directly in business logic
+```
+User visits /{slug} → (tenant) route group
+  → app/(tenant)/[slug]/page.tsx (Server Component)
+  → resolves tenant from slug via DB
+  → renders TenantPublicPage component
 
-**Custom Error Classes with HTTP Status:**
-- Purpose: Uniform error handling from business logic through route handlers to HTTP responses
-- Examples: `BookingConflictError` (409), `TenantNotFoundError` (404), `UnauthorizedError` (401)
-- Pattern: Each error extends Error, includes `readonly statusCode` property, descriptive messages in Russian/English
+User selects slot → POST /api/bookings/slots (resource + date)
+  → lib/booking/engine.ts: generateSlots()
+  → returns available time slots
 
-**Auth Guards:**
-- Purpose: Composable authorization checks for routes and actions
-- Examples: `requireAuth()`, `requireRole()`, `requireTenant()`, `requireAuthWithRole()`
-- Pattern: Guard functions throw error on failure; caller catches and maps to HTTP response
+User submits form → POST /api/bookings
+  → resolveTenant() from request
+  → lib/booking/engine.ts: createBooking()
+  → atomic Prisma transaction (slot conflict check + insert)
+  → sends email confirmation (Resend) + Telegram notification
+  → returns booking with manageToken
+```
 
-**Validation Schemas:**
-- Purpose: Zod-based input validation for API routes and server actions
-- Examples: `createServiceSchema`, `createResourceSchema`, `querySchema` for bookings list
-- Pattern: Schemas colocated with actions/routes, `safeParse()` used for error mapping
+## Data Flow — Dashboard Mutations
 
-**Locale & i18n:**
-- Purpose: Multi-language support (Russian primary, extensible)
-- Examples: Middleware reads `omnibook-locale` cookie, sets `x-omnibook-locale` header, root layout extracts locale
-- Pattern: Locale header/context passed to database translations, email templates use locale-aware formatting
+```
+Dashboard page (Server Component) fetches data via lib/actions/*.ts
+  → requireAuth() + requireRole() guards
+  → getTenantDB(session.tenantId) for scoped queries
+
+Form submit → Server Action (lib/actions/*.ts)
+  → Zod validation
+  → getTenantDB(tenantId) mutation
+  → revalidatePath('/dashboard/...')
+```
+
+## Error Handling Pattern
+
+Custom error classes with `statusCode` property (HTTP status code):
+
+```typescript
+export class BookingConflictError extends Error {
+  readonly statusCode = 409
+  constructor() {
+    super("Это время уже занято.")  // Russian user-facing message
+    this.name = 'BookingConflictError'
+  }
+}
+```
+
+All custom errors follow this pattern. API routes catch and return `{ error: message }` with appropriate status.
+
+Type guard: `isAuthError(err)` to distinguish auth errors from other errors.
+
+## i18n Architecture
+
+- **Locales:** `ru` (default), `kz`, `en`
+- **Storage:** Cookie (`omnibook-locale`) + header (`x-omnibook-locale`)
+- **Server:** `lib/i18n/server.ts` — `getServerT()` reads header/cookie, returns `t(section, key)` function
+- **Translations:** `lib/i18n/translations.ts` — flat nested object (locale → section → key)
+- **DB translations:** `lib/i18n/db-translations.ts` — translated DB field labels
+
+## Niche System
+
+Tenants declare a `niche` (`beauty`, `horeca`, `sports`, `medicine`). `lib/niche/config.ts` provides:
+- Per-niche resource types (e.g. "barber", "room", "doctor")
+- Labels (resourceLabel, serviceLabel, bookingLabel)
+- Attribute fields for resources
+- Theme accent classes
+
+Booking form, resource cards, and public page adapt based on the tenant's niche.
 
 ## Entry Points
 
-**Browser - Public Booking:**
-- Location: `app/(tenant)/[slug]/page.tsx`
-- Triggers: User visits `tenant-slug.omnibook.com` or `/book?tenantSlug=...`
-- Responsibilities: Render public-facing booking page with tenant branding, fetch available resources/services, submit bookings to `/api/bookings`
-
-**Browser - Admin Dashboard:**
-- Location: `app/dashboard/layout.tsx`
-- Triggers: Authenticated user visits `/dashboard`
-- Responsibilities: Check session, fetch tenant info, render admin sidebar, route to subpages (services, staff, bookings, analytics, settings)
-
-**Browser - Authentication:**
-- Location: `app/(auth)/` (login, verify-OTP pages)
-- Triggers: Unauthenticated user visits `/login`, `/register`, OTP verification flow
-- Responsibilities: Credential/email capture, server action calls to auth endpoints, session establishment
-
-**API - Public Bookings:**
-- Location: `app/api/bookings/` (route.ts for POST create, GET list; slots/route.ts for slot availability)
-- Triggers: External clients POST to `/api/bookings`, GET `/api/bookings/slots?tenantSlug=...&resourceId=...&date=...`
-- Responsibilities: Parse query/body, resolve tenant, validate, call booking engine, return JSON
-
-**API - Webhooks:**
-- Location: `app/api/webhooks/route.ts`, `app/api/telegram/webhook/route.ts`
-- Triggers: External services (payment processor, Telegram) POST to webhook URLs
-- Responsibilities: Verify signature, update booking status, trigger notifications
-
-**Cron - Reminder Emails:**
-- Location: `app/api/cron/reminders/route.ts`
-- Triggers: External scheduler (Vercel Cron, external service) calls endpoint
-- Responsibilities: Query bookings due within 24h, send reminder emails, track sent status
-
-**Admin Platform:**
-- Location: `app/admin/`, `app/api/admin/*`
-- Triggers: Superadmin user visits `/admin`
-- Responsibilities: Platform-level operations: view all tenants, suspend/activate, view usage, manage superadmin users
-
-## Error Handling
-
-**Strategy:** Layered error translation—business logic throws domain errors, route handlers map to HTTP responses, middleware provides auth-level rejection.
-
-**Patterns:**
-
-1. **Domain Errors:** Business logic throws custom errors (e.g., `BookingConflictError`). Include `statusCode` property and user-facing message.
-
-   ```typescript
-   // lib/booking/engine.ts
-   export class BookingConflictError extends Error {
-     readonly statusCode = 409
-     constructor() {
-       super("Это время уже занято...")
-       this.name = "BookingConflictError"
-     }
-   }
-   ```
-
-2. **Route Handler Mapping:** Catch domain errors, return JSON with status code.
-
-   ```typescript
-   // app/api/bookings/route.ts
-   try {
-     const booking = await createBooking(...)
-     return NextResponse.json({ booking }, { status: 201 })
-   } catch (err) {
-     if (err instanceof BookingConflictError) {
-       return NextResponse.json({ error: err.message }, { status: err.statusCode })
-     }
-     return NextResponse.json({ error: 'Server error' }, { status: 500 })
-   }
-   ```
-
-3. **Tenant Resolution Errors:** `resolveTenant()` throws specific errors (`TenantNotFoundError`, `TenantInactiveError`). Helper `isTenantError()` determines if error is expected.
-
-   ```typescript
-   // app/api/bookings/slots/route.ts
-   try {
-     const tenant = await resolveTenant(request)
-   } catch (err) {
-     if (isTenantError(err)) {
-       return NextResponse.json({ error: err.message }, { status: (err as any).statusCode })
-     }
-   }
-   ```
-
-4. **Server Actions:** Use guards (`requireAuth()`, `requireRole()`) which throw; caller catches in error boundary or try-catch.
-
-   ```typescript
-   // lib/actions/services.ts
-   async function getServices() {
-     const session = await requireAuth()
-     if (!session.user.tenantId) redirect('/login')
-     const db = getTenantDB(session.user.tenantId)
-     return db.service.findMany(...)
-   }
-   ```
-
-## Cross-Cutting Concerns
-
-**Logging:** Console.log used throughout (cloudflare.com style). TODO: Replace with structured logging (pino/winston) before production. Sample: `console.log("[SLOTS API] params:", { tenantSlug, ... })`.
-
-**Validation:** Zod schemas for input validation in route handlers and server actions. No automatic request body validation—explicit `z.parse()` or `safeParse()` calls.
-
-**Authentication:** NextAuth.js JWT + custom session extension for tenantId/role. Middleware validates token at edge level, guards validate in route handlers/actions.
-
-**Internationalization:** Translations for UI and error messages stored in JSON (Tenant.translations, Resource.translations, Service.translations). Locale set via cookie/header, passed to components via context/prop.
-
-**Database Transactions:** Booking creation uses Prisma transaction (`basePrisma.$transaction()`) to ensure atomicity. Example: create booking + deduct capacity in one TX.
-
-**Rate Limiting:** IP-based OTP attempt limiting (not shown but references in `lib/auth/otp.ts`). TODO: Implement global API rate limiting middleware.
-
-**Tenant Middleware Extension:** Custom Prisma middleware (`lib/tenant/prisma-tenant.ts`) automatically filters all queries by tenantId. Reduces boilerplate but requires bypassing with `basePrisma` for Tenant-level queries.
-
----
-
-*Architecture analysis: 2026-03-17*
+| Entry Point | Purpose |
+|-------------|---------|
+| `app/layout.tsx` | Root layout (providers, theme) |
+| `app/(marketing)/page.tsx` | Landing page |
+| `app/(tenant)/[slug]/page.tsx` | Public booking page per tenant |
+| `app/dashboard/layout.tsx` | Dashboard shell (auth-gated) |
+| `app/admin/layout.tsx` | Superadmin panel |
+| `app/(auth)/login/page.tsx` | Login flow |
+| `app/manage/[token]/page.tsx` | Guest booking management |
+| `middleware.ts` | Auth guards + subdomain routing |
+| `lib/db/index.ts` | DB client singleton + `getTenantDB()` |

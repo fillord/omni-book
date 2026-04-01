@@ -1,282 +1,172 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-03-17
+**Analysis Date:** 2026-04-01
 
 ## Naming Patterns
 
-**Files:**
-- PascalCase for components and classes: `UserCard.tsx`, `TenantPrismaClient`
-- camelCase for utilities, services, and functions: `maskEmail.ts`, `getAvailableSlots`
-- kebab-case for API routes: `bookings/slots/route.ts`, `api/tenants/route.ts`
-- Test files: `*.test.ts` suffix (e.g., `resolve.test.ts`)
+### Files
+- **Feature components:** kebab-case (`booking-form.tsx`, `bookings-dashboard.tsx`)
+- **Landing components:** PascalCase (`HeroSection.tsx`, `FeaturesGrid.tsx`)
+- **Server Actions:** kebab-case grouped by domain (`lib/actions/bookings.ts`)
+- **API routes:** always `route.ts` (Next.js convention)
+- **Lib modules:** kebab-case (`prisma-tenant.ts`, `payment-lifecycle.ts`)
 
-**Functions:**
-- camelCase for all function and method names: `resolveTenant()`, `getTenantId()`, `requireAuth()`
-- Prefix with `get` for accessors: `getTenantId()`, `getAvailableSlots()`
-- Prefix with `set` for mutators: `setTenantContext()`
-- Prefix with `require` for functions that throw on missing context: `requireTenantId()`, `requireAuth()`
-- Prefix with `is` or `use` for predicates/hooks: `isTenantError()`, `useI18n()`
+### Code
+- **React components:** PascalCase (`BookingForm`, `ManualBookingSheet`)
+- **Functions:** camelCase (`createBooking`, `getTenantDB`, `sendBookingConfirmation`)
+- **Auth guards:** `requireX` prefix (`requireAuth`, `requireRole`)
+- **Server actions:** verb+noun (`createManualBooking`, `updateTenantSettings`, `cancelExpiredBooking`)
+- **Error classes:** PascalCase + `Error` suffix (`BookingConflictError`, `TenantNotFoundError`)
+- **Zod schemas:** noun+`Schema` (`manualBookingSchema`, `serviceSchema`, `resourceSchema`)
+- **Type guards:** `isX` prefix (`isAuthError`)
+- **Constants / Sets:** UPPER_SNAKE_CASE (`TENANT_SCOPED`, `WHERE_OPS`, `PROTECTED_PREFIXES`)
 
-**Variables:**
-- camelCase for all variables: `tenantId`, `guestName`, `activeBookings`
-- ALL_CAPS for constants: `MAX_ACTIVE_BOOKINGS_PER_PHONE`, `TENANT_SCOPED` (Sets/arrays), `BOOKING_INCLUDE` (const objects)
-- Prefixed with `$` for Prisma extensions: `$extends`, `$allModels`, `$allOperations`
+## Module Structure
 
-**Types:**
-- PascalCase for all TypeScript types, interfaces, and classes
-- Custom error classes: `TenantNotFoundError`, `BookingConflictError`, `UnauthorizedError`
-- Type inference from Zod: use `z.infer<typeof schema>` pattern
-- Interfaces for context values: `TenantStore`, `I18nContextValue`
+### Server Actions (`lib/actions/*.ts`)
 
-**Error Classes:**
-- Extend `Error` class
-- Set `readonly statusCode` property matching HTTP status codes
-- Set `this.name` to class name for debugging
-- Include descriptive messages (often in user locale when possible)
+Always start with `'use server'` directive. Pattern:
 
-Examples from codebase:
 ```typescript
-// lib/tenant/resolve.ts
-export class TenantNotFoundError extends Error {
-  readonly statusCode = 404
-  constructor(slug: string) {
-    super(`Tenant not found: "${slug}"`)
-    this.name = 'TenantNotFoundError'
+'use server'
+
+export async function createThing(data: ThingInput) {
+  try {
+    const session = await requireAuth()
+    requireRole(session, ['OWNER', 'STAFF'])
+    const tenantId = session.user.tenantId!
+    const parsed = thingSchema.parse(data)
+
+    await getTenantDB(tenantId).thing.create({ data: parsed })
+    revalidatePath('/dashboard/things')
+    return { success: true }
+  } catch (err) {
+    if (err instanceof ZodError) return { error: 'Validation failed' }
+    return { error: 'Operation failed' }
   }
 }
+```
 
-// lib/booking/engine.ts
+### API Routes
+
+Pattern for authenticated endpoints:
+
+```typescript
+export async function POST(request: NextRequest) {
+  try {
+    const tenant = await resolveTenant(request)
+    const body = await request.json()
+    const parsed = schema.parse(body)
+    // ... business logic
+    return NextResponse.json({ result })
+  } catch (err) {
+    if (err instanceof TenantNotFoundError)
+      return NextResponse.json({ error: err.message }, { status: err.statusCode })
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+  }
+}
+```
+
+### Custom Errors
+
+All domain errors carry `statusCode` (HTTP status) and Russian user-facing messages:
+
+```typescript
 export class BookingConflictError extends Error {
   readonly statusCode = 409
   constructor() {
     super("Это время уже занято. Пожалуйста, выберите другой слот.")
-    this.name = "BookingConflictError"
+    this.name = 'BookingConflictError'
   }
 }
 ```
+
+Errors are caught at route handler level and returned as `{ error: message }` with `statusCode`.
+
+## TypeScript Patterns
+
+- **Strict mode** enabled (`tsconfig.json`)
+- **Path alias:** `@/*` maps to project root — always prefer over relative imports
+- **Type inference from Zod:** `type ThingInput = z.infer<typeof thingSchema>`
+- **Prisma types:** imported directly from `@prisma/client`
+- **Return types on public functions:** explicit, especially for Server Actions
+- **`!` non-null assertions** used on `session.user.tenantId` (post-auth guard, guaranteed non-null)
 
 ## Code Style
 
-**Formatting:**
-- ESLint: `eslint` v9 with Next.js config
-- Config file: `.eslintrc.json` extends `next/core-web-vitals` and `next/typescript`
-- No explicit Prettier config found (likely using Next.js defaults)
-- Quotes: double quotes throughout
-- Semicolons: required
-- Line length: appears to follow standard 80-100 character wrapping
+### Imports
 
-**Linting:**
-- Extends Next.js recommended rules
-- Extends TypeScript strict mode rules
-- Configured via: `.eslintrc.json`
-- Run: `npm run lint` (delegates to `next lint`)
+Organized by category (no enforced linter rule, but convention):
+1. Node built-ins (`crypto`, `fs`, `path`)
+2. Next.js / React (`next/headers`, `react`)
+3. Third-party (`date-fns`, `zod`, `next-auth`)
+4. Internal via `@/` alias (`@/lib/db`, `@/lib/auth/guards`)
 
-## Import Organization
+### Section Comments
 
-**Order:**
-1. External/third-party packages: `react`, `next`, `@prisma/client`, etc.
-2. Type imports: `import { type SomeType } from 'module'`
-3. Internal absolute imports: `import { functionName } from '@/lib/...'`
-4. Relative imports: rare, use absolute aliases instead
-
-**Path Aliases:**
-- `@/*` maps to project root (configured in `tsconfig.json`)
-- All internal imports use `@/` prefix: `@/lib/`, `@/app/`, `@/components/`
-- Never use relative `../` paths in new code
-
-**Module exports:**
-- Barrel files (index.ts) re-export public API
-- Example: `lib/auth/index.ts` exports from `./config` and `./guards`
-- Most modules use `export` directly; barrel files consolidate
+Long files use `// ---- Section name ----` dividers:
 
 ```typescript
-// lib/auth/index.ts
-export { authConfig } from './config'
-export {
-  requireAuth,
-  requireRole,
-  requireTenant,
-  requireAuthWithRole,
-  isAuthError,
-  UnauthorizedError,
-  ForbiddenError,
-} from './guards'
-```
-
-## Error Handling
-
-**Patterns:**
-- Custom error classes with `statusCode` property for HTTP responses
-- Type guard functions to check error type: `isTenantError()`, `isAuthError()`
-- Route handlers wrap in try/catch and return NextResponse with error status
-- Server actions return discriminated union types: `{ success: true } | { success: false, error?: string, fieldErrors?: ... }`
-
-Example from `lib/actions/account.ts`:
-```typescript
-export type ChangePasswordResult =
-  | { success: true }
-  | {
-      success: false
-      fieldErrors?: Partial<Record<keyof ChangePasswordInput, string>>
-      error?: string
-    }
-
-export async function changePassword(data: ChangePasswordInput): Promise<ChangePasswordResult> {
-  // validation errors return early with fieldErrors
-  // other errors return success: false with error message
-}
-```
-
-Example from route handler (`app/api/bookings/route.ts`):
-```typescript
-export async function GET(req: NextRequest) {
-  try {
-    const tenant = await resolveTenant(req)
-    // ... process
-    return NextResponse.json({ data })
-  } catch (err) {
-    if (isTenantError(err)) {
-      return NextResponse.json({ error: err.message }, { status: err.statusCode })
-    }
-    // generic error handling
-  }
-}
-```
-
-## Logging
-
-**Framework:** `console` (no dedicated logger library)
-
-**Patterns:**
-- Use `console.log()` for informational output
-- Use `console.error()` for actual errors
-- Prefix logs with context: `[SLOTS API]`, `📧`, `[Resend]`, `[tenant]`
-- Fire-and-forget error logging: `promise.catch(console.error)` at call site
-- Development-friendly emojis in log messages for readability
-
-Examples from codebase:
-```typescript
-// lib/email/reminders.ts
-console.log(`📧 Processing reminders: 24h=${bookings24h.length}, 2h=${bookings2h.length}, 1h=${bookings1h.length}`)
-console.error(`Failed to send ${field} reminder for booking ${booking.id}:`, error)
-
-// app/api/bookings/slots/route.ts
-console.log("[SLOTS API] params:", { tenantSlug, resourceId, serviceId, date })
-console.log("[SLOTS API] tenant:", tenant ? tenant.id : "NULL")
-
-// lib/booking/engine.ts
-// No logging — this is the core business logic layer
-```
-
-## Comments
-
-**When to Comment:**
-- JSDoc/TSDoc for public API functions and types (especially guards, utils, server actions)
-- Section separators using `// ---- Comment ----` pattern for internal organization
-- Explain "why" not "what" — code should be readable enough to show what it does
-
-**JSDoc/TSDoc Pattern:**
-- Used in library files (`lib/`) for function documentation
-- Include parameter descriptions and return types
-- Mark required vs optional context/preconditions
-
-Examples from codebase:
-```typescript
-// lib/tenant/resolve.ts
-/**
- * Resolves the current tenant from a NextRequest.
- *
- * Resolution order:
- *  1. x-tenant-slug request header (set by middleware from subdomain)
- *  2. `tenantSlug` query parameter (fallback for localhost/dev)
- *
- * Throws:
- *  - TenantSlugMissingError  (400) — no slug found anywhere
- *  - TenantNotFoundError     (404) — slug not in DB
- *  - TenantInactiveError     (403) — tenant exists but isActive = false
- */
-export async function resolveTenant(request: NextRequest) { ... }
-
-// lib/tenant/context.ts
-/**
- * Runs `callback` inside a tenant context.
- * All code within the callback (and any async work it spawns) will see
- * the provided tenantId via getTenantId().
- *
- * AsyncLocalStorage guarantees isolation between concurrent requests —
- * each request gets its own store, even when running in parallel.
- */
-export function setTenantContext<T>(tenantId: string, callback: () => Promise<T>): Promise<T>
-```
-
-**Section Markers:**
-- Used to organize code within files
-- Format: `// ---- Description ----`
-- Typically separates: custom errors, types, constants, main functions, helpers
-
-```typescript
-// lib/tenant/resolve.ts structure:
-// ---- Custom errors ---------------------------------------------------------
-// [Error classes]
+// ---- Errors ----------------------------------------------------------------
 
 // ---- Resolver --------------------------------------------------------------
-// [Functions]
+
+// ---- Helpers ---------------------------------------------------------------
 ```
 
-## Function Design
+### JSDoc
 
-**Size:**
-- Aim for small, focused functions (typically under 30 lines)
-- Tenant isolation logic extracted into `lib/tenant/prisma-tenant.ts` for reuse
-- Engine logic (`lib/booking/engine.ts`) handles complex orchestration, stays readable via clear naming
+Used on exported utility functions and public API:
 
-**Parameters:**
-- Use objects for multiple related parameters: `{ tenantId, resourceId, date, serviceId }`
-- Explicit parameters for single values: `getIpAddress(headers: Headers)`
-- Request/response objects from Next.js framework as-is
-
-**Return Values:**
-- Explicit error throwing for guards: `requireAuth()`, `requireTenantId()`
-- Result objects for server actions: discriminated unions `{ success: true } | { success: false, ... }`
-- Typed result interfaces for complex operations: `SlotResult[]`, pagination objects
-
-## Module Design
-
-**Exports:**
-- Named exports for all public functions
-- Barrel files (index.ts) consolidate public API
-- Private utilities stay in files (no export)
-
-**Organization:**
-- `lib/` contains business logic, utilities, integrations
-- `lib/auth/` contains authentication logic split into: `config.ts`, `guards.ts`, `utils.ts`, `otp.ts`, `types.ts`
-- `lib/tenant/` contains tenant context and isolation logic
-- `lib/booking/` contains booking engine and related errors
-- `lib/actions/` contains server actions
-- `lib/email/` contains email integrations
-- Barrel files at each level export public API
-
-**Type Safety:**
-- Strict mode enabled in `tsconfig.json`
-- All functions typed (no `any`)
-- Zod schemas for runtime validation of external input
-- Type inference from Zod with `z.infer<typeof schema>`
-
-## Async/Await Patterns
-
-- Async functions throughout for I/O-bound operations
-- Use `await` for database calls, external APIs
-- Use `Promise.all()` for concurrent non-dependent operations
-- Proper error propagation in try/catch blocks
-
-Example from `app/api/bookings/route.ts`:
 ```typescript
-const [bookings, total] = await Promise.all([
-  db.booking.findMany({ ... }),
-  db.booking.count({ where }),
-])
+/**
+ * Returns a PrismaClient scoped to a specific tenant.
+ * Uses $allOperations extension to automatically inject `tenantId`.
+ */
+export function getTenantPrisma<T extends PrismaClient>(client: T, tenantId: string) {
 ```
 
----
+### Component patterns
 
-*Convention analysis: 2026-03-17*
+- Server Components by default (no `'use client'`)
+- Mark `'use client'` only when needed (event handlers, state, browser APIs)
+- Pass data down as props from Server Components
+- Mutations via Server Actions (forms), not client-side fetch
+
+## Validation Pattern
+
+Zod schemas defined in `lib/validations/*.ts`, imported in both Server Actions and API routes:
+
+```typescript
+// lib/validations/booking.ts
+export const manualBookingSchema = z.object({
+  clientName: z.string().min(1),
+  clientPhone: z.string().min(7),
+  serviceId: z.string().cuid(),
+  resourceId: z.string().cuid(),
+  startsAt: z.coerce.date(),
+})
+export type ManualBookingInput = z.infer<typeof manualBookingSchema>
+```
+
+## Database Access Patterns
+
+- **Feature code:** always use `getTenantDB(tenantId)` — auto-scopes to tenant
+- **Cross-tenant / auth operations:** use `basePrisma` directly (e.g. `resolveTenant`, auth callbacks)
+- **Transactions:** `basePrisma.$transaction(async (tx) => {...})` — booking creation uses tx for conflict-safe inserts
+- Never import `PrismaClient` directly in feature code; always go through `lib/db`
+
+## Russian Locale Convention
+
+User-facing error messages and email templates are in Russian. English is used for:
+- Code identifiers, comments, variable names
+- Log messages (`console.log`, `console.error`)
+- Internal error names (`BookingConflictError.name`)
+
+## Neumorphic UI
+
+Dashboard uses a neumorphic design system with CSS custom properties:
+- `neu-inset`, `neu-flat`, `neu-raised` utility classes
+- `bg-[var(--neu-bg)]` for consistent surface color
+- `text-foreground`, `text-muted-foreground` semantic color tokens
+- These classes appear throughout dashboard components and admin forms

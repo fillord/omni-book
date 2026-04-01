@@ -1,424 +1,171 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-03-17
+**Analysis Date:** 2026-04-01
 
 ## Test Framework
 
-**Runner:**
-- Jest 29 (`jest` ^29)
-- Config: `jest.config.ts` (TypeScript)
-- Environment: Node.js (not jsdom)
+| Tool | Purpose |
+|------|---------|
+| Jest 29 | Test runner |
+| ts-jest | TypeScript transformer (CommonJS mode) |
+| @playwright/test 1.58.2 | E2E browser tests |
 
-**Assertion Library:**
-- Jest built-in matchers (expect API)
+**Jest config:** `jest.config.ts`
+- Preset: `ts-jest`
+- Environment: `node` (not jsdom)
+- Test match: `__tests__/**/*.test.ts` only
+- Module alias: `@/*` → `<rootDir>/*`
+- `clearMocks: true`, `restoreMocks: true` between tests
+- TypeScript override: `module: 'commonjs'` for Jest compatibility
 
-**Run Commands:**
-```bash
-npm test                # Run all tests
-npm test -- --watch     # Watch mode
-npm test -- --coverage  # Coverage report
+## Test File Locations
+
+All tests in `__tests__/` directory (mirrors source structure for lib tests):
+
+```
+__tests__/
+├── lib/
+│   └── tenant/
+│       ├── prisma-tenant.test.ts   — Prisma extension unit tests
+│       ├── resolve.test.ts         — Tenant resolver unit tests
+│       └── context.test.ts         — Tenant context tests
+├── booking-surface.test.ts         — Booking component CSS/markup surface
+├── booking-manage-surface.test.ts  — Booking manage page surface
+├── bookings-crm-surface.test.ts    — CRM bookings surface
+├── cleanup-surface.test.ts         — Cleanup/cancellation surface
+├── client-data-surface.test.ts     — Client data surface
+├── client-ui-surface.test.ts       — Client UI surface
+├── dashboard-auth-surface.test.ts  — Dashboard auth surface
+├── data-display.test.ts            — Data display correctness
+├── god-mode-surface.test.ts        — Admin/superadmin surface
+├── infrastructure-validation.test.ts — Infrastructure checks
+├── landing-surface.test.ts         — Landing page surface
+├── mobile-ui.test.ts               — Mobile UI patterns
+├── neumorphism-surface.test.ts     — Neumorphic design system surface
+├── payment-surface.test.ts         — Payment UI surface
+├── service-form.test.ts            — Service form tests
+└── subscription-lifecycle-surface.test.ts — Subscription UI surface
 ```
 
-**Configuration Details:**
-- Preset: `ts-jest` for TypeScript support
-- Module name mapper: `@/*` paths resolved to project root
-- Test match pattern: `__tests__/**/*.test.ts` (only files in `__tests__/` directory)
-- Mocks: Cleared and restored between tests (`clearMocks: true, restoreMocks: true`)
-- Transform: ts-jest with CommonJS override for test environment
+## Test Categories
 
-From `jest.config.ts`:
-```typescript
-const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  },
-  testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
-  clearMocks: true,
-  restoreMocks: true,
-}
-```
+### 1. Unit Tests — Prisma Extension
 
-## Test File Organization
-
-**Location:**
-- Co-located in `__tests__/` directory at project root
-- Mirror source structure: `__tests__/lib/tenant/` mirrors `lib/tenant/`
-- Naming: `{module}.test.ts`
-
-**Current Test Files:**
-- `__tests__/lib/tenant/resolve.test.ts` — tenant resolution logic
-- `__tests__/lib/tenant/context.test.ts` — async local storage context
-- `__tests__/lib/tenant/prisma-tenant.test.ts` — Prisma extension behavior
-
-**Naming Convention:**
-- File: `{subject}.test.ts`
-- Suite: `describe('{FunctionName}()')`
-- Test case: `it('{specific scenario}')`
-- Nested suites for organized test structure
-
-## Test Structure
-
-**Suite Organization Pattern:**
-All tests follow a similar structure with clear describe blocks for grouped functionality:
+Tests in `__tests__/lib/tenant/prisma-tenant.test.ts`. Tests the `getTenantPrisma` Prisma extension in isolation using a mock Prisma client:
 
 ```typescript
-// From __tests__/lib/tenant/resolve.test.ts
-describe('resolveTenant()', () => {
-  describe('slug resolution — x-tenant-slug header (middleware path)', () => {
-    it('resolves tenant from x-tenant-slug header', async () => {
-      // Test body
-    })
-  })
-
-  describe('slug resolution — tenantSlug query param (dev fallback)', () => {
-    it('resolves tenant from tenantSlug query parameter', async () => {
-      // Test body
-    })
-  })
-
-  describe('error cases', () => {
-    it('throws TenantSlugMissingError (400) when no slug provided', async () => {
-      // Test body
-    })
-  })
-})
-```
-
-**Patterns:**
-
-1. **Setup with describe blocks:**
-   - Top-level: function name
-   - Mid-level: logical feature groups or scenarios
-   - Leaf-level: individual test cases
-
-2. **Test structure (Arrange-Act-Assert):**
-   ```typescript
-   it('description', async () => {
-     // Arrange: set up test data and mocks
-     mockFindUnique.mockResolvedValueOnce(ACTIVE_TENANT)
-     const req = makeRequest({ headers: { 'x-tenant-slug': 'city-polyclinic' } })
-
-     // Act: call the function
-     const tenant = await resolveTenant(req)
-
-     // Assert: verify behavior
-     expect(tenant.id).toBe('tenant-001')
-     expect(mockFindUnique).toHaveBeenCalledWith({ where: { slug: 'city-polyclinic' } })
-   })
-   ```
-
-3. **Test data constants:**
-   - Define reusable test data as module-level constants
-   - Spread to create variations
-
-   ```typescript
-   const ACTIVE_TENANT = {
-     id: 'tenant-001',
-     slug: 'city-polyclinic',
-     name: 'City Polyclinic',
-     niche: 'medicine',
-     plan: 'pro',
-     isActive: true,
-     createdAt: new Date(),
-     updatedAt: new Date(),
-   }
-
-   const INACTIVE_TENANT = { ...ACTIVE_TENANT, isActive: false }
-   ```
-
-4. **Helper functions:**
-   - Extract setup code into reusable functions
-   - Keep test intent clear at call site
-
-   ```typescript
-   function makeRequest(options: {
-     url?: string
-     headers?: Record<string, string>
-   } = {}): NextRequest {
-     const url = options.url ?? 'http://localhost:3000/api/bookings'
-     return new NextRequest(url, {
-       headers: options.headers ?? {},
-     })
-   }
-   ```
-
-## Mocking
-
-**Framework:** Jest mocks (`jest.mock()`, `jest.fn()`)
-
-**Pattern for Database Mocks:**
-Mock at the module level before importing dependent code:
-
-```typescript
-// __tests__/lib/tenant/resolve.test.ts
-jest.mock('@/lib/db', () => ({
-  basePrisma: {
-    tenant: {
-      findUnique: jest.fn(),
-    },
-  },
-  prisma: {},
-}))
-
-// Import AFTER the mock is registered
-import { basePrisma } from '@/lib/db'
-const mockFindUnique = basePrisma.tenant.findUnique as jest.Mock
-```
-
-**Mocking Prisma Extensions:**
-For complex Prisma logic, create a mock client that supports the `$extends` interface:
-
-```typescript
-// __tests__/lib/tenant/prisma-tenant.test.ts
 function makeMockPrisma(tenantId: string) {
-  let capturedHandler: ((params: {...}) => Promise<unknown>) | null = null
-
+  let capturedHandler: ... | null = null
   const mockClient = {
-    $extends(ext: { query?: { $allModels?: { $allOperations?: (params: unknown) => Promise<unknown> } } }) {
-      capturedHandler = ext?.query?.$allModels?.$allOperations as typeof capturedHandler ?? null
+    $extends(ext) {
+      capturedHandler = ext?.query?.$allModels?.$allOperations
       return this
     },
-
-    async _invoke(model: string, operation: string, args: Record<string, unknown>) {
-      if (!capturedHandler) throw new Error('Extension not installed')
-      const where = (args.where as Record<string, unknown>) ?? {}
-      const query = jest.fn().mockResolvedValue({ id: '1', tenantId, ...where })
-      const result = await capturedHandler({ model, operation, args, query })
-      return { result, queryArgs: query.mock.calls[0]?.[0], query }
+    async _invoke(model, operation, args) {
+      const query = jest.fn().mockResolvedValue(...)
+      await capturedHandler({ model, operation, args, query })
+      return { queryArgs: query.mock.calls[0]?.[0] }
     },
   }
-
-  getTenantPrisma(mockClient as never, tenantId)
+  getTenantPrisma(mockClient, tenantId)
   return mockClient
 }
 ```
 
-**What to Mock:**
-- External service calls (database, APIs)
-- Modules with side effects
-- Time-dependent operations (dates, timers)
-- Return value variations using `mockResolvedValueOnce()`, `mockRejectedValueOnce()`
+Covers: WHERE injection, DATA injection, UNIQUE post-validation, non-scoped models pass-through.
 
-**What NOT to Mock:**
-- Pure utility functions (keep them real)
-- Core business logic unless you're testing its integration points
-- Zod validation (test with real schemas)
-- Error classes (test with real instances)
+### 2. Surface Tests (File-reading tests)
 
-## Fixtures and Factories
-
-**Test Data Pattern:**
-Define test data as module-level constants, not in beforeEach:
+Surface tests read component source files directly using `fs.readFileSync` and assert on CSS class presence/absence:
 
 ```typescript
-// __tests__/lib/tenant/resolve.test.ts
-const ACTIVE_TENANT = { id: 'tenant-001', slug: 'city-polyclinic', isActive: true, ... }
-const INACTIVE_TENANT = { ...ACTIVE_TENANT, isActive: false }
+import fs from 'fs'
+import path from 'path'
 
-// In tests:
-it('throws when inactive', async () => {
-  mockFindUnique.mockResolvedValueOnce(INACTIVE_TENANT)
-  // ...
-})
-```
+const COMPONENTS_DIR = path.resolve(__dirname, '..', 'components')
+const readComponent = (name: string) =>
+  fs.readFileSync(path.join(COMPONENTS_DIR, name), 'utf-8')
 
-**Location:**
-- Defined at top of test file, after mock setup
-- Shared across all tests in that suite
-- No dynamic creation unless varying specific fields
-
-**Factory Pattern:**
-Use factory functions for complex setup:
-
-```typescript
-function makeRequest(options: { ... } = {}): NextRequest {
-  // Encapsulates request creation logic
-}
-
-describe('concurrent request isolation', () => {
-  it('isolates context between concurrent operations', async () => {
-    const results: string[] = []
-
-    // Use factory to create multiple test scenarios
-    await Promise.all([
-      setTenantContext('tenant-A', async () => { ... }),
-      setTenantContext('tenant-B', async () => { ... }),
-    ])
+describe('BOOK-01: no hardcoded bg colors in tenant-public-page.tsx', () => {
+  it('root div does not use bg-white', () => {
+    const source = readComponent('tenant-public-page.tsx')
+    expect(source).not.toMatch(/min-h-screen\s+bg-white/)
   })
 })
 ```
 
-## Coverage
+**Purpose:** Enforce design system compliance (no hardcoded colors, semantic tokens only) without running a browser.
 
-**Requirements:** Not enforced (no coverage thresholds in config)
+**Pattern:** Each test group has a tag (`BOOK-01`, `DASH-03`) matching UAT criteria.
 
-**View Coverage:**
-```bash
-npm test -- --coverage
-```
+### 3. Infrastructure Tests
 
-**Current Status:**
-- Core tenant logic is well tested: 3 test files covering isolation, context, and Prisma extension
-- Coverage gaps likely in route handlers and UI components (no tests found in `app/` or component directories)
+`infrastructure-validation.test.ts` validates structural invariants:
+- Required files exist
+- Key exports are present
+- No forbidden patterns
 
-## Test Types
+## Test Patterns
 
-**Unit Tests:**
-- Scope: Single function or module in isolation
-- Approach: Mock all external dependencies
-- Example: `__tests__/lib/tenant/context.test.ts` tests `setTenantContext()`, `getTenantId()`, `requireTenantId()`
-- Assertions focus on: return values, thrown errors, mock calls
+### Describe structure
 
 ```typescript
-describe('getTenantId()', () => {
-  it('returns undefined outside of any context', () => {
-    expect(getTenantId()).toBeUndefined()
-  })
-
-  it('returns the tenantId set by setTenantContext()', async () => {
-    let captured: string | undefined
-
-    await setTenantContext('tenant-abc', async () => {
-      captured = getTenantId()
+describe('ComponentName / FeatureName', () => {
+  describe('scenario', () => {
+    it('does the right thing', () => {
+      // Arrange
+      // Act
+      // Assert
     })
-
-    expect(captured).toBe('tenant-abc')
   })
 })
 ```
 
-**Integration Tests:**
-- Scope: Multiple functions working together, focus on behavior
-- Approach: Mock external I/O (database), keep business logic real
-- Example: `__tests__/lib/tenant/prisma-tenant.test.ts` tests Prisma extension with mock client
-- Assertions: Verify correct WHERE/DATA injection across operations
+### Mock placement
+
+Module-level mocks before imports (Jest hoisting):
 
 ```typescript
-describe('getTenantPrisma (Prisma extension)', () => {
-  describe('findMany / findFirst / count', () => {
-    it.each(['findMany', 'findFirst', 'count'])(
-      'injects tenantId into WHERE for %s',
-      async (operation) => {
-        const mock = makeMockPrisma('tenant-XYZ')
-        const { queryArgs } = await mock._invoke('Booking', operation, { where: { status: 'CONFIRMED' } })
-        expect(queryArgs?.where).toEqual({ status: 'CONFIRMED', tenantId: 'tenant-XYZ' })
-      }
-    )
-  })
+jest.mock('@/lib/db', () => ({
+  basePrisma: { booking: { findUnique: jest.fn() } },
+}))
+jest.mock('@/lib/auth/guards', () => ({
+  requireAuth: jest.fn(),
+  requireRole: jest.fn(),
+}))
+```
+
+### Async tests
+
+All async tests use `async/await`. Error testing via `.rejects.toThrow()`:
+
+```typescript
+it('throws when tenant not found', async () => {
+  mockPrisma.tenant.findUnique.mockResolvedValue(null)
+  await expect(resolveTenant(request)).rejects.toThrow(TenantNotFoundError)
 })
 ```
 
-**E2E Tests:**
-- Not currently implemented
-- Playwright dev dependency present (`@playwright/test` ^1.58.2) but no test files found
-- Would be used for full user flows (booking creation, authentication, etc.)
+## Coverage Gaps (as of 2026-04-01)
 
-## Common Patterns
+| Area | Status |
+|------|--------|
+| Prisma tenant extension | Covered (unit tests) |
+| Booking engine | Partially (surface tests check UI; logic unit tests missing) |
+| Server Actions (`lib/actions/`) | No direct tests |
+| API route handlers | No direct tests |
+| Auth flow (OTP, IP check) | No tests |
+| Email sending | No tests |
+| Telegram notifications | No tests |
+| E2E (Playwright) | Config present; test files not yet written |
+| Payment lifecycle | Surface tests only |
+| Subscription lifecycle | Surface tests only |
 
-**Async Testing:**
-All test functions using async/await are marked `async`:
+## Running Tests
 
-```typescript
-it('resolves tenant from x-tenant-slug header', async () => {
-  mockFindUnique.mockResolvedValueOnce(ACTIVE_TENANT)
-  const req = makeRequest({ headers: { 'x-tenant-slug': 'city-polyclinic' } })
-
-  const tenant = await resolveTenant(req)
-
-  expect(tenant.id).toBe('tenant-001')
-})
+```bash
+npm test              # Run all Jest tests
+npx jest --watch      # Watch mode
+npx jest booking      # Run matching test files
+npx playwright test   # Run E2E tests (separate config)
 ```
-
-**Error Testing:**
-Use Jest's `.rejects.toThrow()` matcher:
-
-```typescript
-it('throws TenantSlugMissingError when no slug provided', async () => {
-  const req = makeRequest()
-  await expect(resolveTenant(req)).rejects.toThrow(TenantSlugMissingError)
-})
-
-it('throws with correct statusCode property', () => {
-  const err = new TenantNotFoundError('ghost')
-  expect(err.statusCode).toBe(404)
-})
-```
-
-**Type Guards / Predicates:**
-Test that type guards work correctly:
-
-```typescript
-describe('isTenantError()', () => {
-  it('returns true for all tenant error types', () => {
-    expect(isTenantError(new TenantSlugMissingError())).toBe(true)
-    expect(isTenantError(new TenantNotFoundError('x'))).toBe(true)
-    expect(isTenantError(new TenantInactiveError('x'))).toBe(true)
-  })
-
-  it('returns false for generic errors', () => {
-    expect(isTenantError(new Error('oops'))).toBe(false)
-    expect(isTenantError(null)).toBe(false)
-    expect(isTenantError('string error')).toBe(false)
-  })
-})
-```
-
-**Context Isolation:**
-Test that AsyncLocalStorage isolation works:
-
-```typescript
-it('isolates context between concurrent async operations', async () => {
-  const results: string[] = []
-
-  await Promise.all([
-    setTenantContext('tenant-A', async () => {
-      await new Promise((r) => setTimeout(r, 10))
-      results.push(getTenantId()!)
-    }),
-    setTenantContext('tenant-B', async () => {
-      await new Promise((r) => setTimeout(r, 5))
-      results.push(getTenantId()!)
-    }),
-  ])
-
-  expect(results).toContain('tenant-A')
-  expect(results).toContain('tenant-B')
-  expect(results).toHaveLength(2)
-})
-```
-
-**Parametrized Tests:**
-Use `.each()` for testing multiple scenarios:
-
-```typescript
-it.each(['findMany', 'findFirst', 'count'])(
-  'injects tenantId into WHERE for %s',
-  async (operation) => {
-    const mock = makeMockPrisma('tenant-XYZ')
-    const { queryArgs } = await mock._invoke('Booking', operation, { where: { status: 'CONFIRMED' } })
-    expect(queryArgs?.where).toEqual({ status: 'CONFIRMED', tenantId: 'tenant-XYZ' })
-  }
-)
-```
-
-## Test Gaps
-
-**Areas without tests:**
-- Route handlers (`app/api/**/*.ts`) — all endpoint logic untested
-- Server actions (`lib/actions/*.ts`) — Zod validation and business logic untested
-- React components — no component tests
-- Email/Telegram integrations — no integration tests
-- Booking engine complex logic — operations like slot generation untested
-- Error handling in route handlers — no tests for error response formats
-
-**Recommendation:**
-Add integration tests for critical paths:
-1. Booking creation (slots → conflict detection → database)
-2. Authentication flow (sign-in, OTP, session)
-3. Tenant isolation (verify cross-tenant queries blocked)
-
----
-
-*Testing analysis: 2026-03-17*
