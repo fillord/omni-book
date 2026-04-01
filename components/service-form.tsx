@@ -57,6 +57,7 @@ type FormValues = {
   durationMin: string
   price: string
   currency: string
+  depositAmount: string
 }
 
 // ---- helpers ---------------------------------------------------------------
@@ -81,6 +82,9 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
   const [selectedResourceIds, setSelectedResourceIds] = useState<string[]>(initialResourceIds)
   const [resourceError, setResourceError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [requireDeposit, setRequireDeposit] = useState<boolean>(
+    (service as unknown as { requireDeposit?: boolean })?.requireDeposit ?? false
+  )
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -93,6 +97,9 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
       durationMin: String(service?.durationMin ?? 30),
       price: service?.price != null ? String(service.price / 100) : '',
       currency: service?.currency ?? 'KZT',
+      depositAmount: (service as unknown as { depositAmount?: number | null })?.depositAmount != null
+        ? String(((service as unknown as { depositAmount: number }).depositAmount) / 100)
+        : '',
     },
   })
 
@@ -109,6 +116,10 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
       return
     }
 
+    const depositAmountTiyn = requireDeposit && values.depositAmount !== ''
+      ? Math.round(parseFloat(values.depositAmount) * 100)
+      : undefined
+
     const parsed = (isEdit ? updateServiceSchema : createServiceSchema).safeParse({
       name: values.name,
       description: values.description || undefined,
@@ -119,7 +130,9 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
       translations: {
         en: { name: values.name_en || '', description: values.desc_en || '' },
         kz: { name: values.name_kz || '', description: values.desc_kz || '' },
-      }
+      },
+      requireDeposit,
+      depositAmount: depositAmountTiyn,
     })
 
     if (!parsed.success) {
@@ -348,6 +361,63 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
               </FormItem>
             )}
           />
+        </div>
+
+        {/* Deposit settings */}
+        <div className="rounded-xl border border-border p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Требует предоплату</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Клиент оплачивает депозит через Kaspi перед подтверждением записи</p>
+            </div>
+            {/* Neumorphic toggle */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={requireDeposit}
+              onClick={() => setRequireDeposit((prev) => !prev)}
+              disabled={isDisabled}
+              className={[
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+                requireDeposit ? 'bg-primary' : 'bg-muted',
+              ].join(' ')}
+            >
+              <span
+                className={[
+                  'pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform duration-200',
+                  requireDeposit ? 'translate-x-5' : 'translate-x-0',
+                ].join(' ')}
+              />
+            </button>
+          </div>
+
+          {requireDeposit && (
+            <FormField
+              control={form.control}
+              name="depositAmount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Сумма предоплаты (KZT)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        {...field}
+                        type="number"
+                        min={1}
+                        placeholder="5000"
+                        disabled={isDisabled}
+                        className="pr-16"
+                      />
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                        ₸
+                      </span>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         {/* Resource multi-select */}
