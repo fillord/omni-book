@@ -84,10 +84,8 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
     { href: '/dashboard/bookings',           section: 'dashboard', tKey: 'bookings',  icon: CalendarDays,    exact: false },
     { href: '/dashboard/clients',            section: 'clients',   tKey: 'title',     icon: Users,           exact: false },
     { href: '/dashboard/analytics',          section: 'dashboard', tKey: 'analytics', icon: BarChart3,        exact: false },
-    { href: '/dashboard/settings',           section: 'dashboard', tKey: 'settings',  icon: Settings,        exact: false },
-    ...(userRole === 'OWNER' || userRole === 'SUPERADMIN'
-      ? [{ href: '/dashboard/settings/billing', section: 'dashboard', tKey: 'billing', icon: CreditCard, exact: false }]
-      : []),
+    { href: '/dashboard/settings',           section: 'dashboard', tKey: 'settings',  icon: Settings,        exact: true  },
+    { href: '/dashboard/settings/billing',  section: 'dashboard', tKey: 'billing',   icon: CreditCard,      exact: false },
   ]
 
   return (
