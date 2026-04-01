@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: Not started
+current_plan: 1
 status: executing
-last_updated: "2026-04-01T03:24:20.294Z"
+last_updated: "2026-04-01T03:57:33.736Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 29
-  completed_plans: 28
+  completed_plans: 29
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 09 — online-payment-with-deposit-via-paylink-kz-kaspi
+**Current focus:** Phase 07 — bookings-dashboard-crm-overhaul-and-manual-booking-creation
 
 ## Current Position
 
-Phase: 09
-Plan: 1 of 4
-Current Plan: Not started
-Status: Executing Phase 09
+Phase: 07 (bookings-dashboard-crm-overhaul-and-manual-booking-creation) — EXECUTING
+Plan: 2 of 4
+Current Plan: 1
+Status: Ready to execute
 Last activity: 2026-04-01
 
 Progress: [██████████] 100% (21/21 plans complete)
@@ -116,6 +116,7 @@ Key patterns carrying forward to next milestone:
 - [Phase 09-03]: payment i18n section added as top-level namespace (not nested under booking) for payment-specific keys
 - [Phase 09-online-payment-with-deposit-via-paylink-kz-kaspi]: Kaspi webhook sends email+Telegram after PENDING->CONFIRMED only; deposit branch exits before notification block to prevent premature notifications
 - [Phase 09-online-payment-with-deposit-via-paylink-kz-kaspi]: vercel.json now has 3 cron entries; Vercel free tier supports 2 — user may need Pro upgrade or fold pending-payments into subscriptions cron
+- [Phase 07]: Slot type uses startsAt/endsAt matching actual API response shape, not start/end from plan spec
 
 ### Pending Todos
 
