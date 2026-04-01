@@ -34,6 +34,7 @@ export type BookingRow = {
   resource: BookingResource
   service: BookingService | null
   user: BookingUser | null
+  paymentExpiresAt: string | null
 }
 
 export type ResourceOption = { id: string; name: string; type: string }
@@ -323,7 +324,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
     <div className="space-y-4">
 
       {/* Header row: Tabs + New Booking button */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
+      <div className="flex w-full justify-between items-center mb-6">
         {/* Tabs */}
         <div className="flex items-center gap-1 rounded-lg neu-inset bg-[var(--neu-bg)] p-1 w-fit">
           <button
@@ -364,7 +365,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 items-end">
+      <div className="flex flex-wrap gap-4 items-center">
         {/* Status chips (non-CANCELLED statuses) */}
         <div className="flex flex-wrap gap-1">
           {ALL_STATUSES.filter((s) => s !== 'CANCELLED').map((s) => (
@@ -470,14 +471,14 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
           {!tableLoading && tableData && tableData.data.length > 0 && (
             <>
               {/* Day-grouped booking sections */}
-              <div className="space-y-1">
+              <div>
                 {groupBookingsByDay(tableData.data, timezone).map(([dateKey, dayBookings]) => {
                   // Sort bookings within the day by start time ascending (API returns desc)
                   const sorted = [...dayBookings].sort((a, b) => a.startsAt.localeCompare(b.startsAt))
                   return (
-                    <div key={dateKey}>
+                    <div key={dateKey} className="mt-8 first:mt-0">
                       {/* Sticky day header */}
-                      <div className="sticky top-0 z-10 bg-[var(--neu-bg)] py-2 px-4 border-t border-border/30">
+                      <div className="sticky top-0 z-10 bg-[var(--neu-bg)] py-2 px-4 mb-4 border-t border-border/30">
                         <span className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
                           {getDayLabel(dateKey, timezone)}
                         </span>
@@ -489,12 +490,19 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
                           const localTime = toZonedTime(new Date(booking.startsAt), timezone)
                           const time = format(localTime, 'HH:mm')
                           const clientName = booking.user?.name ?? booking.guestName
-                          const allowed = TRANSITIONS[booking.status] ?? []
+                          const isExpiredPending =
+                            booking.status === 'PENDING' &&
+                            booking.paymentExpiresAt != null &&
+                            new Date(booking.paymentExpiresAt) < new Date()
+                          const allowed = isExpiredPending ? [] : (TRANSITIONS[booking.status] ?? [])
 
                           return (
                             <div
                               key={booking.id}
-                              className="neu-raised rounded-xl bg-[var(--neu-bg)] px-4 py-2 flex items-center gap-4 hover:bg-muted/30 transition-colors"
+                              className={[
+                                'neu-raised rounded-xl bg-[var(--neu-bg)] px-4 py-2 flex items-center gap-4 hover:bg-muted/30 transition-colors',
+                                isExpiredPending ? 'opacity-60' : '',
+                              ].join(' ')}
                             >
                               {/* Time — dominant visual element */}
                               <span className="font-semibold text-lg tabular-nums w-14 shrink-0">{time}</span>
@@ -517,8 +525,14 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
                                 {booking.resource.name}
                               </span>
 
-                              {/* Status badge */}
-                              <BookingStatusBadge status={booking.status} />
+                              {/* Status badge — expired PENDING gets its own label */}
+                              {isExpiredPending ? (
+                                <span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                  Истекло время оплаты
+                                </span>
+                              ) : (
+                                <BookingStatusBadge status={booking.status} />
+                              )}
 
                               {/* Status change actions */}
                               {canEdit && allowed.length > 0 && (

@@ -345,7 +345,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       clientPhone:       'Телефон клиента',
       saveBooking:       'Сохранить запись',
       showCancelled:     'Отмененные',
+      tomorrow:          'Завтра',
       noSlotsAvailable:  'Нет доступного времени',
+      slotConflict:      'Время уже занято',
     },
     status: {
       // Uppercase — used by BookingStatusBadge (t('status', booking.status))
@@ -671,7 +673,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       depositAmount: 'Сумма депозита',
       depositNotice: 'Для подтверждения записи необходима оплата депозита.',
       waitingForPayment: 'Ожидание оплаты',
-      waitingInstructions: '🔔 Счет выставлен! Откройте приложение Kaspi на вашем телефоне и перейдите в раздел «Платежи» или проверьте уведомления, чтобы подтвердить оплату.',
+      waitingInstructions: "🔔 Счет выставлен! Откройте приложение Kaspi на вашем телефоне и перейдите в раздел 'Платежи' (или проверьте уведомления), чтобы подтвердить оплату.",
       paymentCountdown: 'Осталось времени:',
       paymentExpired: 'Время ожидания оплаты истекло. Запись отменена.',
       paymentExpiredSub: 'Запись автоматически отменена. Вы можете записаться снова.',
@@ -1015,7 +1017,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       clientPhone:       'Клиент телефоны',
       saveBooking:       'Жазбаны сақтау',
       showCancelled:     'Болдырмаған',
+      tomorrow:          'Ертең',
       noSlotsAvailable:  'Бос уақыт жоқ',
+      slotConflict:      'Уақыт бос емес',
     },
     status: {
       PENDING:   'Күтуде',
@@ -1682,7 +1686,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       clientPhone:       'Client phone',
       saveBooking:       'Save booking',
       showCancelled:     'Cancelled',
+      tomorrow:          'Tomorrow',
       noSlotsAvailable:  'No slots available',
+      slotConflict:      'Time slot conflict',
     },
     status: {
       PENDING:   'Pending',
