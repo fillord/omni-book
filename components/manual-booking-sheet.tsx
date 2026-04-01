@@ -21,6 +21,7 @@ type ServiceOption = {
 type Slot = {
   startsAt: string
   endsAt: string
+  available: boolean
 }
 
 type ManualBookingSheetProps = {
@@ -254,18 +255,22 @@ export function ManualBookingSheet({
                 {slots.map((slot) => {
                   const timeLabel = formatSlotTime(slot.startsAt)
                   const isSelected = selectedSlot?.startsAt === slot.startsAt
+                  const isDisabled = !slot.available
                   return (
                     <button
                       key={slot.startsAt}
                       type="button"
-                      onClick={() => setSelectedSlot(slot)}
+                      disabled={isDisabled}
+                      onClick={() => !isDisabled && setSelectedSlot(slot)}
                       aria-label={`Select ${timeLabel}`}
                       aria-pressed={isSelected}
                       className={[
-                        'rounded-lg text-sm px-2 py-1 cursor-pointer transition-colors',
-                        isSelected
-                          ? 'neu-inset bg-[var(--neu-bg)] text-neu-accent'
-                          : 'neu-raised bg-[var(--neu-bg)]',
+                        'rounded-lg text-sm px-2 py-1 transition-colors',
+                        isDisabled
+                          ? 'bg-[var(--neu-bg)] text-gray-500 opacity-50 cursor-not-allowed'
+                          : isSelected
+                            ? 'neu-inset bg-[var(--neu-bg)] text-neu-accent cursor-pointer'
+                            : 'neu-raised bg-[var(--neu-bg)] cursor-pointer',
                       ].join(' ')}
                     >
                       {timeLabel}
