@@ -232,4 +232,28 @@ Plans:
 - [x] 09-01-PLAN.md — Test scaffold + Prisma schema extension + Kaspi adapter mock + engine interface
 - [x] 09-02-PLAN.md — Booking route deposit branch + webhook handler + cron + vercel.json
 - [x] 09-03-PLAN.md — Tenant deposit settings UI + Server Action + i18n keys
-- [ ] 09-04-PLAN.md — WaitingForPaymentScreen countdown UI + deposit notice + visual verification
+- [x] 09-04-PLAN.md — WaitingForPaymentScreen countdown UI + deposit notice + visual verification
+
+### Phase 10: SaaS Monetization, Enterprise Tier & Platform Payments
+
+**Goal:** Move plan pricing and limits from hardcoded constants into a `SubscriptionPlan` DB model with Super Admin UI editor; wire the Enterprise tier with a dynamic Neumorphic pricing calculator (slider-based); and replace the manual "copy card number" payment flow with a mock Kaspi QR / Paylink-style platform payment adapter that auto-activates the subscription on simulated webhook receipt — designed to swap for the real Paylink.kz API once the legal entity is registered.
+**Requirements:** [MON-01, MON-02, MON-03, MON-04, MON-05, MON-06, MON-07, MON-08, MON-09]
+**Depends on:** Phase 9 (platform is live, Phase 3 subscription lifecycle in place)
+**Plans:** 4 plans
+
+Requirements:
+- MON-01: SubscriptionPlan DB model — `plan Plan @unique`, `displayName`, `maxResources`, `priceMonthly Int` (-1 = dynamic), `priceYearly Int`, `pricePerResource Int`, `features String[]`; seeded with FREE/PRO/ENTERPRISE rows matching current hardcoded values
+- MON-02: Remove hardcoded pricing — delete `PLAN_DEFAULT_MAX_RESOURCES` from `lib/actions/admin.ts`, remove hardcoded `10 000 ₸` from `billing-content.tsx`; all plan actions fetch from DB
+- MON-03: Super Admin plan editor — `/admin/plans` page with inline-edit table; `updateSubscriptionPlan()` Server Action with `ensureSuperAdmin()` guard
+- MON-04: Enterprise calculator — interactive Neumorphic slider on billing page; formula `monthly = base + resources × pricePerResource`; yearly = monthly × 10; both prices shown in real-time
+- MON-05: Enterprise inquiry flow — "Request Enterprise" CTA sends Telegram notification with resource count + calculated price; sets `planStatus = PENDING`
+- MON-06: PlatformPayment model — `tenantId`, `amount Int`, `planTarget Plan`, `status PaymentStatus` (PENDING/PAID/FAILED/EXPIRED), `mockQrCode String?`, `expiresAt DateTime`, `paidAt DateTime?`
+- MON-07: Mock payment adapter — `lib/platform-payment.ts` with `createPlatformPayment()` and `processPlatformPayment()`; `initiateSubscriptionPayment()` Server Action replaces `requestProActivation()` in billing-content
+- MON-08: Waiting-for-payment modal — two-step flow in billing page: Step 1 (Initiate) → Step 2 (mock QR + countdown + "Simulate Payment" button behind `NEXT_PUBLIC_MOCK_PAYMENTS=true` flag); resume on page refresh if `pendingPayment` exists
+- MON-09: Mock webhook/simulate endpoint — `app/api/mock-payment/simulate/route.ts` calls `processPlatformPayment()`: PAID status, activates subscription, sends Telegram admin notification, creates audit log `saas_payment_received`
+
+Plans:
+- [ ] 10-01-PLAN.md — Test scaffold + Prisma schema (SubscriptionPlan, PlatformPayment) + remove hardcoded pricing
+- [ ] 10-02-PLAN.md — Mock payment adapter + initiateSubscriptionPayment + simulate endpoint + billing page.tsx data
+- [ ] 10-03-PLAN.md — Super Admin plan editor (/admin/plans) + nav link
+- [ ] 10-04-PLAN.md — Enterprise calculator + Enterprise inquiry + payment modal + billing-content refactor + i18n
