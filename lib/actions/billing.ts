@@ -109,6 +109,50 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
   }
 }
 
+export async function requestEnterpriseInquiry(
+  resourceCount: number,
+  calculatedMonthlyPrice: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await requireAuth()
+    requireRole(session, ['OWNER'])
+    const tenantId = session.user.tenantId!
+
+    // Set planStatus to PENDING
+    const tenant = await basePrisma.tenant.update({
+      where: { id: tenantId },
+      data: { planStatus: 'PENDING' },
+      select: { name: true },
+    })
+
+    // Send Telegram to admin
+    const adminChatId = process.env.ADMIN_TELEGRAM_CHAT_ID
+    if (adminChatId) {
+      await sendTelegramMessage(
+        adminChatId,
+        `<b>Заявка на Enterprise</b>\n\nКомпания: ${tenant.name}\nРесурсы: ${resourceCount}\nРасчётная цена: ${calculatedMonthlyPrice.toLocaleString()} ₸/мес`
+      ).catch(console.error)
+    }
+
+    revalidatePath('/dashboard/settings/billing')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Failed to submit enterprise inquiry' }
+  }
+}
+
+export async function simulatePaymentAction(paymentId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { processPlatformPayment } = await import('@/lib/platform-payment')
+    const result = await processPlatformPayment(paymentId)
+    if (!result.success) return { success: false, error: result.error }
+    revalidatePath('/dashboard/settings/billing')
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Simulation failed' }
+  }
+}
+
 export async function renewSubscription() {
   try {
     const session = await requireAuth()
