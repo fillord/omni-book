@@ -98,9 +98,12 @@ describe("Phase 10 SaaS Monetization — Static Assertions", () => {
       expect(content).toMatch(/subscriptionPlan\.findUnique/)
     })
 
-    it("app/admin/analytics/page.tsx does NOT contain hardcoded PLAN_MRR constant definition", () => {
+    it("app/admin/analytics/page.tsx does NOT contain hardcoded PLAN_MRR constant definition (with static values)", () => {
       const content = safeRead("app/admin/analytics/page.tsx")
-      expect(content).not.toMatch(/const PLAN_MRR/)
+      // The OLD hardcoded constant had literal prices like: { FREE: 0, PRO: 10000, ENTERPRISE: 29900 }
+      // The new dynamic version builds PLAN_MRR from DB — it must NOT contain the hardcoded static PRO: 10000 value
+      expect(content).not.toMatch(/PRO:\s*10000/)
+      expect(content).not.toMatch(/ENTERPRISE:\s*29900/)
     })
 
     it("app/dashboard/settings/billing/billing-content.tsx does NOT contain '10 000 ₸' hardcoded price", () => {

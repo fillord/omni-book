@@ -8,6 +8,7 @@ export type AuditEventType =
   | 'service_deleted'
   | 'resource_deleted'
   | 'staff_deleted'
+  | 'saas_payment_received'
 
 export async function createAuditLog(
   tenantId: string,

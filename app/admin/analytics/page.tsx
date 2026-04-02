@@ -7,17 +7,22 @@ const formatKZT = (amount: number) =>
 // AnalyticsCharts renders two Recharts BarChart + ResponsiveContainer — see ./analytics-charts.tsx
 import { AnalyticsCharts } from './analytics-charts'
 
-const PLAN_MRR: Record<string, number> = { FREE: 0, PRO: 29, ENTERPRISE: 99 }
-
 export default async function AdminAnalyticsPage() {
-  const [planCounts, totalTenants] = await Promise.all([
+  const [planCounts, totalTenants, planPrices] = await Promise.all([
     basePrisma.tenant.groupBy({
       by: ['plan'],
       where: { planStatus: 'ACTIVE' },
       _count: { _all: true },
     }),
     basePrisma.tenant.count({ where: { planStatus: 'ACTIVE' } }),
+    basePrisma.subscriptionPlan.findMany({
+      select: { plan: true, priceMonthly: true },
+    }),
   ])
+
+  const PLAN_MRR: Record<string, number> = Object.fromEntries(
+    planPrices.map(p => [p.plan, p.priceMonthly < 0 ? 0 : p.priceMonthly])
+  )
 
   const mrr = planCounts.reduce(
     (sum, row) => sum + (PLAN_MRR[row.plan] ?? 0) * row._count._all,

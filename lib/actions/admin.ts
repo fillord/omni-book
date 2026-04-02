@@ -6,6 +6,7 @@ import { authConfig } from '@/lib/auth/config'
 import { getServerSession } from 'next-auth'
 import { basePrisma } from '@/lib/db'
 import { createAuditLog } from '@/lib/actions/audit-log'
+import { processSubscriptionLifecycle } from '@/lib/subscription-lifecycle'
 
 
 // Безопасная проверка: только админ
@@ -18,47 +19,100 @@ async function ensureSuperAdmin() {
   }
 }
 
-const PLAN_DEFAULT_MAX_RESOURCES: Record<Plan, number> = {
-  FREE: 1,
-  PRO: 20,
-  ENTERPRISE: 100,
-}
-
 export async function updateTenantPlan(tenantId: string, plan: Plan, planStatus: PlanStatus) {
   try {
     await ensureSuperAdmin()
 
-    // Получаем текущий план, чтобы понять — изменился ли он
+    const planRecord = await basePrisma.subscriptionPlan.findUnique({
+      where: { plan },
+      select: { maxResources: true },
+    })
+    const maxResources = planRecord?.maxResources ?? { FREE: 1, PRO: 20, ENTERPRISE: 100 }[plan]
+
     const current = await basePrisma.tenant.findUnique({
       where: { id: tenantId },
       select: { plan: true },
     })
 
-    const data: { plan: Plan; planStatus: PlanStatus; maxResources?: number } = { plan, planStatus }
+    const planChanged = current && current.plan !== plan
 
-    // Автоматически выставляем лимит ресурсов только при смене тарифа
-    if (current && current.plan !== plan) {
-      data.maxResources = PLAN_DEFAULT_MAX_RESOURCES[plan]
-    }
-
-    await basePrisma.tenant.update({
-      where: { id: tenantId },
-      data,
-    })
-
-    // Audit: detect plan change direction
-    if (current && current.plan !== plan) {
+    if (planChanged) {
       const PLAN_ORDER = { FREE: 0, PRO: 1, ENTERPRISE: 2 } as const
       const oldOrder = PLAN_ORDER[current.plan as keyof typeof PLAN_ORDER] ?? 0
       const newOrder = PLAN_ORDER[plan as keyof typeof PLAN_ORDER] ?? 0
-      const eventType = newOrder > oldOrder ? 'plan_upgrade' : 'plan_downgrade'
-      createAuditLog(tenantId, eventType, {
-        oldPlan: current.plan,
-        newPlan: plan,
+      const isUpgrade = newOrder > oldOrder
+
+      if (isUpgrade) {
+        // Upgrade: set expiry, unfreeze resources/services
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+        await basePrisma.$transaction([
+          basePrisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+              plan,
+              planStatus: 'ACTIVE',
+              subscriptionExpiresAt: expiresAt,
+              maxResources,
+            },
+          }),
+          basePrisma.resource.updateMany({
+            where: { tenantId, isFrozen: true },
+            data: { isFrozen: false },
+          }),
+          basePrisma.service.updateMany({
+            where: { tenantId, isFrozen: true },
+            data: { isFrozen: false },
+          }),
+        ])
+        createAuditLog(tenantId, 'plan_upgrade', { oldPlan: current.plan, newPlan: plan })
+      } else {
+        // Downgrade: clear expiry, freeze resources/services
+        const oldestResource = await basePrisma.resource.findFirst({
+          where: { tenantId },
+          orderBy: { createdAt: 'asc' },
+          select: { id: true },
+        })
+        const oldestService = await basePrisma.service.findFirst({
+          where: { tenantId },
+          orderBy: { createdAt: 'asc' },
+          select: { id: true },
+        })
+        await basePrisma.$transaction([
+          basePrisma.tenant.update({
+            where: { id: tenantId },
+            data: {
+              plan,
+              planStatus: 'ACTIVE',
+              subscriptionExpiresAt: null,
+              maxResources,
+            },
+          }),
+          ...(oldestResource
+            ? [basePrisma.resource.updateMany({
+                where: { tenantId, id: { not: oldestResource.id } },
+                data: { isFrozen: true },
+              })]
+            : []),
+          ...(oldestService
+            ? [basePrisma.service.updateMany({
+                where: { tenantId, id: { not: oldestService.id } },
+                data: { isFrozen: true },
+              })]
+            : []),
+        ])
+        createAuditLog(tenantId, 'plan_downgrade', { oldPlan: current.plan, newPlan: plan })
+      }
+    } else {
+      // Status-only change (or same plan): update without touching lifecycle fields
+      await basePrisma.tenant.update({
+        where: { id: tenantId },
+        data: { plan, planStatus },
       })
     }
 
     revalidatePath('/admin/tenants')
+    revalidatePath(`/admin/tenants/${tenantId}`)
+    revalidatePath('/dashboard/settings/billing')
     return { success: true }
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Ошибка обновления плана' }
@@ -83,20 +137,26 @@ export async function updateTenantMaxResources(tenantId: string, maxResources: n
   }
 }
 
-export async function activateSubscription(tenantId: string) {
+export async function activateSubscription(tenantId: string, plan: Plan = 'PRO') {
   try {
     await ensureSuperAdmin()
 
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+    const planRecord = await basePrisma.subscriptionPlan.findUnique({
+      where: { plan },
+      select: { maxResources: true },
+    })
+    const maxResources = planRecord?.maxResources ?? 20
+
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
     await basePrisma.$transaction([
       basePrisma.tenant.update({
         where: { id: tenantId },
         data: {
-          plan: 'PRO',
+          plan,
           planStatus: 'ACTIVE',
           subscriptionExpiresAt: expiresAt,
-          maxResources: PLAN_DEFAULT_MAX_RESOURCES.PRO, // 20
+          maxResources,
         },
       }),
       basePrisma.resource.updateMany({
@@ -153,5 +213,15 @@ export async function deleteTenant(tenantId: string) {
     return { success: true }
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Ошибка при удалении компании' }
+  }
+}
+
+export async function triggerSubscriptionCron() {
+  try {
+    await ensureSuperAdmin()
+    const result = await processSubscriptionLifecycle()
+    return { success: true, ...result }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Ошибка запуска cron' }
   }
 }
