@@ -255,5 +255,5 @@ Requirements:
 Plans:
 - [x] 10-01-PLAN.md — Test scaffold + Prisma schema (SubscriptionPlan, PlatformPayment) + remove hardcoded pricing
 - [ ] 10-02-PLAN.md — Mock payment adapter + initiateSubscriptionPayment + simulate endpoint + billing page.tsx data
-- [ ] 10-03-PLAN.md — Super Admin plan editor (/admin/plans) + nav link
+- [x] 10-03-PLAN.md — Super Admin plan editor (/admin/plans) + nav link
 - [ ] 10-04-PLAN.md — Enterprise calculator + Enterprise inquiry + payment modal + billing-content refactor + i18n
