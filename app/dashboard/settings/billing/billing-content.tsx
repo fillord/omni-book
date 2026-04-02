@@ -178,7 +178,7 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
             <div className="bg-[var(--neu-bg)] neu-inset rounded-xl p-6 my-6">
               <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-4xl font-bold text-foreground">
-                  {proPlan?.priceMonthly.toLocaleString() ?? '10 000'} ₸
+                  {(proPlan?.priceMonthly ?? 10000).toLocaleString()} ₸
                 </span>
                 <span className="text-sm text-muted-foreground">/ месяц</span>
               </div>
