@@ -121,4 +121,4 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | Beauty specialization → free-text (not select) | Removes 6 opaque `opt_xxx` options; staff records with type:'staff' still match forTypes filter | ✓ Good — simpler UX, backward compatible for stored records |
 
 ---
-*Last updated: 2026-03-25 after v1.3 milestone close — v1.4 Client Base started*
+*Last updated: 2026-04-02 — Phase 10 complete: SaaS monetization, Enterprise tier & platform payments*
