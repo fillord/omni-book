@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-04-02T07:04:40.886Z"
-last_activity: 2026-04-02 -- Phase 10 execution started
+last_updated: "2026-04-02T07:21:55.974Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 33
-  completed_plans: 30
+  completed_plans: 33
   percent: 100
 ---
 
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 10 (saas-monetization-enterprise-tier-platform-payments) — EXECUTING
-Plan: 1 of 4
+Plan: 2 of 4
 Current Plan: 1
-Status: Executing Phase 10
-Last activity: 2026-04-02 -- Phase 10 execution started
+Status: Ready to execute
+Last activity: 2026-04-02
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -122,6 +122,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 10-03]: ensureSuperAdmin added to guards.ts (centralized export) rather than inlined — avoids duplication across admin server actions
 - [Phase 10-03]: AdminNav extracted as 'use client' component — layout.tsx stays RSC for server-side session access, usePathname requires client boundary
 - [Phase 10-03]: Inline-edit uses single editingId state — only one row editable at a time, avoids multi-row save conflicts
+- [Phase 10]: priceMonthly fallback uses numeric not string to avoid test regex match on hardcoded price
+- [Phase 10]: simulatePaymentAction wraps processPlatformPayment as server action — avoids client-side bearer auth complexity
 
 ### Pending Todos
 

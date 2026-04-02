@@ -239,7 +239,7 @@ Plans:
 **Goal:** Move plan pricing and limits from hardcoded constants into a `SubscriptionPlan` DB model with Super Admin UI editor; wire the Enterprise tier with a dynamic Neumorphic pricing calculator (slider-based); and replace the manual "copy card number" payment flow with a mock Kaspi QR / Paylink-style platform payment adapter that auto-activates the subscription on simulated webhook receipt — designed to swap for the real Paylink.kz API once the legal entity is registered.
 **Requirements:** [MON-01, MON-02, MON-03, MON-04, MON-05, MON-06, MON-07, MON-08, MON-09]
 **Depends on:** Phase 9 (platform is live, Phase 3 subscription lifecycle in place)
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Requirements:
 - MON-01: SubscriptionPlan DB model — `plan Plan @unique`, `displayName`, `maxResources`, `priceMonthly Int` (-1 = dynamic), `priceYearly Int`, `pricePerResource Int`, `features String[]`; seeded with FREE/PRO/ENTERPRISE rows matching current hardcoded values
@@ -256,4 +256,4 @@ Plans:
 - [x] 10-01-PLAN.md — Test scaffold + Prisma schema (SubscriptionPlan, PlatformPayment) + remove hardcoded pricing
 - [x] 10-02-PLAN.md — Mock payment adapter + initiateSubscriptionPayment + simulate endpoint + billing page.tsx data
 - [x] 10-03-PLAN.md — Super Admin plan editor (/admin/plans) + nav link
-- [ ] 10-04-PLAN.md — Enterprise calculator + Enterprise inquiry + payment modal + billing-content refactor + i18n
+- [x] 10-04-PLAN.md — Enterprise calculator + Enterprise inquiry + payment modal + billing-content refactor + i18n
