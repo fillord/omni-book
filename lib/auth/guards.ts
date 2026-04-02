@@ -74,3 +74,16 @@ export async function requireAuthWithRole(roles: Role[]): Promise<Session> {
   requireRole(session, roles)
   return session
 }
+
+/**
+ * Verifies the current user is a super admin.
+ * Throws UnauthorizedError if not authenticated, ForbiddenError if not SUPERADMIN.
+ * Use in Server Actions that should only be accessible to super admins.
+ */
+export async function ensureSuperAdmin(): Promise<void> {
+  const session = await getServerSession(authConfig)
+  if (!session?.user?.email) throw new UnauthorizedError()
+  if (session.user.role !== 'SUPERADMIN' && session.user.email !== 'admin@omnibook.com') {
+    throw new ForbiddenError('Superadmin only')
+  }
+}

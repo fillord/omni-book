@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BarChart3, Users, FileText, Megaphone } from 'lucide-react'
+import { LayoutDashboard, BarChart3, Users, FileText, Megaphone, CreditCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_LINKS = [
   { href: '/admin', label: 'Обзор', icon: LayoutDashboard, exact: true },
   { href: '/admin/analytics', label: 'Аналитика', icon: BarChart3 },
   { href: '/admin/tenants', label: 'Компании', icon: Users },
+  { href: '/admin/plans', label: 'Тарифы', icon: CreditCard },
   { href: '/admin/audit-logs', label: 'Логи действий', icon: FileText },
   { href: '/admin/announcements', label: 'Объявления', icon: Megaphone },
 ]
