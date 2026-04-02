@@ -1,33 +1,24 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { 
-  Check, 
-  CreditCard, 
-  Clock, 
-  CheckCircle2, 
-  ShieldCheck, 
-  Zap, 
-  XCircle, 
+import {
+  Check,
+  CreditCard,
+  Clock,
+  CheckCircle2,
+  ShieldCheck,
+  Zap,
+  XCircle,
   AlertTriangle,
-  Copy 
 } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { requestProActivation, renewSubscription } from "@/lib/actions/billing"
 import { updatePaymentSettings } from "@/lib/actions/payment-settings"
+import { EnterpriseCalculator } from './enterprise-calculator'
+import { PaymentModal } from './payment-modal'
 
 type TenantInfo = {
   plan: string
@@ -37,11 +28,38 @@ type TenantInfo = {
   kaspiApiKey: string | null
 }
 
-export function BillingContent({ tenant }: { tenant: TenantInfo }) {
+type SubscriptionPlanInfo = {
+  plan: string
+  displayName: string
+  priceMonthly: number
+  priceYearly: number
+  features: string[]
+}
+
+type PendingPaymentInfo = {
+  id: string
+  amount: number
+  mockQrCode: string | null
+  expiresAt: string
+  planTarget: string
+}
+
+type EnterprisePlanInfo = {
+  priceMonthly: number
+  pricePerResource: number
+}
+
+type Props = {
+  tenant: TenantInfo
+  subscriptionPlans?: SubscriptionPlanInfo[]
+  pendingPayment?: PendingPaymentInfo | null
+  enterprisePlan?: EnterprisePlanInfo | null
+}
+
+export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment = null, enterprisePlan = null }: Props) {
   const router = useRouter()
-  
+
   const [isOpen, setIsOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   const [kaspiMerchantId, setKaspiMerchantId] = useState(tenant.kaspiMerchantId ?? '')
   const [kaspiApiKey, setKaspiApiKey] = useState(tenant.kaspiApiKey ?? '')
@@ -53,26 +71,14 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
   const isExpiredOrCanceled = tenant.planStatus === "EXPIRED" || tenant.planStatus === "CANCELED"
   const showUpgradeCard = (isFree && !isPending) || (isPro && isExpiredOrCanceled)
 
-  async function handlePaymentConfirm() {
-    setLoading(true)
-    const res = isExpiredOrCanceled
-      ? await renewSubscription()
-      : await requestProActivation()
-    
-    setLoading(false)
-    setIsOpen(false)
+  const proPlan = subscriptionPlans.find(p => p.plan === 'PRO')
 
-    if (res?.error) {
-      toast.error(res.error || "Произошла ошибка")
-      return
+  // Auto-open modal if pending payment exists on page load
+  useEffect(() => {
+    if (pendingPayment) {
+      setIsOpen(true)
     }
-
-    toast.success("Заявка принята! 🎉", {
-      description: "Перезагружаем страницу...",
-    })
-    
-    router.refresh()
-  }
+  }, [pendingPayment])
 
   async function handleSaveDeposit() {
     setSavingDeposit(true)
@@ -154,7 +160,7 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
       {showUpgradeCard && (
         <Card className="overflow-hidden relative neu-inset bg-[var(--neu-bg)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full blur-3xl -mr-10 -mt-20 pointer-events-none" />
-          
+
           <CardHeader className="pb-4">
             <div className="flex items-center gap-2 mb-2">
               <Zap className="text-amber-500 fill-amber-500" size={20} />
@@ -171,113 +177,63 @@ export function BillingContent({ tenant }: { tenant: TenantInfo }) {
           <CardContent>
             <div className="bg-[var(--neu-bg)] neu-inset rounded-xl p-6 my-6">
               <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-bold text-foreground">10 000 ₸</span>
+                <span className="text-4xl font-bold text-foreground">
+                  {proPlan?.priceMonthly.toLocaleString() ?? '10 000'} ₸
+                </span>
                 <span className="text-sm text-muted-foreground">/ месяц</span>
               </div>
-              
+
               <ul className="grid sm:grid-cols-2 gap-3">
-                {[
-                  "До 20 ресурсов (мастеров/залов)",
-                  "Безлимит бронирований",
-                  "Email и СМС уведомления",
-                  "Расширенная аналитика",
-                  "Приоритетная поддержка",
-                  "Увеличенная конверсия",
-                ].map((feature, i) => (
+                {proPlan?.features.map((feature, i) => (
                   <li key={i} className="flex items-center gap-2.5 text-sm text-foreground">
                     <Check className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
                     {feature}
                   </li>
-                ))}
+                )) ?? (
+                  <>
+                    {[
+                      "До 20 ресурсов (мастеров/залов)",
+                      "Безлимит бронирований",
+                      "Email и СМС уведомления",
+                      "Расширенная аналитика",
+                      "Приоритетная поддержка",
+                      "Увеличенная конверсия",
+                    ].map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2.5 text-sm text-foreground">
+                        <Check className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </>
+                )}
               </ul>
             </div>
 
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogTrigger>
-                <div role="button" tabIndex={0} className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium cursor-pointer neu-raised bg-[var(--neu-bg)] text-orange-500 active:neu-inset transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [filter:drop-shadow(0_0_8px_theme(colors.orange.400/40%))]">
-                  <ShieldCheck size={18} />
-                  {isFree ? 'Выбрать PRO' : 'Продлить подписку'}
-                </div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle className="text-xl">Оплата подписки PRO</DialogTitle>
-                  <DialogDescription className="text-muted-foreground">
-                    Активация тарифа происходит после подтверждения платежа.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="py-6 space-y-6">
-                  <div className="bg-[var(--neu-bg)] neu-inset p-4 rounded-lg text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">Сумма к оплате:</p>
-                    <p className="text-3xl font-bold text-foreground">10 000 ₸</p>
-                  </div>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="inline-flex w-full sm:w-auto h-12 px-8 items-center justify-center gap-2 whitespace-nowrap rounded-md text-base font-medium cursor-pointer neu-raised bg-[var(--neu-bg)] text-orange-500 active:neu-inset transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [filter:drop-shadow(0_0_8px_theme(colors.orange.400/40%))]"
+            >
+              <ShieldCheck size={18} />
+              {isFree ? 'Выбрать PRO' : 'Продлить подписку'}
+            </button>
 
-                  <div className="space-y-4">
-                    <div className="flex gap-4 items-start">
-                      <div className="w-10 h-10 rounded-full neu-raised bg-[var(--neu-bg)] flex items-center justify-center shrink-0">
-                        <CreditCard className="text-red-600 dark:text-red-400" size={20} />
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <h4 className="font-semibold text-foreground">
-                          Перевод на карту
-                        </h4>
-                        <p className="text-sm text-foreground">
-                          Отправьте перевод на указанный ниже номер карты:
-                        </p>
-                        
-                        {/* ИНТЕРАКТИВНЫЙ БЛОК КОПИРОВАНИЯ НОМЕРА */}
-                        <div 
-                          onClick={() => {
-                            navigator.clipboard.writeText("4400430389830552")
-                            toast.success("Номер скопирован! 📋")
-                          }}
-                          className="flex items-center gap-2 mt-1 cursor-pointer group w-fit hover:opacity-70 transition-opacity active:scale-95"
-                          title="Нажмите, чтобы скопировать"
-                        >
-                          <p className="text-lg font-mono font-medium text-indigo-600 dark:text-indigo-400">
-                            4400 4303 8983 0552
-                          </p>
-                          <Copy className="w-4 h-4 text-indigo-600/50 dark:text-indigo-400/50 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
-                        </div>
-                        {/* КОНЕЦ ИНТЕРАКТИВНОГО БЛОКА */}
-
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Получатель: Нұрсұлтан Г.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-  
-                  <div className="bg-[var(--neu-bg)] neu-inset rounded p-3 text-foreground text-sm">
-                    <strong>Внимание:</strong> 
-                    После перевода нажмите кнопку «Я оплатил» и дождитесь подтверждения. Активация может занять до 15 минут. Если у вас возникнут вопросы, пожалуйста, свяжитесь с нашей поддержкой.
-                  </div>
-                </div>
-
-                <DialogFooter className="sm:justify-between items-center flex-col sm:flex-row gap-3">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsOpen(false)}
-                    disabled={loading}
-                    className="w-full sm:w-auto text-muted-foreground hover:bg-muted"
-                  >
-                    Отмена
-                  </Button>
-                  <Button 
-                    type="button" 
-                    onClick={handlePaymentConfirm} 
-                    disabled={loading}
-                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white"
-                  >
-                    {loading ? "Отправка..." : "Я оплатил"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <PaymentModal
+              isOpen={isOpen}
+              onOpenChange={setIsOpen}
+              pendingPayment={pendingPayment}
+              planLabel={isFree ? 'PRO' : tenant.plan}
+              planPrice={proPlan?.priceMonthly ?? 10000}
+            />
           </CardContent>
         </Card>
+      )}
+
+      {/* Enterprise Calculator */}
+      {enterprisePlan && (
+        <EnterpriseCalculator
+          enterprisePlan={enterprisePlan}
+          isPending={isPending}
+        />
       )}
 
       {/* Kaspi payment configuration — PRO+ only */}
