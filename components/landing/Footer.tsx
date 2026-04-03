@@ -7,6 +7,7 @@ export function Footer() {
   const { t } = useI18n()
 
   return (
+    <>
     {/* intentional: neu-raised footer uses fixed bg-[var(--neu-bg)] — brand anchor, not semantic token */}
     <footer className="neu-raised bg-[var(--neu-bg)] py-12">
       <div className="max-w-6xl mx-auto px-4">
@@ -56,5 +57,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
+    </>
   )
 }
