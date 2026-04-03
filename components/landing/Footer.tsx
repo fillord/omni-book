@@ -6,35 +6,54 @@ import { useI18n } from "@/lib/i18n/context"
 export function Footer() {
   const { t } = useI18n()
 
-  const LINKS = [
-    { label: t('landing', 'about'), href: "#" },
-    { label: t('landing', 'pricing'), href: "#pricing" },
-    { label: t('landing', 'docs'), href: "#" },
-    { label: t('landing', 'support'), href: "#" },
-  ]
   return (
+    {/* intentional: neu-raised footer uses fixed bg-[var(--neu-bg)] — brand anchor, not semantic token */}
     <footer className="neu-raised bg-[var(--neu-bg)] py-12">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex flex-col items-center md:items-start gap-1">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Three-column grid (per D-01) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8">
+          {/* Product column (per D-02) */}
+          <div>
+            <h4 className="font-semibold text-sm text-foreground mb-4">
+              {t('landing', 'footerColProduct')}
+            </h4>
+            <ul className="space-y-2">
+              <li><a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'features')}</a></li>
+              <li><a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'pricing')}</a></li>
+              <li><a href="#demo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'demo')}</a></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerDocs')}</a></li>
+            </ul>
+          </div>
+          {/* Legal column (per D-03) */}
+          <div>
+            <h4 className="font-semibold text-sm text-foreground mb-4">
+              {t('landing', 'footerColLegal')}
+            </h4>
+            <ul className="space-y-2">
+              <li><Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerPrivacy')}</Link></li>
+              <li><Link href="/oferta" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerOferta')}</Link></li>
+              <li><Link href="/refund" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerRefund')}</Link></li>
+            </ul>
+          </div>
+          {/* Company column (per D-04) */}
+          <div>
+            <h4 className="font-semibold text-sm text-foreground mb-4">
+              {t('landing', 'footerColCompany')}
+            </h4>
+            <ul className="space-y-2">
+              <li><Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerAbout')}</Link></li>
+              <li><Link href="/about#contacts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerContacts')}</Link></li>
+              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerSupport')}</a></li>
+            </ul>
+          </div>
+        </div>
+        {/* Bottom bar (per D-05) */}
+        <div className="border-t border-muted-foreground/20 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <Link href="/" className="font-bold text-lg text-foreground">
             omni<span className="text-neu-accent">book</span>
           </Link>
-          <p className="text-xs text-muted-foreground">{t('landing', 'heroSubtitle')}</p>
+          <p className="text-xs text-muted-foreground">© 2026 omni-book. {t('landing', 'footerRights')}</p>
         </div>
-
-        <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-          {LINKS.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
-
-        <p className="text-xs text-muted-foreground">© 2026 omni-book</p>
       </div>
     </footer>
   )
