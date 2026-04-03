@@ -78,7 +78,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
 | 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
 | 6. Tokenized Booking Management | v1.4 | 0/4 | In Progress | - |
-| 12. Kaspi → Paylink.kz + WhatsApp | v1.5 | 1/4 | In Progress|  |
+| 12. Kaspi → Paylink.kz + WhatsApp | v1.5 | 3/4 | In Progress|  |
 
 ## Phase Details
 
@@ -279,7 +279,7 @@ Plans:
 **Goal:** Complete architectural pivot away from Kaspi Pay. Remove all Kaspi logic (booking deposits + platform payment mock QR). Replace SaaS subscription payments with real Paylink.kz API (redirect-based). Replace in-widget deposit flow with a WhatsApp deep-link button that pre-fills a professional booking confirmation template with booking details.
 **Requirements:** [PIV-01, PIV-02, PIV-03, PIV-04, PIV-05, PIV-06, PIV-07, PIV-08, PIV-09, PIV-10]
 **Depends on:** Phase 11
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Requirements:
 - PIV-01: Remove Kaspi booking deposit — delete `lib/payments/kaspi.ts`, `app/api/webhooks/kaspi/route.ts`, `app/api/cron/pending-payments/route.ts`; remove Kaspi cron from `vercel.json`
@@ -294,7 +294,7 @@ Requirements:
 - PIV-10: Billing UI cleanup — remove Kaspi Merchant ID / API Key config section from `billing-content.tsx`; update payment section label to "Оплата через Paylink.kz"; keep Neumorphic design consistent
 
 Plans:
-- [ ] 12-01-PLAN.md — Prisma schema migration (remove Kaspi fields) + delete Kaspi files + vercel.json cleanup
+- [x] 12-01-PLAN.md — Prisma schema migration (remove Kaspi fields) + delete Kaspi files + vercel.json cleanup
 - [x] 12-02-PLAN.md — Booking route cleanup + WhatsApp prepayment button in booking-form.tsx + service-form.tsx deposit section removal
-- [ ] 12-03-PLAN.md — Paylink.kz adapter + Paylink webhook handler + platform-payment.ts rewrite + remove simulate endpoint
+- [x] 12-03-PLAN.md — Paylink.kz adapter + Paylink webhook handler + platform-payment.ts rewrite + remove simulate endpoint
 - [ ] 12-04-PLAN.md — Payment modal rewrite (Paylink redirect + polling) + billing-content.tsx Kaspi config removal + i18n key updates

@@ -4,13 +4,13 @@ milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
 status: executing
-last_updated: "2026-04-03T21:14:25.725Z"
+last_updated: "2026-04-03T21:21:09.779Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 11
   completed_phases: 10
   total_plans: 39
-  completed_plans: 36
+  completed_plans: 38
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 ## Current Position
 
 Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Current Plan: 1
 Status: Ready to execute
 Last activity: 2026-04-03
@@ -130,6 +130,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 11]: About page uses id='contacts' on Contacts section to support /about#contacts footer anchor link
 - [Phase 12]: WhatsApp button placed in SuccessScreen only — shown after booking confirmation, not during booking steps
 - [Phase 12]: buildWhatsAppPrepaymentUrl pre-fills Russian template — appropriate for KZ market primary language
+- [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: PENDING bookings now block slots unconditionally after paymentExpiresAt field removed
+- [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: payment-settings.ts stubbed to return error — Kaspi fields removed, Paylink settings in 12-04
+- [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: paylinkOrderId/paylinkUrl replace mockQrCode/mockPaylink in PlatformPayment schema
 
 ### Pending Todos
 
