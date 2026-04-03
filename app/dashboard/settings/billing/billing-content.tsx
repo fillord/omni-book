@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import {
   Check,
-  CreditCard,
   Clock,
   CheckCircle2,
   ShieldCheck,
@@ -12,7 +11,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EnterpriseCalculator } from './enterprise-calculator'
 import { PaymentModal } from './payment-modal'
 
@@ -33,7 +32,7 @@ type SubscriptionPlanInfo = {
 type PendingPaymentInfo = {
   id: string
   amount: number
-  paylinkUrl: string | null
+  paylinkUrl: string | null   // CHANGED: was mockQrCode
   expiresAt: string
   planTarget: string
 }
@@ -193,7 +192,10 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
             <PaymentModal
               isOpen={isOpen}
               onOpenChange={setIsOpen}
-              pendingPayment={pendingPayment}
+              pendingPayment={pendingPayment ? {
+                ...pendingPayment,
+                paylinkUrl: pendingPayment.paylinkUrl,  // CHANGED: was mockQrCode
+              } : null}
               planLabel={isFree ? 'PRO' : tenant.plan}
               planPrice={proPlan?.priceMonthly ?? 10000}
             />
@@ -209,7 +211,21 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
         />
       )}
 
-      {/* TODO(12-03): Paylink.kz payment configuration will be added here in Phase 12-03 */}
+      {/* Paylink.kz — Platform Subscription Provider */}
+      <Card className="rounded-2xl bg-[var(--neu-bg)] neu-raised border-0">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-semibold">Оплата подписки через Paylink.kz</CardTitle>
+          <CardDescription>
+            Оплата тарифов Omni Book производится через платёжный шлюз Paylink.kz
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-xs text-muted-foreground">
+            При выборе тарифа вы будете перенаправлены на защищённую страницу оплаты Paylink.kz.
+            После успешной оплаты подписка активируется автоматически.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
