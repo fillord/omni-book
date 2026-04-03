@@ -54,7 +54,7 @@ export async function requestProActivation() {
 export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
   success: boolean
   paymentId?: string
-  paylinkUrl?: string | null
+  paylinkUrl?: string
   amount?: number
   expiresAt?: string
   error?: string
@@ -81,7 +81,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       return {
         success: true,
         paymentId: existingPending.id,
-        paylinkUrl: existingPending.paylinkUrl,
+        paylinkUrl: existingPending.paylinkUrl ?? undefined,
         amount: existingPending.amount,
         expiresAt: existingPending.expiresAt.toISOString(),
       }
@@ -93,7 +93,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       data: { planStatus: 'PENDING' },
     })
 
-    // Create platform payment
+    // Create platform payment with Paylink integration
     const result = await createPlatformPayment(tenantId, plan, planRecord.priceMonthly)
 
     revalidatePath('/dashboard/settings/billing')
@@ -105,6 +105,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       expiresAt: result.expiresAt.toISOString(),
     }
   } catch (err) {
+    console.error('[initiateSubscriptionPayment] error:', err)
     return { success: false, error: 'Failed to initiate payment' }
   }
 }
@@ -138,18 +139,6 @@ export async function requestEnterpriseInquiry(
     return { success: true }
   } catch {
     return { success: false, error: 'Failed to submit enterprise inquiry' }
-  }
-}
-
-export async function simulatePaymentAction(paymentId: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { processPlatformPayment } = await import('@/lib/platform-payment')
-    const result = await processPlatformPayment(paymentId)
-    if (!result.success) return { success: false, error: result.error }
-    revalidatePath('/dashboard/settings/billing')
-    return { success: true }
-  } catch {
-    return { success: false, error: 'Simulation failed' }
   }
 }
 
