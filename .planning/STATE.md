@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
 current_plan: 1
-status: verifying
-last_updated: "2026-04-03T11:13:11.280Z"
+status: executing
+last_updated: "2026-04-03T21:14:25.725Z"
 last_activity: 2026-04-03
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 10
-  total_plans: 35
-  completed_plans: 35
+  total_plans: 39
+  completed_plans: 36
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 11 — public-landing-page-footer-and-legal-informational-pages-for-kaspi-pay-compliance
+**Current focus:** Phase 12 — remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment
 
 ## Current Position
 
-Phase: 11 (public-landing-page-footer-and-legal-informational-pages-for-kaspi-pay-compliance) — EXECUTING
-Plan: 2 of 2
+Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — EXECUTING
+Plan: 2 of 4
 Current Plan: 1
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [██████████] 100% (21/21 plans complete)
@@ -128,6 +128,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 11-01]: Wave 0 RED tests in legal-surface.test.ts are intentional — 19 failures expected until Plan 02 creates legal pages and i18n namespaces
 - [Phase 11]: Separate namespace per legal page (oferta/privacy/refund/about + shared legal) — each page has 6-12 sections so separate namespaces keep translations.ts organized
 - [Phase 11]: About page uses id='contacts' on Contacts section to support /about#contacts footer anchor link
+- [Phase 12]: WhatsApp button placed in SuccessScreen only — shown after booking confirmation, not during booking steps
+- [Phase 12]: buildWhatsAppPrepaymentUrl pre-fills Russian template — appropriate for KZ market primary language
 
 ### Pending Todos
 

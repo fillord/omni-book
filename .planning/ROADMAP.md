@@ -60,6 +60,10 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 - [x] **Phase 4: Client Data Foundation** — Prisma Client model, aggregation logic, sync from existing bookings (completed 2026-03-25)
 - [x] **Phase 5: Client UI, Outreach & Polish** — Clients table page, detail page, Telegram send action, Neumorphism design, RU/EN/KZ i18n (completed 2026-03-25)
 
+### v1.5 Payments Pivot
+
+- [ ] **Phase 12: Remove Kaspi Pay → Paylink.kz + WhatsApp** — Remove all Kaspi Pay integration, wire real Paylink.kz for SaaS subscriptions, replace booking deposit UI with WhatsApp prepayment button
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -74,6 +78,7 @@ Full Neumorphism Soft UI visual system, Super-Admin "God Mode" management panel,
 | 4. Client Data Foundation | v1.4 | 2/2 | Complete | 2026-03-25 |
 | 5. Client UI, Outreach & Polish | 3/3 | Complete   | 2026-03-25 | - |
 | 6. Tokenized Booking Management | v1.4 | 0/4 | In Progress | - |
+| 12. Kaspi → Paylink.kz + WhatsApp | v1.5 | 1/4 | In Progress|  |
 
 ## Phase Details
 
@@ -268,3 +273,28 @@ Plans:
 Plans:
 - [x] 11-01-PLAN.md — Test scaffold + multi-column Footer.tsx rewrite + footer i18n keys
 - [x] 11-02-PLAN.md — Legal i18n content (5 namespaces) + 4 legal page components (/oferta, /privacy, /refund, /about)
+
+### Phase 12: Remove Kaspi Pay — Integrate Paylink.kz + WhatsApp Prepayment
+
+**Goal:** Complete architectural pivot away from Kaspi Pay. Remove all Kaspi logic (booking deposits + platform payment mock QR). Replace SaaS subscription payments with real Paylink.kz API (redirect-based). Replace in-widget deposit flow with a WhatsApp deep-link button that pre-fills a professional booking confirmation template with booking details.
+**Requirements:** [PIV-01, PIV-02, PIV-03, PIV-04, PIV-05, PIV-06, PIV-07, PIV-08, PIV-09, PIV-10]
+**Depends on:** Phase 11
+**Plans:** 1/4 plans executed
+
+Requirements:
+- PIV-01: Remove Kaspi booking deposit — delete `lib/payments/kaspi.ts`, `app/api/webhooks/kaspi/route.ts`, `app/api/cron/pending-payments/route.ts`; remove Kaspi cron from `vercel.json`
+- PIV-02: Schema cleanup — remove `kaspiMerchantId`, `kaspiApiKey` from Tenant; remove `requireDeposit`, `depositAmount` from Tenant (keep on Service for future); remove `paymentInvoiceId`, `paymentExpiresAt` from Booking
+- PIV-03: Booking route cleanup — remove deposit branch from `app/api/bookings/route.ts`; always create CONFIRMED bookings
+- PIV-04: WhatsApp prepayment button — replace WaitingForPaymentScreen in `components/booking-form.tsx` with a "Написать в WhatsApp для предоплаты" button; generates wa.me deep link to tenant phone with pre-filled template including service name, date/time, price, cancellation policy
+- PIV-05: Service form cleanup — remove "Kaspi deposit" section from `components/service-form.tsx` (requireDeposit + depositAmount fields); keep deposit fields in DB for future if desired
+- PIV-06: Paylink.kz adapter — `lib/payments/paylink.ts` with `createPaylinkPayment(orderId, amount, description, backUrl)` — calls real Paylink.kz API with BIN 030506501136, returns redirect URL
+- PIV-07: Paylink webhook handler — `app/api/webhooks/paylink/route.ts` replaces `app/api/webhooks/kaspi/route.ts` for platform payments; verifies signature, calls `processPlatformPayment()` on success
+- PIV-08: Platform payment adapter rewrite — update `lib/platform-payment.ts` and `PlatformPayment` model to use `paylinkOrderId` + `paylinkUrl` instead of `mockQrCode` + `mockPaylink`; remove simulate endpoint (`app/api/mock-payment/simulate/route.ts`)
+- PIV-09: Payment modal rewrite — `app/dashboard/settings/billing/payment-modal.tsx` shows "Оплатить через Paylink" redirect button + polling for webhook confirmation instead of mock QR + simulate button
+- PIV-10: Billing UI cleanup — remove Kaspi Merchant ID / API Key config section from `billing-content.tsx`; update payment section label to "Оплата через Paylink.kz"; keep Neumorphic design consistent
+
+Plans:
+- [ ] 12-01-PLAN.md — Prisma schema migration (remove Kaspi fields) + delete Kaspi files + vercel.json cleanup
+- [x] 12-02-PLAN.md — Booking route cleanup + WhatsApp prepayment button in booking-form.tsx + service-form.tsx deposit section removal
+- [ ] 12-03-PLAN.md — Paylink.kz adapter + Paylink webhook handler + platform-payment.ts rewrite + remove simulate endpoint
+- [ ] 12-04-PLAN.md — Payment modal rewrite (Paylink redirect + polling) + billing-content.tsx Kaspi config removal + i18n key updates
