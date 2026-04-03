@@ -1,40 +1,50 @@
 import { basePrisma } from '@/lib/db'
-import { createAuditLog } from '@/lib/actions/audit-log'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { Plan } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { createPaylinkPayment } from '@/lib/payments/paylink'
 
 // ---------------------------------------------------------------------------
 // createPlatformPayment
 // ---------------------------------------------------------------------------
 
-// TODO(12-03): Wire real Paylink.kz API here — paylinkOrderId and paylinkUrl
-// will be populated from the Paylink adapter response.
-
 export async function createPlatformPayment(
   tenantId: string,
   plan: Plan,
   amount: number
-): Promise<{ paymentId: string; paylinkOrderId: string | null; paylinkUrl: string | null; expiresAt: Date }> {
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+): Promise<{ paymentId: string; paylinkUrl: string; expiresAt: Date }> {
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
 
+  // Create DB record first to get the ID
   const payment = await basePrisma.platformPayment.create({
     data: {
       tenantId,
       amount,
       planTarget: plan,
-      paylinkOrderId: null, // TODO(12-03): populate from Paylink API
-      paylinkUrl: null,     // TODO(12-03): populate from Paylink API
+      paylinkOrderId: '', // filled below
+      paylinkUrl: '',     // filled below
       expiresAt,
     },
   })
 
-  return {
-    paymentId: payment.id,
-    paylinkOrderId: payment.paylinkOrderId,
-    paylinkUrl: payment.paylinkUrl,
-    expiresAt,
-  }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://omni-book.site'
+  const backUrl = `${appUrl}/dashboard/settings/billing`
+  const description = `Подписка ${plan} — Omni Book`
+
+  const { orderId, paymentUrl } = await createPaylinkPayment(
+    payment.id, // use DB record ID as orderId
+    amount,
+    description,
+    backUrl
+  )
+
+  // Update with real Paylink data
+  await basePrisma.platformPayment.update({
+    where: { id: payment.id },
+    data: { paylinkOrderId: orderId, paylinkUrl: paymentUrl },
+  })
+
+  return { paymentId: payment.id, paylinkUrl: paymentUrl, expiresAt }
 }
 
 // ---------------------------------------------------------------------------
@@ -60,13 +70,12 @@ export async function processPlatformPayment(paymentId: string): Promise<{
   if (updated.count === 0) return { success: true, alreadyProcessed: true }
 
   // 3. Activate subscription
-  // Replicates activateSubscription transaction logic without ensureSuperAdmin guard
   const planRecord = await basePrisma.subscriptionPlan.findUnique({
     where: { plan: payment.planTarget },
     select: { maxResources: true },
   })
   const maxResources = planRecord?.maxResources ?? 20
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+  const subscriptionExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
   await basePrisma.$transaction([
     basePrisma.tenant.update({
@@ -74,7 +83,7 @@ export async function processPlatformPayment(paymentId: string): Promise<{
       data: {
         plan: payment.planTarget,
         planStatus: 'ACTIVE',
-        subscriptionExpiresAt: expiresAt,
+        subscriptionExpiresAt,
         maxResources,
       },
     }),
@@ -90,14 +99,7 @@ export async function processPlatformPayment(paymentId: string): Promise<{
 
   revalidatePath('/dashboard/settings/billing')
 
-  // 4. Audit log (fire-and-forget)
-  await createAuditLog(payment.tenantId, 'saas_payment_received', {
-    paymentId: payment.id,
-    amount: payment.amount,
-    plan: payment.planTarget,
-  })
-
-  // 5. Telegram notification to admin
+  // 4. Telegram notification to admin (fire-and-forget)
   const tenant = await basePrisma.tenant.findUnique({
     where: { id: payment.tenantId },
     select: { name: true },
