@@ -688,6 +688,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       paymentCountdown: 'Осталось времени:',
       paymentExpired: 'Время ожидания оплаты истекло. Запись отменена.',
       paymentExpiredSub: 'Запись автоматически отменена. Вы можете записаться снова.',
+      whatsappPrepayment: 'Написать в WhatsApp для предоплаты',
     },
     billing: {
       payWithKaspi: 'Оплатить через Kaspi',
@@ -1472,6 +1473,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       paymentCountdown: 'Қалған уақыт:',
       paymentExpired: 'Төлем уақыты аяқталды. Жазба жойылды.',
       paymentExpiredSub: 'Жазбаңыз автоматты түрде жойылды. Қайта жазыла аласыз.',
+      whatsappPrepayment: 'Алдын ала төлем үшін WhatsApp-қа жазу',
     },
     billing: {
       payWithKaspi: 'Kaspi арқылы төлеу',
@@ -2256,6 +2258,7 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       paymentCountdown: 'Time remaining:',
       paymentExpired: 'Payment time expired. Booking cancelled.',
       paymentExpiredSub: 'Your booking was automatically cancelled. You can book again.',
+      whatsappPrepayment: 'Message on WhatsApp for prepayment',
     },
     billing: {
       payWithKaspi: 'Pay with Kaspi',
