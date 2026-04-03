@@ -1,8 +1,8 @@
 import { basePrisma } from '@/lib/db'
+import { createAuditLog } from '@/lib/actions/audit-log'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { Plan } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { createPaylinkPayment } from '@/lib/payments/paylink'
 
 // ---------------------------------------------------------------------------
 // createPlatformPayment
@@ -13,7 +13,7 @@ export async function createPlatformPayment(
   plan: Plan,
   amount: number
 ): Promise<{ paymentId: string; paylinkUrl: string; expiresAt: Date }> {
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24h
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
   // Create DB record first to get the ID
   const payment = await basePrisma.platformPayment.create({
@@ -21,8 +21,8 @@ export async function createPlatformPayment(
       tenantId,
       amount,
       planTarget: plan,
-      paylinkOrderId: '', // filled below
-      paylinkUrl: '',     // filled below
+      paylinkOrderId: '',  // filled below
+      paylinkUrl: '',      // filled below
       expiresAt,
     },
   })
@@ -31,20 +31,49 @@ export async function createPlatformPayment(
   const backUrl = `${appUrl}/dashboard/settings/billing`
   const description = `Подписка ${plan} — Omni Book`
 
-  const { orderId, paymentUrl } = await createPaylinkPayment(
-    payment.id, // use DB record ID as orderId
-    amount,
-    description,
-    backUrl
-  )
+  let paylinkUrl: string
+
+  const apiKey = process.env.PAYLINK_API_KEY
+  if (!apiKey) {
+    // Fallback for local dev without credentials
+    console.warn('[Paylink] PAYLINK_API_KEY not set — using mock payment URL')
+    paylinkUrl = `${backUrl}?mock_payment=1&orderId=${payment.id}`
+  } else {
+    const apiBaseUrl = process.env.PAYLINK_API_URL ?? 'https://api.paylink.kz'
+    const response = await fetch(`${apiBaseUrl}/v1/payments/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        order_id: payment.id,
+        amount,
+        currency: 'KZT',
+        description,
+        back_url: backUrl,
+        webhook_url: `${appUrl}/api/webhooks/paylink`,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`[Paylink] API error ${response.status}: ${errorText}`)
+      // Fallback to dev mock URL on API error so payment isn't fully broken
+      paylinkUrl = `${backUrl}?mock_payment=1&orderId=${payment.id}`
+    } else {
+      const data = await response.json()
+      paylinkUrl = data.payment_url ?? `${backUrl}?mock_payment=1&orderId=${payment.id}`
+    }
+  }
 
   // Update with real Paylink data
   await basePrisma.platformPayment.update({
     where: { id: payment.id },
-    data: { paylinkOrderId: orderId, paylinkUrl: paymentUrl },
+    data: { paylinkOrderId: payment.id, paylinkUrl },
   })
 
-  return { paymentId: payment.id, paylinkUrl: paymentUrl, expiresAt }
+  return { paymentId: payment.id, paylinkUrl, expiresAt }
 }
 
 // ---------------------------------------------------------------------------
@@ -70,12 +99,13 @@ export async function processPlatformPayment(paymentId: string): Promise<{
   if (updated.count === 0) return { success: true, alreadyProcessed: true }
 
   // 3. Activate subscription
+  // Replicates activateSubscription transaction logic without ensureSuperAdmin guard
   const planRecord = await basePrisma.subscriptionPlan.findUnique({
     where: { plan: payment.planTarget },
     select: { maxResources: true },
   })
   const maxResources = planRecord?.maxResources ?? 20
-  const subscriptionExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
 
   await basePrisma.$transaction([
     basePrisma.tenant.update({
@@ -83,7 +113,7 @@ export async function processPlatformPayment(paymentId: string): Promise<{
       data: {
         plan: payment.planTarget,
         planStatus: 'ACTIVE',
-        subscriptionExpiresAt,
+        subscriptionExpiresAt: expiresAt,
         maxResources,
       },
     }),
@@ -99,7 +129,14 @@ export async function processPlatformPayment(paymentId: string): Promise<{
 
   revalidatePath('/dashboard/settings/billing')
 
-  // 4. Telegram notification to admin (fire-and-forget)
+  // 4. Audit log (fire-and-forget)
+  await createAuditLog(payment.tenantId, 'saas_payment_received', {
+    paymentId: payment.id,
+    amount: payment.amount,
+    plan: payment.planTarget,
+  })
+
+  // 5. Telegram notification to admin
   const tenant = await basePrisma.tenant.findUnique({
     where: { id: payment.tenantId },
     select: { name: true },

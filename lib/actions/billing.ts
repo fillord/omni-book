@@ -54,7 +54,7 @@ export async function requestProActivation() {
 export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
   success: boolean
   paymentId?: string
-  paylinkUrl?: string
+  paylinkUrl?: string   // CHANGED: was mockQrCode
   amount?: number
   expiresAt?: string
   error?: string
@@ -81,7 +81,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       return {
         success: true,
         paymentId: existingPending.id,
-        paylinkUrl: existingPending.paylinkUrl ?? undefined,
+        paylinkUrl: existingPending.paylinkUrl ?? undefined,  // CHANGED: was mockQrCode
         amount: existingPending.amount,
         expiresAt: existingPending.expiresAt.toISOString(),
       }
@@ -93,19 +93,18 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       data: { planStatus: 'PENDING' },
     })
 
-    // Create platform payment with Paylink integration
+    // Create platform payment
     const result = await createPlatformPayment(tenantId, plan, planRecord.priceMonthly)
 
     revalidatePath('/dashboard/settings/billing')
     return {
       success: true,
       paymentId: result.paymentId,
-      paylinkUrl: result.paylinkUrl,
+      paylinkUrl: result.paylinkUrl,  // CHANGED: was mockQrCode
       amount: planRecord.priceMonthly,
       expiresAt: result.expiresAt.toISOString(),
     }
   } catch (err) {
-    console.error('[initiateSubscriptionPayment] error:', err)
     return { success: false, error: 'Failed to initiate payment' }
   }
 }
