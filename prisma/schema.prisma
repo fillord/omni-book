@@ -285,8 +285,8 @@ model PlatformPayment {
   amount      Int
   planTarget  Plan
   status      PaymentStatus @default(PENDING)
-  mockQrCode  String?
-  mockPaylink String?
+  paylinkOrderId String?
+  paylinkUrl     String?
   expiresAt   DateTime
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
