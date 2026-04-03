@@ -263,8 +263,8 @@ Plans:
 **Goal:** Replace the single-row landing page footer with a multi-column Product/Legal/Company grid layout, and create 4 public legal/informational pages (/oferta, /privacy, /refund, /about) with full RU/KZ/EN i18n and Neumorphism design — satisfying Kaspi Pay merchant compliance requirements for public-facing legal documentation.
 **Requirements:** [LAND-F01, LAND-F02, LAND-F03, LEGAL-01, LEGAL-02, LEGAL-03, LEGAL-04, LEGAL-05, LEGAL-06, LEGAL-07]
 **Depends on:** Phase 10
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 11-01-PLAN.md — Test scaffold + multi-column Footer.tsx rewrite + footer i18n keys
-- [ ] 11-02-PLAN.md — Legal i18n content (5 namespaces) + 4 legal page components (/oferta, /privacy, /refund, /about)
+- [x] 11-02-PLAN.md — Legal i18n content (5 namespaces) + 4 legal page components (/oferta, /privacy, /refund, /about)
