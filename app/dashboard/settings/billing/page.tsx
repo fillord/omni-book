@@ -12,11 +12,24 @@ export default async function BillingPage() {
 
   const [tenant, subscriptionPlans, pendingPayment] = await Promise.all([
     basePrisma.tenant.findUnique({
-      where: { id: tenantId }
+      where: { id: tenantId },
+      select: {
+        id: true,
+        plan: true,
+        planStatus: true,
+        subscriptionExpiresAt: true,
+      },
     }),
     basePrisma.subscriptionPlan.findMany({ where: { isActive: true }, orderBy: { plan: 'asc' } }),
     basePrisma.platformPayment.findFirst({
       where: { tenantId, status: 'PENDING', expiresAt: { gt: new Date() } },
+      select: {
+        id: true,
+        amount: true,
+        paylinkUrl: true,   // CHANGED: was mockQrCode
+        expiresAt: true,
+        planTarget: true,
+      },
       orderBy: { createdAt: 'desc' },
     }),
   ])
@@ -40,7 +53,7 @@ export default async function BillingPage() {
         pendingPayment={pendingPayment ? {
           id: pendingPayment.id,
           amount: pendingPayment.amount,
-          paylinkUrl: pendingPayment.paylinkUrl,
+          paylinkUrl: pendingPayment.paylinkUrl,   // CHANGED: was mockQrCode
           expiresAt: pendingPayment.expiresAt.toISOString(),
           planTarget: pendingPayment.planTarget,
         } : null}
