@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
-import { cancelExpiredBooking } from '@/lib/actions/bookings'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
@@ -17,8 +16,6 @@ export type ServiceOption = {
   durationMin:    number
   price:          number | null
   currency:       string
-  requireDeposit: boolean
-  depositAmount:  number | null   // minor units (tiyn); divide by 100 for tenge
 }
 
 export type ResourceOption = {
@@ -42,6 +39,8 @@ type Props = {
   nicheColor?:   string
   /** Rolling booking window: max days ahead for booking */
   bookingWindowDays?: number
+  /** Tenant phone number used for WhatsApp prepayment deep link */
+  tenantPhone?:  string | null
 }
 
 type Step = 'service' | 'resource' | 'datetime' | 'confirm'
@@ -326,84 +325,32 @@ function SuccessScreen({
   )
 }
 
-// ---- WaitingForPaymentScreen -----------------------------------------------
+// ---- buildWhatsAppPrepaymentUrl --------------------------------------------
 
-function WaitingForPaymentScreen({ bookingId, onReset, expiresAt, onExpire }: { bookingId: string; onReset: () => void; expiresAt?: number; onExpire?: () => void }) {
-  const { t } = useI18n()
-  const initialSeconds = expiresAt ? Math.max(0, Math.floor((expiresAt - Date.now()) / 1000)) : 10 * 60
-  const [secondsLeft, setSecondsLeft] = useState(initialSeconds)
-  const [expired, setExpired] = useState(false)
-  const expiredFiredRef = useRef(false)
+function buildWhatsAppPrepaymentUrl(params: {
+  tenantPhone: string
+  guestName:   string
+  serviceName: string
+  date:        string
+  time:        string
+  price:       number | null
+  currency:    string
+}): string {
+  const priceText = params.price
+    ? `${new Intl.NumberFormat('ru-RU').format(params.price)} ${params.currency}`
+    : ''
 
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      setExpired(true)
-      if (!expiredFiredRef.current) {
-        expiredFiredRef.current = true
-        onExpire?.()
-      }
-      return
-    }
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
-          setExpired(true)
-          if (!expiredFiredRef.current) {
-            expiredFiredRef.current = true
-            onExpire?.()
-          }
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [secondsLeft, onExpire])
+  const template = [
+    `Здравствуйте! Я хочу подтвердить бронирование.`,
+    `📋 Услуга: ${params.serviceName}`,
+    `📅 Дата и время: ${params.date}, ${params.time}`,
+    priceText ? `💰 Стоимость: ${priceText}` : '',
+    ``,
+    `Мне необходимо внести предоплату. Подскажите, как это сделать?`,
+  ].filter(Boolean).join('\n')
 
-  const minutes = Math.floor(secondsLeft / 60)
-  const seconds = secondsLeft % 60
-  const timeDisplay = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-
-  if (expired) {
-    return (
-      <div className="text-center space-y-4 p-6 rounded-2xl bg-[var(--neu-bg)] neu-raised">
-        <div className="text-4xl">&#9200;</div>
-        <h3 className="text-lg font-semibold text-foreground">
-          {t('payment', 'paymentExpired')}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {t('payment', 'paymentExpiredSub')}
-        </p>
-        <button
-          onClick={onReset}
-          className="mt-4 px-6 py-2 rounded-xl bg-[var(--neu-bg)] neu-raised text-sm font-medium hover:opacity-80 transition-opacity"
-        >
-          {t('booking', 'bookAgain')}
-        </button>
-      </div>
-    )
-  }
-
-  // suppress unused var warning — bookingId reserved for future polling
-  void bookingId
-
-  return (
-    <div className="text-center space-y-4 p-6 rounded-2xl bg-[var(--neu-bg)] neu-raised">
-      <div className="text-4xl">&#128179;</div>
-      <h3 className="text-lg font-semibold text-foreground">
-        {t('payment', 'waitingForPayment')}
-      </h3>
-      <p className="text-sm text-muted-foreground">
-        {t('payment', 'waitingInstructions')}
-      </p>
-      <div className="text-3xl font-mono font-bold text-foreground neu-inset inline-block px-6 py-3 rounded-xl bg-[var(--neu-bg)]">
-        {timeDisplay}
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {t('payment', 'paymentCountdown')}
-      </p>
-    </div>
-  )
+  const phone = params.tenantPhone.replace(/[^0-9]/g, '')
+  return `https://wa.me/${phone}?text=${encodeURIComponent(template)}`
 }
 
 // ---- BookingForm -----------------------------------------------------------
@@ -416,6 +363,7 @@ export function BookingForm({
   resourceLabel,
   nicheColor,
   bookingWindowDays = 14,
+  tenantPhone,
 }: Props) {
   const { t, locale } = useI18n()
   const colors = BOOKING_COLORS[nicheColor ?? 'blue'] ?? FALLBACK_COLORS
@@ -442,29 +390,10 @@ export function BookingForm({
   const [dayOff,       setDayOff]       = useState(false)
   const [slotsFrozen,  setSlotsFrozen]  = useState(false)
 
-  const [loading,          setLoading]          = useState(false)
-  const [error,            setError]            = useState<string | null>(null)
-  const [successId,        setSuccessId]        = useState<string | null>(null)
-  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null)
-  const [paymentExpiresAt, setPaymentExpiresAt] = useState<number | null>(null)
-  const [slideDir,         setSlideDir]         = useState<'left' | 'right'>('left')
-
-  // Restore pending payment state from sessionStorage on mount
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('pendingBooking')
-      if (!saved) return
-      const parsed = JSON.parse(saved) as { bookingId: string; status: string; expiresAt: number }
-      if (parsed.status === 'PENDING' && parsed.expiresAt > Date.now()) {
-        setPendingPaymentId(parsed.bookingId)
-        setPaymentExpiresAt(parsed.expiresAt)
-      } else {
-        sessionStorage.removeItem('pendingBooking')
-      }
-    } catch {
-      sessionStorage.removeItem('pendingBooking')
-    }
-  }, [])
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState<string | null>(null)
+  const [successId, setSuccessId] = useState<string | null>(null)
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('left')
 
   function goForward(nextStep: Step) {
     setSlideDir('left')
@@ -503,10 +432,6 @@ export function BookingForm({
   const selectedService  = services.find((s) => s.id === selectedServiceId)
   const selectedResource = resources.find((r) => r.id === selectedResourceId)
   const slotStartsAtMap  = Object.fromEntries(slots.map((s) => [s.time, s.startsAt]))
-
-  // Deposit derived from the selected service (not tenant-global)
-  const requireDeposit = selectedService?.requireDeposit ?? false
-  const depositAmount  = selectedService?.depositAmount ?? 0
 
   const availableResources = selectedServiceId
     ? resources.filter((r) => r.serviceIds.includes(selectedServiceId))
@@ -558,14 +483,6 @@ export function BookingForm({
         setError(data.error ?? t('booking', 'genericError'))
         return
       }
-      // Phase 9: deposit branch — show waiting-for-payment screen instead of success
-      if (data.invoiceCreated) {
-        const expiresAt = Date.now() + 10 * 60 * 1000
-        sessionStorage.setItem('pendingBooking', JSON.stringify({ bookingId: data.booking.id, status: 'PENDING', expiresAt }))
-        setPaymentExpiresAt(expiresAt)
-        setPendingPaymentId(data.booking.id)
-        return
-      }
       setSuccessId(data.booking.id)
     } catch {
       setError(t('booking', 'networkError'))
@@ -586,23 +503,10 @@ export function BookingForm({
     setGuestEmail('')
     setError(null)
     setSuccessId(null)
-    setPendingPaymentId(null)
-    setPaymentExpiresAt(null)
+    // TODO(12-02): remove setPendingPaymentId / setPaymentExpiresAt state — Kaspi deposit flow
   }
 
-  if (pendingPaymentId) {
-    return (
-      <WaitingForPaymentScreen
-        bookingId={pendingPaymentId}
-        onReset={handleReset}
-        expiresAt={paymentExpiresAt ?? undefined}
-        onExpire={async () => {
-          sessionStorage.removeItem('pendingBooking')
-          await cancelExpiredBooking(pendingPaymentId)
-        }}
-      />
-    )
-  }
+  // TODO(12-02): WaitingForPaymentScreen block removed — Kaspi deposit flow deleted in Phase 12-01
 
   if (successId && selectedService && selectedResource) {
     return (
@@ -939,17 +843,7 @@ export function BookingForm({
             </div>
           )}
 
-          {requireDeposit && depositAmount && depositAmount > 0 && (
-            <div className="p-3 rounded-xl bg-[var(--neu-bg)] neu-inset text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {t('payment', 'depositRequired')}:
-              </span>{' '}
-              {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'KZT', maximumFractionDigits: 0 }).format(depositAmount / 100)}
-              <p className="mt-1 text-xs">
-                {t('payment', 'depositNotice')}
-              </p>
-            </div>
-          )}
+          {/* TODO(12-02): Deposit display removed — Kaspi deposit flow removed in Phase 12-01 */}
 
           <div className="flex justify-between pt-2">
             <button

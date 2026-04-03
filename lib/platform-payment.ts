@@ -5,28 +5,17 @@ import { Plan } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function generateMockQrSvg(plan: Plan, amount: number): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-    <rect width="200" height="200" fill="#f0f0f0" rx="8"/>
-    <text x="100" y="85" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#666">Mock QR</text>
-    <text x="100" y="110" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#999">${plan}</text>
-    <text x="100" y="135" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#333">${amount.toLocaleString()} ₸</text>
-  </svg>`
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
-}
-
-// ---------------------------------------------------------------------------
 // createPlatformPayment
 // ---------------------------------------------------------------------------
+
+// TODO(12-03): Wire real Paylink.kz API here — paylinkOrderId and paylinkUrl
+// will be populated from the Paylink adapter response.
 
 export async function createPlatformPayment(
   tenantId: string,
   plan: Plan,
   amount: number
-): Promise<{ paymentId: string; mockQrCode: string; mockPaylink: string; expiresAt: Date }> {
+): Promise<{ paymentId: string; paylinkOrderId: string | null; paylinkUrl: string | null; expiresAt: Date }> {
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
   const payment = await basePrisma.platformPayment.create({
@@ -34,23 +23,16 @@ export async function createPlatformPayment(
       tenantId,
       amount,
       planTarget: plan,
-      mockQrCode: generateMockQrSvg(plan, amount),
-      mockPaylink: '', // placeholder, updated after creation
+      paylinkOrderId: null, // TODO(12-03): populate from Paylink API
+      paylinkUrl: null,     // TODO(12-03): populate from Paylink API
       expiresAt,
     },
   })
 
-  // Update mockPaylink with the actual payment ID
-  const mockPaylink = `https://mock-kaspi.local/pay?id=${payment.id}`
-  await basePrisma.platformPayment.update({
-    where: { id: payment.id },
-    data: { mockPaylink },
-  })
-
   return {
     paymentId: payment.id,
-    mockQrCode: payment.mockQrCode!,
-    mockPaylink,
+    paylinkOrderId: payment.paylinkOrderId,
+    paylinkUrl: payment.paylinkUrl,
     expiresAt,
   }
 }

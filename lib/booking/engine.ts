@@ -102,10 +102,7 @@ export interface CreateBookingParams {
   guestName: string
   guestPhone: string
   guestEmail?: string | null
-  // Phase 9: payment support
   status?: 'CONFIRMED' | 'PENDING'
-  paymentExpiresAt?: Date | null
-  paymentInvoiceId?: string | null
 }
 
 // ---- Constants -------------------------------------------------------------
@@ -199,14 +196,16 @@ export async function getAvailableSlots(
   const dayStart = zonedDatetime(date, schedule.startTime, timezone)
   const dayEnd   = zonedDatetime(date, schedule.endTime, timezone)
 
-  // Fetch all non-cancelled bookings for this resource on that day
+  // Fetch all active bookings for this resource on that day.
   const existingBookings = await db.booking.findMany({
     where: {
       resourceId,
-      status: { not: "CANCELLED" },
       AND: [
         { startsAt: { lt: dayEnd } },
         { endsAt:   { gt: dayStart } },
+        {
+          status: { in: ['CONFIRMED', 'COMPLETED', 'NO_SHOW', 'PENDING'] },
+        },
       ],
     },
     select: { startsAt: true, endsAt: true },
@@ -268,7 +267,7 @@ export async function getAvailableSlots(
  * Throws BookingConflictError on overlap.
  */
 export async function createBooking(params: CreateBookingParams) {
-  const { tenantId, resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail, status: requestedStatus, paymentExpiresAt, paymentInvoiceId } = params
+  const { tenantId, resourceId, serviceId, startsAt, guestName, guestPhone, guestEmail, status: requestedStatus } = params
 
   const startsAtDate = new Date(startsAt)
   if (isNaN(startsAtDate.getTime())) {
@@ -311,27 +310,28 @@ export async function createBooking(params: CreateBookingParams) {
       if (resource.isFrozen || service.isFrozen) throw new FrozenError()
 
       // Anti-spam: max active bookings per phone per tenant
+      const limitNow = new Date()
       const activeCount = await tx.booking.count({
         where: {
           tenantId,
           guestPhone: normalizedPhone,
-          status: { in: ["PENDING", "CONFIRMED"] },
-          endsAt: { gte: new Date() },
+          endsAt: { gte: limitNow },
+          status: { in: ['CONFIRMED', 'PENDING'] },
         },
       })
       if (activeCount >= MAX_ACTIVE_BOOKINGS_PER_PHONE) throw new BookingLimitError()
 
       const endsAtDate = new Date(startsAtDate.getTime() + service.durationMin * 60 * 1000)
 
-      // Collision check inside the transaction
+      // Collision check
       const collision = await tx.booking.findFirst({
         where: {
           tenantId,
           resourceId,
-          status: { in: ["CONFIRMED", "PENDING"] },
           AND: [
             { startsAt: { lt: endsAtDate } },
             { endsAt:   { gt: startsAtDate } },
+            { status: { in: ['CONFIRMED', 'PENDING'] } },
           ],
         },
       })
@@ -352,8 +352,6 @@ export async function createBooking(params: CreateBookingParams) {
           endsAt:     endsAtDate,
           status:     requestedStatus ?? "CONFIRMED",
           manageToken,
-          paymentInvoiceId: paymentInvoiceId ?? null,
-          paymentExpiresAt: paymentExpiresAt ?? null,
         },
       })
     },

@@ -40,7 +40,7 @@ export default async function BillingPage() {
         pendingPayment={pendingPayment ? {
           id: pendingPayment.id,
           amount: pendingPayment.amount,
-          mockQrCode: pendingPayment.mockQrCode,
+          paylinkUrl: pendingPayment.paylinkUrl,
           expiresAt: pendingPayment.expiresAt.toISOString(),
           planTarget: pendingPayment.planTarget,
         } : null}

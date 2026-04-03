@@ -1,43 +1,8 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
-import { requireAuth, requireRole } from '@/lib/auth/guards'
-import { basePrisma } from '@/lib/db'
+// TODO(12-04): updatePaymentSettings will be replaced with Paylink.kz settings action.
+// Kaspi fields (kaspiMerchantId, kaspiApiKey) removed from Tenant model in Phase 12-01.
 
-export async function updatePaymentSettings(data: {
-  kaspiMerchantId?: string
-  kaspiApiKey?: string
-}) {
-  try {
-    const session = await requireAuth()
-    requireRole(session, ['OWNER'])
-    const tenantId = session?.user?.tenantId
-
-    if (!tenantId) {
-      return { error: 'Tenant ID не найден в сессии' }
-    }
-
-    // Gate: PRO+ only (per D-07d)
-    const tenant = await basePrisma.tenant.findUnique({
-      where: { id: tenantId },
-      select: { plan: true },
-    })
-
-    if (!tenant || tenant.plan === 'FREE') {
-      return { error: 'Требуется план PRO' }
-    }
-
-    await basePrisma.tenant.update({
-      where: { id: tenantId },
-      data: {
-        kaspiMerchantId: data.kaspiMerchantId?.trim() || null,
-        kaspiApiKey: data.kaspiApiKey?.trim() || null,
-      },
-    })
-
-    revalidatePath('/dashboard/settings/billing')
-    return { success: true }
-  } catch (error: unknown) {
-    return { error: error instanceof Error ? error.message : 'Произошла ошибка при сохранении настроек' }
-  }
+export async function updatePaymentSettings(_data: Record<string, string | undefined>) {
+  return { error: 'Kaspi payment settings removed. Paylink.kz integration coming in Phase 12-03.' }
 }

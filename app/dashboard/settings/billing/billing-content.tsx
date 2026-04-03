@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import {
   Check,
   CreditCard,
@@ -13,10 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { updatePaymentSettings } from "@/lib/actions/payment-settings"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { EnterpriseCalculator } from './enterprise-calculator'
 import { PaymentModal } from './payment-modal'
 
@@ -24,8 +20,6 @@ type TenantInfo = {
   plan: string
   planStatus: string
   subscriptionExpiresAt: Date | null
-  kaspiMerchantId: string | null
-  kaspiApiKey: string | null
 }
 
 type SubscriptionPlanInfo = {
@@ -39,7 +33,7 @@ type SubscriptionPlanInfo = {
 type PendingPaymentInfo = {
   id: string
   amount: number
-  mockQrCode: string | null
+  paylinkUrl: string | null
   expiresAt: string
   planTarget: string
 }
@@ -57,13 +51,7 @@ type Props = {
 }
 
 export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment = null, enterprisePlan = null }: Props) {
-  const router = useRouter()
-
   const [isOpen, setIsOpen] = useState(false)
-
-  const [kaspiMerchantId, setKaspiMerchantId] = useState(tenant.kaspiMerchantId ?? '')
-  const [kaspiApiKey, setKaspiApiKey] = useState(tenant.kaspiApiKey ?? '')
-  const [savingDeposit, setSavingDeposit] = useState(false)
 
   const isFree = tenant.plan === "FREE"
   const isPending = tenant.planStatus === "PENDING"
@@ -79,21 +67,6 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
       setIsOpen(true)
     }
   }, [pendingPayment])
-
-  async function handleSaveDeposit() {
-    setSavingDeposit(true)
-    const res = await updatePaymentSettings({
-      kaspiMerchantId: kaspiMerchantId || undefined,
-      kaspiApiKey: kaspiApiKey || undefined,
-    })
-    setSavingDeposit(false)
-    if (res?.error) {
-      toast.error(res.error)
-      return
-    }
-    toast.success('Настройки оплаты сохранены')
-    router.refresh()
-  }
 
   return (
     <div className="space-y-8">
@@ -236,46 +209,7 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
         />
       )}
 
-      {/* Kaspi payment configuration — PRO+ only */}
-      {isPro && (
-        <Card className="bg-[var(--neu-bg)] neu-raised">
-          <CardHeader>
-            <CardTitle>Настройки оплаты</CardTitle>
-            <CardDescription>Подключите Kaspi для приёма онлайн-оплаты</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Kaspi Merchant ID</label>
-              <input
-                type="text"
-                value={kaspiMerchantId}
-                onChange={(e) => setKaspiMerchantId(e.target.value)}
-                className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
-                placeholder="Merchant ID"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Kaspi API Key</label>
-              <input
-                type="password"
-                value={kaspiApiKey}
-                onChange={(e) => setKaspiApiKey(e.target.value)}
-                className="w-full rounded-xl bg-[var(--neu-bg)] neu-inset px-3 py-2 text-sm"
-                placeholder="API Key"
-              />
-            </div>
-
-            <Button
-              onClick={handleSaveDeposit}
-              disabled={savingDeposit}
-              className="neu-raised"
-            >
-              {savingDeposit ? 'Сохранение...' : 'Сохранить настройки оплаты'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      {/* TODO(12-03): Paylink.kz payment configuration will be added here in Phase 12-03 */}
     </div>
   )
 }

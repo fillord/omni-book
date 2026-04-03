@@ -16,7 +16,7 @@ import { ShieldCheck, Clock } from 'lucide-react'
 type PendingPayment = {
   id: string
   amount: number
-  mockQrCode: string | null
+  paylinkUrl: string | null
   expiresAt: string  // ISO string
   planTarget: string
 }
@@ -31,7 +31,7 @@ type Props = {
 
 type PaymentData = {
   id: string
-  mockQrCode: string
+  paylinkUrl: string | null
   amount: number
   expiresAt: string
 }
@@ -49,7 +49,7 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
       setStep(2)
       setPaymentData({
         id: pendingPayment.id,
-        mockQrCode: pendingPayment.mockQrCode ?? '',
+        paylinkUrl: pendingPayment.paylinkUrl,
         amount: pendingPayment.amount,
         expiresAt: pendingPayment.expiresAt,
       })
@@ -83,7 +83,7 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
       }
       setPaymentData({
         id: res.paymentId,
-        mockQrCode: res.mockQrCode ?? '',
+        paylinkUrl: res.paylinkUrl ?? null,
         amount: res.amount ?? planPrice,
         expiresAt: res.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       })
@@ -129,7 +129,7 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
                 disabled={isPending}
                 className="w-full neu-raised"
               >
-                {isPending ? 'Обработка...' : 'Оплатить через Kaspi'}
+                {isPending ? 'Обработка...' : 'Оплатить через Paylink.kz'}
               </Button>
             </div>
           </>
@@ -142,13 +142,17 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
               </DialogTitle>
             </DialogHeader>
             <div className="py-6 space-y-6">
-              {timeLeft > 0 && paymentData?.mockQrCode ? (
+              {/* TODO(12-03): Show Paylink.kz QR/link here once paylinkUrl is populated */}
+              {timeLeft > 0 && paymentData?.paylinkUrl ? (
                 <div className="flex justify-center">
-                  <img
-                    src={paymentData.mockQrCode}
-                    alt="QR Code"
-                    className="w-48 h-48 rounded-xl"
-                  />
+                  <a
+                    href={paymentData.paylinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center p-4 rounded-xl neu-inset bg-[var(--neu-bg)] text-sm text-indigo-600 dark:text-indigo-400 underline"
+                  >
+                    Оплатить через Paylink.kz
+                  </a>
                 </div>
               ) : null}
 

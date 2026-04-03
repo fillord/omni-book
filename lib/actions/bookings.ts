@@ -10,6 +10,8 @@ import { sendBookingConfirmation } from '@/lib/email/resend'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { manualBookingSchema, type ManualBookingInput } from '@/lib/validations/booking'
 
+// TODO(12-02): cancelExpiredBooking removed — Kaspi deposit flow removed in Phase 12
+
 export async function createManualBooking(data: ManualBookingInput) {
   try {
     const session = await requireAuth()
@@ -28,9 +30,9 @@ export async function createManualBooking(data: ManualBookingInput) {
         const conflict = await tx.booking.findFirst({
           where: {
             resourceId: parsed.resourceId,
-            status: { not: 'CANCELLED' },
             startsAt: { lt: new Date(parsed.endsAt) },
             endsAt: { gt: new Date(parsed.startsAt) },
+            status: { in: ['CONFIRMED', 'COMPLETED', 'NO_SHOW', 'PENDING'] },
           },
         })
 

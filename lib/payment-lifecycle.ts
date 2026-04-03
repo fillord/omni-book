@@ -1,19 +1,5 @@
-import { basePrisma } from '@/lib/db'
-
+// TODO(12-02): cancelExpiredPendingBookings removed — Kaspi deposit flow removed in Phase 12.
+// This file is retained for module resolution. Paylink.kz lifecycle will be added in Phase 12-03.
 export async function cancelExpiredPendingBookings(): Promise<{ cancelled: number }> {
-  const now = new Date()
-
-  const result = await basePrisma.booking.updateMany({
-    where: {
-      status: 'PENDING',
-      paymentExpiresAt: { lte: now },
-    },
-    data: { status: 'CANCELLED' },
-  })
-
-  if (result.count > 0) {
-    console.log(`[Payment Lifecycle] Cancelled ${result.count} expired PENDING booking(s)`)
-  }
-
-  return { cancelled: result.count }
+  return { cancelled: 0 }
 }
