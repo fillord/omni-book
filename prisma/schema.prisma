@@ -33,10 +33,6 @@ model Tenant {
   workingHours    String?
   bookingWindowDays Int        @default(14)
   telegramChatId  String?
-  requireDeposit   Boolean  @default(false)
-  depositAmount    Int      @default(0)
-  kaspiMerchantId  String?
-  kaspiApiKey      String?
   bookings        Booking[]
   resources    Resource[]
   services     Service[]
