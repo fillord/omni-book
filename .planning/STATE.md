@@ -140,6 +140,7 @@ None.
 - Phase 7 added: Bookings Dashboard CRM Overhaul and Manual Booking Creation
 - v1.4 roadmap defined: Phase 4 (Client Data Foundation), Phase 5 (Client UI, Outreach & Polish)
 - Phase 6 added: Implement tokenized booking management for clients (cancel/reschedule) via email and Telegram links
+- Phase 11 added: Public landing page footer and legal/informational pages for Kaspi Pay compliance
 - See ROADMAP.md for full milestone history
 
 ### Quick Tasks Completed
