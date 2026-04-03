@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -10,13 +10,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { initiateSubscriptionPayment, simulatePaymentAction } from '@/lib/actions/billing'
-import { ShieldCheck, Clock } from 'lucide-react'
+import { initiateSubscriptionPayment } from '@/lib/actions/billing'
+import { ShieldCheck } from 'lucide-react'
 
 type PendingPayment = {
   id: string
   amount: number
-  paylinkUrl: string | null
+  paylinkUrl: string | null   // CHANGED: was mockQrCode
   expiresAt: string  // ISO string
   planTarget: string
 }
@@ -31,7 +31,7 @@ type Props = {
 
 type PaymentData = {
   id: string
-  paylinkUrl: string | null
+  paylinkUrl: string         // CHANGED: was mockQrCode
   amount: number
   expiresAt: string
 }
@@ -42,6 +42,15 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null)
   const [timeLeft, setTimeLeft] = useState(0)
   const [isPending, startTransition] = useTransition()
+  const [isPolling, setIsPolling] = useState(false)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+    }
+  }, [])
 
   // Resume on pending payment prop
   useEffect(() => {
@@ -49,7 +58,7 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
       setStep(2)
       setPaymentData({
         id: pendingPayment.id,
-        paylinkUrl: pendingPayment.paylinkUrl,
+        paylinkUrl: pendingPayment.paylinkUrl ?? '',
         amount: pendingPayment.amount,
         expiresAt: pendingPayment.expiresAt,
       })
@@ -74,6 +83,16 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
     return () => clearInterval(interval)
   }, [step, paymentData])
 
+  function startPolling() {
+    if (pollingRef.current) return  // already polling
+    setIsPolling(true)
+    pollingRef.current = setInterval(async () => {
+      // Refresh the page — the billing-content Server Component will re-fetch tenant data
+      // If planStatus is ACTIVE, billing-content will show the active plan, not the modal
+      router.refresh()
+    }, 5000)
+  }
+
   async function handleInitiate() {
     startTransition(async () => {
       const res = await initiateSubscriptionPayment('PRO')
@@ -82,31 +101,14 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
         return
       }
       setPaymentData({
-        id: res.paymentId,
-        paylinkUrl: res.paylinkUrl ?? null,
+        id: res.paymentId!,
+        paylinkUrl: res.paylinkUrl ?? '',  // CHANGED
         amount: res.amount ?? planPrice,
         expiresAt: res.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       })
       setStep(2)
     })
   }
-
-  function handleSimulate() {
-    if (!paymentData) return
-    startTransition(async () => {
-      const res = await simulatePaymentAction(paymentData.id)
-      if (!res.success) {
-        toast.error(res.error ?? 'Ошибка симуляции')
-        return
-      }
-      toast.success('Платёж успешно симулирован!')
-      onOpenChange(false)
-      router.refresh()
-    })
-  }
-
-  const formatTime = (seconds: number) =>
-    `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -137,51 +139,62 @@ export function PaymentModal({ isOpen, onOpenChange, pendingPayment, planLabel, 
           <>
             <DialogHeader>
               <DialogTitle className="text-xl flex items-center gap-2">
-                <Clock size={20} className="text-amber-500" />
-                Ожидание оплаты подписки
+                Оплата подписки {planLabel}
               </DialogTitle>
             </DialogHeader>
-            <div className="py-6 space-y-6">
-              {/* TODO(12-03): Show Paylink.kz QR/link here once paylinkUrl is populated */}
-              {timeLeft > 0 && paymentData?.paylinkUrl ? (
-                <div className="flex justify-center">
-                  <a
-                    href={paymentData.paylinkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full text-center p-4 rounded-xl neu-inset bg-[var(--neu-bg)] text-sm text-indigo-600 dark:text-indigo-400 underline"
-                  >
-                    Оплатить через Paylink.kz
-                  </a>
-                </div>
-              ) : null}
 
-              {paymentData && (
-                <div className="text-center text-sm text-muted-foreground">
-                  {paymentData.amount.toLocaleString()} ₸
-                </div>
-              )}
-
-              <div className="neu-inset bg-[var(--neu-bg)] rounded-xl p-3 text-center">
-                {timeLeft > 0 ? (
-                  <p className="text-lg font-mono font-semibold text-foreground">
-                    {formatTime(timeLeft)}
-                  </p>
-                ) : (
-                  <p className="text-sm text-destructive font-medium">Время оплаты истекло</p>
-                )}
+            {/* Step 2: Redirect to Paylink.kz */}
+            <div className="space-y-5">
+              <div className="text-center space-y-2">
+                <div className="text-4xl">🔗</div>
+                <h3 className="text-base font-semibold text-foreground">
+                  Оплата через Paylink.kz
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Нажмите кнопку ниже, чтобы перейти на страницу оплаты.
+                  После оплаты подписка активируется автоматически.
+                </p>
               </div>
 
-              {process.env.NEXT_PUBLIC_MOCK_PAYMENTS === 'true' && timeLeft > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={handleSimulate}
-                  disabled={isPending}
-                  className="w-full neu-raised text-sm"
-                >
-                  {isPending ? 'Обработка...' : 'Симулировать оплату'}
-                </Button>
+              {/* Amount display */}
+              <div className="text-center p-4 rounded-xl bg-[var(--neu-bg)] neu-inset">
+                <p className="text-2xl font-bold text-foreground">
+                  {paymentData?.amount.toLocaleString('ru-RU')} ₸
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Подписка {planLabel}
+                </p>
+              </div>
+
+              {/* Paylink redirect button */}
+              <Button
+                className="w-full neu-raised bg-[var(--neu-bg)] text-primary font-semibold"
+                onClick={() => {
+                  if (paymentData?.paylinkUrl) {
+                    window.open(paymentData.paylinkUrl, '_blank', 'noopener,noreferrer')
+                    startPolling()  // start polling for webhook confirmation
+                  }
+                }}
+                disabled={!paymentData?.paylinkUrl}
+              >
+                Оплатить через Paylink.kz →
+              </Button>
+
+              {/* Polling status */}
+              {isPolling && (
+                <p className="text-xs text-center text-muted-foreground animate-pulse">
+                  Ожидаем подтверждения оплаты...
+                </p>
               )}
+
+              {/* Countdown */}
+              <p className="text-xs text-center text-muted-foreground">
+                Ссылка действительна ещё {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+              </p>
+
+              <Button variant="ghost" className="w-full text-xs" onClick={() => onOpenChange(false)}>
+                Закрыть
+              </Button>
             </div>
           </>
         )}
