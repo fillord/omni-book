@@ -257,3 +257,14 @@ Plans:
 - [x] 10-02-PLAN.md — Mock payment adapter + initiateSubscriptionPayment + simulate endpoint + billing page.tsx data
 - [x] 10-03-PLAN.md — Super Admin plan editor (/admin/plans) + nav link
 - [x] 10-04-PLAN.md — Enterprise calculator + Enterprise inquiry + payment modal + billing-content refactor + i18n
+
+### Phase 11: Public landing page footer and legal/informational pages for Kaspi Pay compliance
+
+**Goal:** Replace the single-row landing page footer with a multi-column Product/Legal/Company grid layout, and create 4 public legal/informational pages (/oferta, /privacy, /refund, /about) with full RU/KZ/EN i18n and Neumorphism design — satisfying Kaspi Pay merchant compliance requirements for public-facing legal documentation.
+**Requirements:** [LAND-F01, LAND-F02, LAND-F03, LEGAL-01, LEGAL-02, LEGAL-03, LEGAL-04, LEGAL-05, LEGAL-06, LEGAL-07]
+**Depends on:** Phase 10
+**Plans:** 2 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Test scaffold + multi-column Footer.tsx rewrite + footer i18n keys
+- [ ] 11-02-PLAN.md — Legal i18n content (5 namespaces) + 4 legal page components (/oferta, /privacy, /refund, /about)
