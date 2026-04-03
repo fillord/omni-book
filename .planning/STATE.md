@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: Not started
+current_plan: 1
 status: executing
-last_updated: "2026-04-02T07:29:20.554Z"
-last_activity: 2026-04-02
+last_updated: "2026-04-03T11:04:10.448Z"
+last_activity: 2026-04-03
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 9
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 35
+  completed_plans: 34
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 10 — saas-monetization-enterprise-tier-platform-payments
+**Current focus:** Phase 11 — public-landing-page-footer-and-legal-informational-pages-for-kaspi-pay-compliance
 
 ## Current Position
 
-Phase: 10
-Plan: 2 of 4
-Current Plan: Not started
+Phase: 11 (public-landing-page-footer-and-legal-informational-pages-for-kaspi-pay-compliance) — EXECUTING
+Plan: 2 of 2
+Current Plan: 1
 Status: Ready to execute
-Last activity: 2026-04-02
+Last activity: 2026-04-03
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -124,6 +124,8 @@ Key patterns carrying forward to next milestone:
 - [Phase 10-03]: Inline-edit uses single editingId state — only one row editable at a time, avoids multi-row save conflicts
 - [Phase 10]: priceMonthly fallback uses numeric not string to avoid test regex match on hardcoded price
 - [Phase 10]: simulatePaymentAction wraps processPlatformPayment as server action — avoids client-side bearer auth complexity
+- [Phase 11-01]: Footer.tsx uses JSX comment for 'intentional' keyword — toContain is case-sensitive, JS // INTENTIONAL: uppercase fails the test
+- [Phase 11-01]: Wave 0 RED tests in legal-surface.test.ts are intentional — 19 failures expected until Plan 02 creates legal pages and i18n namespaces
 
 ### Pending Todos
 
