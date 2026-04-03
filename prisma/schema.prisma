@@ -147,23 +147,21 @@ model Schedule {
 }
 
 model Service {
-  id              String            @id @default(cuid())
-  tenantId        String
-  name            String
-  description     String?
-  durationMin     Int
-  price           Int?
-  currency        String            @default("KZT")
-  translations    Json              @default("{}")
-  isActive        Boolean           @default(true)
-  isFrozen        Boolean           @default(false)
-  requireDeposit  Boolean           @default(false)
-  depositAmount   Int?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  bookings        Booking[]
-  resources       ResourceService[]
-  tenant          Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id          String            @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  durationMin Int
+  price       Int?
+  currency    String            @default("KZT")
+  translations Json             @default("{}")
+  isActive    Boolean           @default(true)
+  isFrozen    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  bookings    Booking[]
+  resources   ResourceService[]
+  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
@@ -291,6 +289,45 @@ model PlatformPayment {
   paidAt      DateTime?
   createdAt   DateTime      @default(now())
   tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status, expiresAt])
+  @@index([tenantId, status])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+}
+
+model SubscriptionPlan {
+  id               String   @id @default(cuid())
+  plan             Plan     @unique
+  displayName      String
+  maxResources     Int
+  priceMonthly     Int
+  priceYearly      Int
+  pricePerResource Int      @default(0)
+  isActive         Boolean  @default(true)
+  features         String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model PlatformPayment {
+  id             String        @id @default(cuid())
+  tenantId       String
+  amount         Int
+  planTarget     Plan
+  status         PaymentStatus @default(PENDING)
+  paylinkOrderId String?
+  paylinkUrl     String?
+  expiresAt      DateTime
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([status, expiresAt])
