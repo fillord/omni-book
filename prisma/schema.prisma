@@ -197,8 +197,6 @@ model Booking {
   reminder1hSentAt  DateTime?
   telegramChatId    String?
   manageToken       String?       @unique
-  paymentInvoiceId  String?
-  paymentExpiresAt  DateTime?
   resource       Resource      @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   service        Service?      @relation(fields: [serviceId], references: [id])
   tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -211,7 +209,6 @@ model Booking {
   @@index([startsAt, reminder24hSentAt])
   @@index([startsAt, reminder2hSentAt])
   @@index([startsAt, reminder1hSentAt])
-  @@index([status, paymentExpiresAt])
 }
 
 model Client {
