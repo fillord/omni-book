@@ -603,6 +603,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       renewRequest: 'Заявка на продление PRO',
       activated: 'Подписка активирована',
     },
+    payment: {
+      whatsappPrepayment: 'Написать в WhatsApp для предоплаты',
+    },
     days: {
       mon: 'Пн',
       tue: 'Вт',
@@ -1384,6 +1387,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       renewRequest: 'PRO жазылымын жаңарту өтінімі',
       activated: 'Жазылым белсендірілді',
     },
+    payment: {
+      whatsappPrepayment: 'Алдын ала төлем үшін WhatsApp-қа жазу',
+    },
     days: {
       mon: 'Дс',
       tue: 'Сс',
@@ -2164,6 +2170,9 @@ export const translations: Record<Locale, Record<string, Record<string, string>>
       staffLocked: 'Staff management unavailable — subscription expired.',
       renewRequest: 'PRO renewal request',
       activated: 'Subscription activated',
+    },
+    payment: {
+      whatsappPrepayment: 'Message on WhatsApp for prepayment',
     },
     days: {
       mon: 'Mon',

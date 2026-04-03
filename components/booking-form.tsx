@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import { PhoneInput } from '@/components/ui/phone-input'
 import { useI18n } from '@/lib/i18n/context'
@@ -10,12 +11,12 @@ import { useI18n } from '@/lib/i18n/context'
 // ---- types -----------------------------------------------------------------
 
 export type ServiceOption = {
-  id:             string
-  name:           string
-  description:    string | null
-  durationMin:    number
-  price:          number | null
-  currency:       string
+  id:          string
+  name:        string
+  description: string | null
+  durationMin: number
+  price:       number | null
+  currency:    string
 }
 
 export type ResourceOption = {
@@ -39,69 +40,61 @@ type Props = {
   nicheColor?:   string
   /** Rolling booking window: max days ahead for booking */
   bookingWindowDays?: number
-  /** Tenant phone number used for WhatsApp prepayment deep link */
-  tenantPhone?:  string | null
+  tenantPhone?:  string | null  // used for WhatsApp prepayment deep link
 }
 
 type Step = 'service' | 'resource' | 'datetime' | 'confirm'
 
 // ---- niche colors ----------------------------------------------------------
-// Neumorphic accent palette. Most surfaces use neu-raised/neu-inset; the
-// submit CTA uses a solid bg fill for conversion prominence.
 
 type NicheColorClasses = {
-  stepActive:       string   // border + text for the active step circle
-  stepDone:         string   // text color for the completed step circle (circle itself uses neu-raised)
-  stepLine:         string   // bg color for the connecting progress line
-  slotSelectedText: string   // text color for the pressed/selected time-slot button
-  slotHoverText:    string   // hover text color for available slots
-  accentText:       string   // text color for Next buttons
-  submitBtn:        string   // solid fill for the main Book CTA
-  serviceSelected:  string   // selected service card: border + dark mode tint
-  resourceSelected: string   // selected resource card: border + dark mode tint
+  stepActive:       string
+  stepDone:         string
+  stepLine:         string
+  slotSelected:     string
+  slotHover:        string
+  submitBtn:        string
+  serviceSelected:  string
+  resourceSelected: string
 }
 
 const BOOKING_COLORS: Record<string, NicheColorClasses> = {
   blue: {
-    stepActive:       'border-blue-500 text-blue-500',
-    stepDone:         'text-blue-500',
-    stepLine:         'bg-blue-500',
-    slotSelectedText: 'text-blue-500',
-    slotHoverText:    'hover:text-blue-500',
-    accentText:       'text-blue-500',
+    stepActive:       'border-blue-600 text-blue-600',
+    stepDone:         'bg-blue-600 border-blue-600 text-white',
+    stepLine:         'bg-blue-600',
+    slotSelected:     'bg-blue-600 text-white border-blue-600',
+    slotHover:        'hover:border-blue-500 hover:text-blue-600',
     submitBtn:        'bg-blue-600 hover:bg-blue-700 text-white',
     serviceSelected:  'border-blue-600 bg-card dark:bg-blue-950/40',
     resourceSelected: 'border-blue-600 bg-card dark:bg-blue-950/40',
   },
   pink: {
-    stepActive:       'border-pink-500 text-pink-500',
-    stepDone:         'text-pink-500',
-    stepLine:         'bg-pink-500',
-    slotSelectedText: 'text-pink-500',
-    slotHoverText:    'hover:text-pink-500',
-    accentText:       'text-pink-500',
+    stepActive:       'border-pink-600 text-pink-600',
+    stepDone:         'bg-pink-600 border-pink-600 text-white',
+    stepLine:         'bg-pink-600',
+    slotSelected:     'bg-pink-600 text-white border-pink-600',
+    slotHover:        'hover:border-pink-500 hover:text-pink-600',
     submitBtn:        'bg-pink-600 hover:bg-pink-700 text-white',
     serviceSelected:  'border-pink-600 bg-card dark:bg-pink-950/40',
     resourceSelected: 'border-pink-600 bg-card dark:bg-pink-950/40',
   },
   orange: {
-    stepActive:       'border-orange-500 text-orange-500',
-    stepDone:         'text-orange-500',
-    stepLine:         'bg-orange-500',
-    slotSelectedText: 'text-orange-500',
-    slotHoverText:    'hover:text-orange-500',
-    accentText:       'text-orange-500',
+    stepActive:       'border-orange-600 text-orange-600',
+    stepDone:         'bg-orange-600 border-orange-600 text-white',
+    stepLine:         'bg-orange-600',
+    slotSelected:     'bg-orange-600 text-white border-orange-600',
+    slotHover:        'hover:border-orange-500 hover:text-orange-600',
     submitBtn:        'bg-orange-600 hover:bg-orange-700 text-white',
     serviceSelected:  'border-orange-600 bg-card dark:bg-orange-950/40',
     resourceSelected: 'border-orange-600 bg-card dark:bg-orange-950/40',
   },
   green: {
-    stepActive:       'border-green-500 text-green-500',
-    stepDone:         'text-green-500',
-    stepLine:         'bg-green-500',
-    slotSelectedText: 'text-green-500',
-    slotHoverText:    'hover:text-green-500',
-    accentText:       'text-green-500',
+    stepActive:       'border-green-600 text-green-600',
+    stepDone:         'bg-green-600 border-green-600 text-white',
+    stepLine:         'bg-green-600',
+    slotSelected:     'bg-green-600 text-white border-green-600',
+    slotHover:        'hover:border-green-500 hover:text-green-600',
     submitBtn:        'bg-green-600 hover:bg-green-700 text-white',
     serviceSelected:  'border-green-600 bg-card dark:bg-green-950/40',
     resourceSelected: 'border-green-600 bg-card dark:bg-green-950/40',
@@ -154,18 +147,16 @@ function StepIndicator({
   return (
     <ol className="flex items-center w-full mb-8">
       {steps.map((step, idx) => {
-        const done     = idx < currentIdx
+        const done   = idx < currentIdx
         const isActive = idx === currentIdx
         return (
           <li key={step.id} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1 min-w-[2.5rem]">
               <span className={[
-                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all',
-                done
-                  ? `neu-raised bg-[var(--neu-bg)] ${colors.stepDone}`
-                  : isActive
-                  ? `border-2 ${colors.stepActive}`
-                  : 'border-2 border-border text-muted-foreground',
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all',
+                done     ? colors.stepDone
+                : isActive ? colors.stepActive
+                : 'border-border text-muted-foreground',
               ].join(' ')}>
                 {done ? '✓' : idx + 1}
               </span>
@@ -198,21 +189,25 @@ function SuccessScreen({
   resource,
   date,
   time,
+  tenantPhone,
   onReset,
 }: {
-  bookingId: string
-  guestName: string
-  service:   ServiceOption
-  resource:  ResourceOption
-  date:      string
-  time:      string
-  onReset:   () => void
+  bookingId:   string
+  guestName:   string
+  service:     ServiceOption
+  resource:    ResourceOption
+  date:        string
+  time:        string
+  tenantPhone?: string | null
+  onReset:     () => void
 }) {
   const { t, locale } = useI18n()
   const [visible, setVisible] = useState(false)
   useEffect(() => { setTimeout(() => setVisible(true), 50) }, [])
 
+  // Confetti particles
   const confettiColors = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6']
+
 
   function downloadICS() {
     const ics = generateICS({
@@ -272,23 +267,44 @@ function SuccessScreen({
         <p className="text-muted-foreground text-sm">{guestName}, {t('booking', 'successSub')}</p>
       </div>
 
-      {/* Summary card */}
-      <div className="w-full rounded-2xl bg-[var(--neu-bg)] neu-raised p-5 text-sm space-y-3 text-left max-w-sm">
+      <div className="w-full rounded-xl border border-border bg-card p-5 text-sm space-y-3 text-left max-w-sm">
         <SummaryRow label={t('booking', 'service')}    value={service.name} />
         <SummaryRow label={t('booking', 'specialist')} value={resource.name} />
-        <div className="border-t border-foreground/5 pt-3 space-y-3">
-          <SummaryRow
-            label={t('booking', 'date')}
-            value={new Date(date).toLocaleDateString(dateLocale, { dateStyle: 'long' })}
-          />
-          <SummaryRow label={t('booking', 'timeSlot')} value={time} />
-        </div>
-        <div className="border-t border-foreground/5 pt-3">
-          <p className="text-xs text-muted-foreground">
-            {t('booking', 'bookingNumber')}: <span className="font-mono font-medium text-foreground">{bookingId}</span>
-          </p>
-        </div>
+        <Separator />
+        <SummaryRow
+          label={t('booking', 'date')}
+          value={new Date(date).toLocaleDateString(dateLocale, { dateStyle: 'long' })}
+        />
+        <SummaryRow label={t('booking', 'timeSlot')} value={time} />
+        <Separator />
+        <p className="text-xs text-muted-foreground pt-1">
+          {t('booking', 'bookingNumber')}: <span className="font-mono font-medium text-foreground">{bookingId}</span>
+        </p>
       </div>
+
+      {tenantPhone && (
+        <div className="mt-4 pt-4 border-t border-[var(--neu-bg)] w-full max-w-sm">
+          <a
+            href={buildWhatsAppPrepaymentUrl({
+              tenantPhone,
+              guestName,
+              serviceName: service.name,
+              date: new Date(date).toLocaleDateString('ru-RU', { dateStyle: 'long' }),
+              time,
+              price: service.price ?? null,
+              currency: service.currency,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-[var(--neu-bg)] neu-raised text-sm font-medium text-green-600 hover:opacity-80 transition-opacity"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            {t('payment', 'whatsappPrepayment')}
+          </a>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 w-full max-w-sm">
         {/* Telegram deep-link — only shown when bot username is configured */}
@@ -325,16 +341,16 @@ function SuccessScreen({
   )
 }
 
-// ---- buildWhatsAppPrepaymentUrl --------------------------------------------
+// ---- WhatsApp prepayment ---------------------------------------------------
 
 function buildWhatsAppPrepaymentUrl(params: {
   tenantPhone: string
-  guestName:   string
+  guestName: string
   serviceName: string
-  date:        string
-  time:        string
-  price:       number | null
-  currency:    string
+  date: string
+  time: string
+  price: number | null
+  currency: string
 }): string {
   const priceText = params.price
     ? `${new Intl.NumberFormat('ru-RU').format(params.price)} ${params.currency}`
@@ -388,12 +404,11 @@ export function BookingForm({
   const [slots,        setSlots]        = useState<{ time: string; startsAt: string; endsAt: string; available: boolean }[]>([])
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [dayOff,       setDayOff]       = useState(false)
-  const [slotsFrozen,  setSlotsFrozen]  = useState(false)
 
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
+  const [loading,   setLoading]   = useState(false)
+  const [error,     setError]     = useState<string | null>(null)
   const [successId, setSuccessId] = useState<string | null>(null)
-  const [slideDir, setSlideDir] = useState<'left' | 'right'>('left')
+  const [slideDir,  setSlideDir]  = useState<'left' | 'right'>('left')
 
   function goForward(nextStep: Step) {
     setSlideDir('left')
@@ -413,7 +428,6 @@ export function BookingForm({
     const controller = new AbortController()
     setSlotsLoading(true)
     setDayOff(false)
-    setSlotsFrozen(false)
     fetch(
       `/api/bookings/slots?tenantSlug=${encodeURIComponent(tenantSlug)}&resourceId=${selectedResourceId}&serviceId=${selectedServiceId}&date=${selectedDate}`,
       { signal: controller.signal }
@@ -422,7 +436,6 @@ export function BookingForm({
       .then((data) => {
         setSlots(data.slots ?? [])
         setDayOff(!!data.dayOff)
-        setSlotsFrozen(!!data.frozen)
       })
       .catch(() => {})
       .finally(() => setSlotsLoading(false))
@@ -492,7 +505,6 @@ export function BookingForm({
   }
 
   function handleReset() {
-    sessionStorage.removeItem('pendingBooking')
     setStep('service')
     setSelectedServiceId('')
     setSelectedResourceId('')
@@ -503,10 +515,7 @@ export function BookingForm({
     setGuestEmail('')
     setError(null)
     setSuccessId(null)
-    // TODO(12-02): remove setPendingPaymentId / setPaymentExpiresAt state — Kaspi deposit flow
   }
-
-  // TODO(12-02): WaitingForPaymentScreen block removed — Kaspi deposit flow deleted in Phase 12-01
 
   if (successId && selectedService && selectedResource) {
     return (
@@ -517,6 +526,7 @@ export function BookingForm({
         resource={selectedResource}
         date={selectedDate}
         time={selectedTime}
+        tenantPhone={tenantPhone}
         onReset={handleReset}
       />
     )
@@ -526,7 +536,7 @@ export function BookingForm({
     <div>
       <StepIndicator current={step} steps={steps} colors={colors} />
 
-      {/* ── STEP 1 — Service ───────────────────────────────────────────────── */}
+      {/* STEP 1 — Service */}
       {step === 'service' && (
         <div className={`space-y-4 animate-slide-${slideDir}`}>
           <h3 className="font-semibold text-foreground">{t('booking', 'selectService')}</h3>
@@ -540,25 +550,24 @@ export function BookingForm({
                 key={service.id}
                 htmlFor={`service-${service.id}`}
                 className={[
-                  'flex items-start gap-3 p-4 rounded-2xl bg-[var(--neu-bg)] cursor-pointer transition-all duration-200',
-                  selectedServiceId === service.id ? `neu-inset ${colors.serviceSelected}` : 'neu-raised',
+                  'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                  selectedServiceId === service.id
+                    ? colors.serviceSelected
+                    : 'border-border hover:border-border/80',
                 ].join(' ')}
               >
                 <RadioGroupItem value={service.id} id={`service-${service.id}`} className="mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-semibold text-foreground">{service.name}</span>
-                    <span className={[
-                      'text-sm font-bold whitespace-nowrap',
-                      selectedServiceId === service.id ? colors.accentText : 'text-foreground',
-                    ].join(' ')}>
+                    <span className="text-sm font-bold text-foreground whitespace-nowrap">
                       {formatPrice(service.price, service.currency)}
                     </span>
                   </div>
                   {service.description && (
                     <p className="text-sm text-muted-foreground mt-0.5">{service.description}</p>
                   )}
-                  <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
+                  <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                     {service.durationMin} {t('booking', 'minutes')}
                   </span>
                 </div>
@@ -569,7 +578,7 @@ export function BookingForm({
             <button
               disabled={!selectedServiceId}
               onClick={() => goForward('resource')}
-              className={`px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold transition-all duration-300 active:neu-inset disabled:opacity-40 disabled:cursor-not-allowed ${colors.accentText}`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -577,14 +586,14 @@ export function BookingForm({
         </div>
       )}
 
-      {/* ── STEP 2 — Resource ──────────────────────────────────────────────── */}
+      {/* STEP 2 — Resource */}
       {step === 'resource' && (
         <div className={`space-y-4 animate-slide-${slideDir}`}>
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-semibold text-foreground">
               {t('booking', 'selectResource').replace('{resource}', (resourceLabel ?? t('booking', 'specialist')).toLowerCase())}
             </h3>
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground truncate max-w-[120px]">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-muted text-muted-foreground truncate max-w-[120px]">
               {selectedService?.name}
             </span>
           </div>
@@ -598,21 +607,25 @@ export function BookingForm({
                 key={resource.id}
                 htmlFor={`resource-${resource.id}`}
                 className={[
-                  'flex items-start gap-3 p-4 rounded-2xl bg-[var(--neu-bg)] cursor-pointer transition-all duration-200',
-                  selectedResourceId === resource.id ? `neu-inset ${colors.resourceSelected}` : 'neu-raised',
+                  'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                  selectedResourceId === resource.id
+                    ? colors.resourceSelected
+                    : 'border-border hover:border-border/80',
                 ].join(' ')}
               >
                 <RadioGroupItem value={resource.id} id={`resource-${resource.id}`} className="mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <span className="font-semibold text-foreground">{resource.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{resource.name}</span>
+                  </div>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {resource.specialization && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {resource.specialization.startsWith('opt_') ? t('niche', resource.specialization) : resource.specialization}
                       </span>
                     )}
                     {resource.experienceYears != null && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                         {t('booking', 'experience').replace('{n}', String(resource.experienceYears))}
                       </span>
                     )}
@@ -622,20 +635,18 @@ export function BookingForm({
                         .slice(0, 2)
                         .map(([k, v]) => {
                           if (typeof v === 'boolean') return v
-                            ? <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">{k === 'indoor' ? t('booking', 'indoor') : k}</span>
+                            ? <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{k === 'indoor' ? t('booking', 'indoor') : k}</span>
                             : null
                           if (Array.isArray(v) || v == null) return null
                           if (k === 'capacity') return (
-                            <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
+                            <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                               {t('booking', 'capacity').replace('{n}', String(v))}
                             </span>
                           )
                           const strVal = String(v)
-                          return (
-                            <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">
-                              {strVal.startsWith('opt_') ? t('niche', strVal) : strVal}
-                            </span>
-                          )
+                          return <span key={k} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                            {strVal.startsWith('opt_') ? t('niche', strVal) : strVal}
+                          </span>
                         })
                     }
                   </div>
@@ -644,16 +655,13 @@ export function BookingForm({
             ))}
           </RadioGroup>
           <div className="flex justify-between pt-2">
-            <button
-              onClick={() => goBack('service')}
-              className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground transition-all duration-300 active:neu-inset"
-            >
+            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedResourceId}
               onClick={() => goForward('datetime')}
-              className={`px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold transition-all duration-300 active:neu-inset disabled:opacity-40 disabled:cursor-not-allowed ${colors.accentText}`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -661,18 +669,17 @@ export function BookingForm({
         </div>
       )}
 
-      {/* ── STEP 3 — Date & Time ───────────────────────────────────────────── */}
+      {/* STEP 3 — Date & Time */}
       {step === 'datetime' && (
         <div className={`space-y-5 animate-slide-${slideDir}`}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <h3 className="font-semibold text-foreground shrink-0">{t('booking', 'datetime')}</h3>
-            <div className="flex flex-wrap gap-1.5 sm:ml-auto">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">{selectedService?.name}</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--neu-bg)] neu-inset text-muted-foreground">{selectedResource?.name}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-foreground">{t('booking', 'datetime')}</h3>
+            <div className="flex gap-1.5 ml-auto">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{selectedService?.name}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{selectedResource?.name}</span>
             </div>
           </div>
 
-          {/* Date picker */}
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground">{t('booking', 'date')}</label>
             <input
@@ -682,27 +689,16 @@ export function BookingForm({
               value={selectedDate}
               onChange={(e) => {
                 const val = e.target.value
+                // Guard against malformed years (e.g. "0020" instead of "2026")
                 const yearMatch = val.match(/^(\d{4})/)
                 if (yearMatch && (parseInt(yearMatch[1]) < 2000 || parseInt(yearMatch[1]) > 2099)) return
                 setSelectedDate(val)
                 setSelectedTime('')
               }}
-              className="block w-full min-h-[50px] rounded-xl neu-inset bg-[var(--neu-bg)] border-0 px-3 py-2.5 text-sm focus:outline-none text-foreground opacity-100 transition-colors"
-              style={{
-                // WebKit/iOS Safari: strip native OS date chrome that fights our custom shadow,
-                // force opaque text (iOS sometimes renders date value as transparent),
-                // and pin a min-width so the element cannot collapse to 0 on real devices.
-                WebkitAppearance: 'none',
-                appearance: 'none',
-                color: 'var(--foreground)',
-                opacity: 1,
-                minWidth: '0',
-                width: '100%',
-              }}
+              className="block w-full sm:max-w-xs rounded-xl border-2 border-input px-3 py-2.5 text-sm focus:outline-none focus:border-ring transition-colors bg-background text-foreground"
             />
           </div>
 
-          {/* Time slots */}
           {selectedDate && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -721,15 +717,8 @@ export function BookingForm({
               {slotsLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {Array.from({ length: 8 }).map((_, i) => (
-                    <div key={i} className="h-10 rounded-xl bg-[var(--neu-bg)] neu-raised animate-pulse" />
+                    <div key={i} className="h-10 rounded-xl bg-muted animate-pulse" />
                   ))}
-                </div>
-              ) : slotsFrozen ? (
-                <div className="flex items-start gap-2 rounded-xl neu-inset bg-[var(--neu-bg)] px-4 py-3">
-                  <svg className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                  </svg>
-                  <p className="text-sm text-muted-foreground">{t('public', 'bookingFrozenHint')}</p>
                 </div>
               ) : dayOff ? (
                 <p className="text-sm text-muted-foreground py-2">{t('booking', 'dayOff')}</p>
@@ -745,12 +734,12 @@ export function BookingForm({
                         disabled={!slot.available}
                         onClick={() => slot.available && setSelectedTime(slot.time)}
                         className={[
-                          'py-2.5 rounded-xl text-sm font-medium bg-[var(--neu-bg)] transition-all duration-200',
+                          'py-2.5 rounded-xl text-sm font-medium border-2 transition-all',
                           !slot.available
-                            ? 'neu-raised opacity-30 text-muted-foreground cursor-not-allowed'
+                            ? 'border-border/50 bg-muted/50 text-muted-foreground/40 cursor-not-allowed'
                             : selectedTime === slot.time
-                            ? `neu-inset ${colors.slotSelectedText}`
-                            : `neu-raised text-foreground ${colors.slotHoverText}`,
+                            ? colors.slotSelected
+                            : `border-border text-foreground ${colors.slotHover}`,
                         ].join(' ')}
                       >
                         {slot.time}
@@ -764,16 +753,13 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button
-              onClick={() => goBack('resource')}
-              className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground transition-all duration-300 active:neu-inset"
-            >
+            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedDate || !selectedTime}
               onClick={() => goForward('confirm')}
-              className={`px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold transition-all duration-300 active:neu-inset disabled:opacity-40 disabled:cursor-not-allowed ${colors.accentText}`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -781,35 +767,31 @@ export function BookingForm({
         </div>
       )}
 
-      {/* ── STEP 4 — Confirm ───────────────────────────────────────────────── */}
+      {/* STEP 4 — Confirm */}
       {step === 'confirm' && (
         <div className={`space-y-5 animate-slide-${slideDir}`}>
           <h3 className="font-semibold text-foreground">{t('booking', 'confirmBooking')}</h3>
 
-          {/* Booking summary */}
-          <div className="rounded-2xl bg-[var(--neu-bg)] neu-raised p-4 space-y-3 text-sm">
+          <div className="rounded-xl border border-border bg-card p-4 space-y-3 text-sm">
             <SummaryRow label={t('booking', 'service')}  value={selectedService?.name ?? '—'} />
             <SummaryRow label={t('booking', 'price')}    value={formatPrice(selectedService?.price ?? null, selectedService?.currency ?? 'KZT')} />
             <SummaryRow label={t('booking', 'duration')} value={`${selectedService?.durationMin} ${t('booking', 'minutes')}`} />
-            <div className="border-t border-foreground/5 pt-3 space-y-3">
-              <SummaryRow label={t('booking', 'specialist')} value={selectedResource?.name ?? '—'} />
-              {selectedResource?.specialization && (
-                <SummaryRow
-                  label={t('booking', 'specialization')}
-                  value={selectedResource.specialization.startsWith('opt_') ? t('niche', selectedResource.specialization) : selectedResource.specialization}
-                />
-              )}
-            </div>
-            <div className="border-t border-foreground/5 pt-3 space-y-3">
+            <Separator />
+            <SummaryRow label={t('booking', 'specialist')} value={selectedResource?.name ?? '—'} />
+            {selectedResource?.specialization && (
               <SummaryRow
-                label={t('booking', 'date')}
-                value={new Date(selectedDate).toLocaleDateString(dateLocale, { dateStyle: 'long' })}
+                label={t('booking', 'specialization')}
+                value={selectedResource.specialization.startsWith('opt_') ? t('niche', selectedResource.specialization) : selectedResource.specialization}
               />
-              <SummaryRow label={t('booking', 'timeSlot')} value={selectedTime} />
-            </div>
+            )}
+            <Separator />
+            <SummaryRow
+              label={t('booking', 'date')}
+              value={new Date(selectedDate).toLocaleDateString(dateLocale, { dateStyle: 'long' })}
+            />
+            <SummaryRow label={t('booking', 'timeSlot')} value={selectedTime} />
           </div>
 
-          {/* Guest details */}
           <div className="space-y-4">
             <h4 className="text-sm font-semibold text-foreground">{t('booking', 'yourDetails')}</h4>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -843,21 +825,14 @@ export function BookingForm({
             </div>
           )}
 
-          {/* TODO(12-02): Deposit display removed — Kaspi deposit flow removed in Phase 12-01 */}
-
           <div className="flex justify-between pt-2">
-            <button
-              onClick={() => goBack('datetime')}
-              disabled={loading}
-              className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground transition-all duration-300 active:neu-inset disabled:opacity-40"
-            >
+            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-40">
               ← {t('common', 'back')}
             </button>
-            {/* Main CTA */}
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className={`min-w-40 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
+              className={`min-w-40 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
