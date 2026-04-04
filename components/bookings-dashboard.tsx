@@ -106,30 +106,6 @@ function buildWhatsAppManagerUrl(params: {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
-function formatPrice(price: number | null, currency: string): string {
-  if (price == null) return '—'
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(price / 100)
-}
-
-function formatDateTimeRu(utcStr: string, timezone: string): { date: string; time: string } {
-  const d = new Date(utcStr)
-  const date = new Intl.DateTimeFormat('ru-RU', {
-    timeZone: timezone,
-    day: 'numeric',
-    month: 'short',
-  }).format(d)
-  const time = new Intl.DateTimeFormat('ru-RU', {
-    timeZone: timezone,
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d)
-  return { date, time }
-}
-
 // ---- day-grouping helpers --------------------------------------------------
 
 function groupBookingsByDay(bookings: BookingRow[], timezone: string): [string, BookingRow[]][] {
@@ -229,7 +205,7 @@ export function BookingsDashboard({ tenantSlug, timezone, tenantName, canEdit, r
     } finally {
       setTableLoading(false)
     }
-  }, [tenantSlug, page, selectedStatuses, showCancelled, resourceId, dateFrom, dateTo])
+  }, [tenantSlug, page, selectedStatuses, showCancelled, resourceId, dateFrom, dateTo, t])
 
   // ---- fetch calendar data --------------------------------------------------
 
@@ -249,7 +225,7 @@ export function BookingsDashboard({ tenantSlug, timezone, tenantName, canEdit, r
     } finally {
       setCalendarLoading(false)
     }
-  }, [tenantSlug, weekStart, resourceId])
+  }, [tenantSlug, weekStart, resourceId, t])
 
   // Effects
   useEffect(() => {

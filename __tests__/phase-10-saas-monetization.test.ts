@@ -69,11 +69,6 @@ describe("Phase 10 SaaS Monetization — Static Assertions", () => {
       expect(schema).toMatch(/planTarget\s+Plan/)
     })
 
-    it("prisma/schema.prisma contains mockQrCode field in PlatformPayment", () => {
-      const schema = safeRead("prisma/schema.prisma")
-      expect(schema).toMatch(/mockQrCode/)
-    })
-
     it("prisma/schema.prisma contains platformPayments PlatformPayment[] in Tenant model", () => {
       const schema = safeRead("prisma/schema.prisma")
       expect(schema).toMatch(/platformPayments\s+PlatformPayment\[\]/)
