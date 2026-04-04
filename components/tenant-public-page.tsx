@@ -507,7 +507,6 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
               resourceLabel={t('niche', nicheConfig.resourceLabel)}
               nicheColor={nicheConfig.color}
               bookingWindowDays={(tenant as unknown as { bookingWindowDays: number }).bookingWindowDays ?? 14}
-              tenantPhone={(tenant as unknown as { phone: string | null }).phone ?? null}
             />
           )}
         </section>

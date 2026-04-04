@@ -15,7 +15,7 @@ export default async function BookingsPage() {
   const [tenant, resources, services, t] = await Promise.all([
     basePrisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { slug: true, timezone: true },
+      select: { slug: true, timezone: true, name: true },
     }),
     basePrisma.resource.findMany({
       where: { tenantId, isActive: true },
@@ -50,6 +50,7 @@ export default async function BookingsPage() {
       <BookingsDashboard
         tenantSlug={tenant.slug}
         timezone={tenant.timezone}
+        tenantName={tenant.name}
         canEdit={canEdit}
         resources={resources}
         services={services}

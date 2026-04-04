@@ -8,39 +8,39 @@ datasource db {
 }
 
 model Tenant {
-  id                    String     @id @default(cuid())
-  slug                  String     @unique
+  id                    String            @id @default(cuid())
+  slug                  String            @unique
   name                  String
   niche                 String?
-  plan                  Plan       @default(FREE)
-  planStatus            PlanStatus @default(ACTIVE)
-  maxResources          Int        @default(1)
+  plan                  Plan              @default(FREE)
+  planStatus            PlanStatus        @default(ACTIVE)
+  maxResources          Int               @default(1)
   subscriptionExpiresAt DateTime?
-  isActive              Boolean    @default(true)
-  timezone     String     @default("Asia/Almaty")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  address      String?
-  city         String?
-  coverUrl     String?
-  description  String?
-  email        String?
-  logoUrl      String?
-  phone        String?
-  socialLinks  Json       @default("{}")
-  translations Json       @default("{}")
-  website      String?
-  workingHours    String?
-  bookingWindowDays Int        @default(14)
-  telegramChatId  String?
-  bookings        Booking[]
-  resources    Resource[]
-  services     Service[]
-  users        User[]
-  notifications  Notification[]
-  auditLogs      AuditLog[]
-  clients        Client[]
-  platformPayments PlatformPayment[]
+  isActive              Boolean           @default(true)
+  timezone              String            @default("Asia/Almaty")
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  address               String?
+  city                  String?
+  coverUrl              String?
+  description           String?
+  email                 String?
+  logoUrl               String?
+  phone                 String?
+  socialLinks           Json              @default("{}")
+  translations          Json              @default("{}")
+  website               String?
+  workingHours          String?
+  bookingWindowDays     Int               @default(14)
+  telegramChatId        String?
+  bookings              Booking[]
+  resources             Resource[]
+  services              Service[]
+  users                 User[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+  clients               Client[]
+  platformPayments      PlatformPayment[]
 }
 
 model Announcement {
@@ -80,20 +80,20 @@ model AuditLog {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  tenantId      String?
-  email         String    @unique
-  name          String?
-  phone         String?
-  passwordHash  String?
-  lastIpAddress String?
-  role          Role      @default(CUSTOMER)
-  emailVerified DateTime?
+  id              String    @id @default(cuid())
+  tenantId        String?
+  email           String    @unique
+  name            String?
+  phone           String?
+  passwordHash    String?
+  lastIpAddress   String?
+  role            Role      @default(CUSTOMER)
+  emailVerified   DateTime?
   activeSessionId String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  bookings      Booking[]
-  tenant        Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  bookings        Booking[]
+  tenant          Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([email])
@@ -105,29 +105,29 @@ model OtpCode {
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   @@unique([email, code])
 }
 
 model Resource {
-  id          String            @id @default(cuid())
-  tenantId    String
-  name        String
-  type        String
-  description String?
-  capacity    Int?
-  attributes  Json              @default("{}")
-  translations Json             @default("{}")
-  lunchStart  String?
-  lunchEnd    String?
-  isActive    Boolean           @default(true)
-  isFrozen    Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  bookings    Booking[]
-  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  services    ResourceService[]
-  schedules   Schedule[]
+  id           String            @id @default(cuid())
+  tenantId     String
+  name         String
+  type         String
+  description  String?
+  capacity     Int?
+  attributes   Json              @default("{}")
+  translations Json              @default("{}")
+  lunchStart   String?
+  lunchEnd     String?
+  isActive     Boolean           @default(true)
+  isFrozen     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  bookings     Booking[]
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  services     ResourceService[]
+  schedules    Schedule[]
 
   @@index([tenantId])
   @@index([tenantId, type])
@@ -147,21 +147,21 @@ model Schedule {
 }
 
 model Service {
-  id          String            @id @default(cuid())
-  tenantId    String
-  name        String
-  description String?
-  durationMin Int
-  price       Int?
-  currency    String            @default("KZT")
-  translations Json             @default("{}")
-  isActive    Boolean           @default(true)
-  isFrozen    Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  bookings    Booking[]
-  resources   ResourceService[]
-  tenant      Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String            @id @default(cuid())
+  tenantId     String
+  name         String
+  description  String?
+  durationMin  Int
+  price        Int?
+  currency     String            @default("KZT")
+  translations Json              @default("{}")
+  isActive     Boolean           @default(true)
+  isFrozen     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  bookings     Booking[]
+  resources    ResourceService[]
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
 }
@@ -176,29 +176,29 @@ model ResourceService {
 }
 
 model Booking {
-  id             String        @id @default(cuid())
-  tenantId       String
-  resourceId     String
-  serviceId      String?
-  userId         String?
-  guestName      String?
-  guestPhone     String?
-  guestEmail     String?
-  startsAt       DateTime
-  endsAt         DateTime
-  status         BookingStatus @default(CONFIRMED)
-  notes          String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  tenantId          String
+  resourceId        String
+  serviceId         String?
+  userId            String?
+  guestName         String?
+  guestPhone        String?
+  guestEmail        String?
+  startsAt          DateTime
+  endsAt            DateTime
+  status            BookingStatus @default(CONFIRMED)
+  notes             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
   reminder24hSentAt DateTime?
   reminder2hSentAt  DateTime?
   reminder1hSentAt  DateTime?
   telegramChatId    String?
   manageToken       String?       @unique
-  resource       Resource      @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  service        Service?      @relation(fields: [serviceId], references: [id])
-  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user           User?         @relation(fields: [userId], references: [id])
+  resource          Resource      @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  service           Service?      @relation(fields: [serviceId], references: [id])
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user              User?         @relation(fields: [userId], references: [id])
 
   @@index([tenantId])
   @@index([tenantId, resourceId, startsAt])
@@ -210,18 +210,18 @@ model Booking {
 }
 
 model Client {
-  id             String    @id @default(cuid())
-  tenantId       String
-  phone          String
-  name           String
-  email          String?
-  totalVisits    Int       @default(0)
-  totalRevenue   Int       @default(0)
-  lastVisitAt    DateTime?
-  hasTelegram    Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  tenantId     String
+  phone        String
+  name         String
+  email        String?
+  totalVisits  Int       @default(0)
+  totalRevenue Int       @default(0)
+  lastVisitAt  DateTime?
+  hasTelegram  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, phone])
   @@index([tenantId])
@@ -254,45 +254,6 @@ enum PlanStatus {
   EXPIRED
   BANNED
   CANCELED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  EXPIRED
-}
-
-model SubscriptionPlan {
-  id               String   @id @default(cuid())
-  plan             Plan     @unique
-  displayName      String
-  maxResources     Int
-  priceMonthly     Int
-  priceYearly      Int
-  pricePerResource Int      @default(0)
-  isActive         Boolean  @default(true)
-  features         String[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
-model PlatformPayment {
-  id          String        @id @default(cuid())
-  tenantId    String
-  amount      Int
-  planTarget  Plan
-  status      PaymentStatus @default(PENDING)
-  paylinkOrderId String?
-  paylinkUrl     String?
-  expiresAt   DateTime
-  paidAt      DateTime?
-  createdAt   DateTime      @default(now())
-  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId])
-  @@index([status, expiresAt])
-  @@index([tenantId, status])
 }
 
 enum PaymentStatus {

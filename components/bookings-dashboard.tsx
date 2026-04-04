@@ -34,7 +34,6 @@ export type BookingRow = {
   resource: BookingResource
   service: BookingService | null
   user: BookingUser | null
-  paymentExpiresAt: string | null
 }
 
 export type ResourceOption = { id: string; name: string; type: string }
@@ -49,6 +48,7 @@ type ServiceOption = {
 type Props = {
   tenantSlug: string
   timezone: string
+  tenantName: string
   canEdit: boolean
   resources: ResourceOption[]
   services?: ServiceOption[]
@@ -88,6 +88,23 @@ const ACTION_LABELS: Record<BookingStatusValue, string> = {
 }
 
 // ---- helpers ---------------------------------------------------------------
+
+function buildWhatsAppManagerUrl(params: {
+  clientPhone: string
+  clientName: string
+  tenantName: string
+  serviceName: string
+  date: string
+  time: string
+}): string {
+  const message = [
+    `Здравствуйте, ${params.clientName}! Это ${params.tenantName}.`,
+    `Вы записаны на ${params.serviceName} ${params.date} в ${params.time}.`,
+    `Для подтверждения бронирования, пожалуйста, внесите предоплату.`,
+  ].join('\n')
+  const phone = params.clientPhone.replace(/[^0-9]/g, '')
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
 
 function formatPrice(price: number | null, currency: string): string {
   if (price == null) return '—'
@@ -142,7 +159,7 @@ function getDayLabel(dateKey: string, timezone: string): string {
 
 // ---- component -------------------------------------------------------------
 
-export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, services }: Props) {
+export function BookingsDashboard({ tenantSlug, timezone, tenantName, canEdit, resources, services }: Props) {
   const { t } = useI18n()
   // Tab
   const [tab, setTab] = useState<'table' | 'calendar'>('table')
@@ -489,20 +506,14 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
                         {sorted.map((booking) => {
                           const localTime = toZonedTime(new Date(booking.startsAt), timezone)
                           const time = format(localTime, 'HH:mm')
+                          const date = format(localTime, 'd MMMM', { locale: ru })
                           const clientName = booking.user?.name ?? booking.guestName
-                          const isExpiredPending =
-                            booking.status === 'PENDING' &&
-                            booking.paymentExpiresAt != null &&
-                            new Date(booking.paymentExpiresAt) < new Date()
-                          const allowed = isExpiredPending ? [] : (TRANSITIONS[booking.status] ?? [])
+                          const allowed = TRANSITIONS[booking.status] ?? []
 
                           return (
                             <div
                               key={booking.id}
-                              className={[
-                                'neu-raised rounded-xl bg-[var(--neu-bg)] px-4 py-2 flex items-center gap-4 hover:bg-muted/30 transition-colors',
-                                isExpiredPending ? 'opacity-60' : '',
-                              ].join(' ')}
+                              className="neu-raised rounded-xl bg-[var(--neu-bg)] px-4 py-2 flex items-center gap-4 hover:bg-muted/30 transition-colors"
                             >
                               {/* Time — dominant visual element */}
                               <span className="font-semibold text-lg tabular-nums w-14 shrink-0">{time}</span>
@@ -525,13 +536,29 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
                                 {booking.resource.name}
                               </span>
 
-                              {/* Status badge — expired PENDING gets its own label */}
-                              {isExpiredPending ? (
-                                <span className="inline-flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                                  Истекло время оплаты
-                                </span>
-                              ) : (
-                                <BookingStatusBadge status={booking.status} />
+                              {/* Status badge */}
+                              <BookingStatusBadge status={booking.status} />
+
+                              {/* WhatsApp button — only when client phone is known */}
+                              {booking.guestPhone && (
+                                <a
+                                  href={buildWhatsAppManagerUrl({
+                                    clientPhone: booking.guestPhone,
+                                    clientName: clientName ?? 'клиент',
+                                    tenantName,
+                                    serviceName: booking.service?.name ?? '',
+                                    date,
+                                    time,
+                                  })}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center justify-center h-7 w-7 rounded-lg text-green-600 hover:bg-green-50 transition-colors shrink-0"
+                                  title="Написать в WhatsApp"
+                                >
+                                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                  </svg>
+                                </a>
                               )}
 
                               {/* Status change actions */}
@@ -598,6 +625,7 @@ export function BookingsDashboard({ tenantSlug, timezone, canEdit, resources, se
           calendarData={calendarData}
           timezone={timezone}
           tenantSlug={tenantSlug}
+          tenantName={tenantName}
           weekStart={weekStart}
           onWeekChange={setWeekStart}
           onStatusChange={handleStatusChange}
