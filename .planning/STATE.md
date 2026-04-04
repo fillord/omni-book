@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Client Base
-current_plan: 1
-status: executing
-last_updated: "2026-04-04T03:02:24.047Z"
-last_activity: 2026-04-04 -- Phase 12 execution started
+current_plan: 4
+status: complete
+last_updated: "2026-04-04T05:00:00.000Z"
+last_activity: 2026-04-04 -- Phase 12 complete (all 4 plans executed)
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 39
-  completed_plans: 39
+  total_phases: 12
+  completed_phases: 12
+  total_plans: 43
+  completed_plans: 43
   percent: 100
 ---
 
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 12 — remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment
+**Current focus:** Phase 12 complete — Remove Kaspi Pay, integrate Paylink.kz + WhatsApp prepayment
 
 ## Current Position
 
-Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — EXECUTING
-Plan: 1 of 4
-Current Plan: 1
-Status: Executing Phase 12
-Last activity: 2026-04-04 -- Phase 12 execution started
+Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — COMPLETE
+Plan: 4 of 4 (all complete)
+Current Plan: 4
+Status: Phase 12 complete
+Last activity: 2026-04-04 -- Phase 12 complete (all 4 plans executed)
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -133,6 +133,10 @@ Key patterns carrying forward to next milestone:
 - [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: PENDING bookings now block slots unconditionally after paymentExpiresAt field removed
 - [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: payment-settings.ts stubbed to return error — Kaspi fields removed, Paylink settings in 12-04
 - [Phase 12-remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment]: paylinkOrderId/paylinkUrl replace mockQrCode/mockPaylink in PlatformPayment schema
+- [Phase 12-04]: Polling via router.refresh() every 5s — billing Server Component re-fetches tenant; ACTIVE plan hides modal automatically
+- [Phase 12-04]: Paylink info card always visible (not PRO-gated) — all tenants see payment provider info
+- [Phase 12-04]: Mock fallback in platform-payment.ts when PAYLINK_API_KEY not set — dev mode works without credentials
+- [Phase 12-04]: payment-lifecycle.ts made no-op — PENDING booking cancellation removed since Kaspi deposit flow is gone
 
 ### Pending Todos
 
