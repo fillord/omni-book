@@ -29,7 +29,7 @@ Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — COMPLE
 Plan: 4 of 4 (all complete)
 Current Plan: 4
 Status: Phase 12 complete
-Last activity: 2026-04-04 -- Phase 12 complete (all 4 plans executed)
+Last activity: 2026-04-04 -- Phase 12.1-01 gap closure plan complete
 
 Progress: [██████████] 100% (21/21 plans complete)
 
@@ -137,6 +137,9 @@ Key patterns carrying forward to next milestone:
 - [Phase 12-04]: Paylink info card always visible (not PRO-gated) — all tenants see payment provider info
 - [Phase 12-04]: Mock fallback in platform-payment.ts when PAYLINK_API_KEY not set — dev mode works without credentials
 - [Phase 12-04]: payment-lifecycle.ts made no-op — PENDING booking cancellation removed since Kaspi deposit flow is gone
+- [Phase 12.1-01]: service-form.tsx deposit fields removed from FormValues type, not just JSX — prevents type pollution in handleSubmit
+- [Phase 12.1-01]: Duplicate payment: blocks removed by deleting early single-key blocks (not merging) — full blocks already had whatsappPrepayment
+- [Phase 12.1-01]: mock-payment directory removed entirely via git rm — TS1117 and dead route gaps from VERIFICATION.md closed
 
 ### Pending Todos
 
