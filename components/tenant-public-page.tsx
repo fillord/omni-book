@@ -164,8 +164,6 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
     durationMin:    s.durationMin,
     price:          s.price,
     currency:       s.currency,
-    requireDeposit: (s as unknown as { requireDeposit: boolean }).requireDeposit ?? false,
-    depositAmount:  (s as unknown as { depositAmount: number | null }).depositAmount ?? null,
   }))
 
   const bookingResources = bookableResources.map((r) => {

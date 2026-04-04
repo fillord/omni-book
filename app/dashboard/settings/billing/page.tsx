@@ -26,7 +26,7 @@ export default async function BillingPage() {
       select: {
         id: true,
         amount: true,
-        paylinkUrl: true,   // CHANGED: was mockQrCode
+        paylinkUrl: true,
         expiresAt: true,
         planTarget: true,
       },
@@ -53,7 +53,7 @@ export default async function BillingPage() {
         pendingPayment={pendingPayment ? {
           id: pendingPayment.id,
           amount: pendingPayment.amount,
-          paylinkUrl: pendingPayment.paylinkUrl,   // CHANGED: was mockQrCode
+          paylinkUrl: pendingPayment.paylinkUrl,
           expiresAt: pendingPayment.expiresAt.toISOString(),
           planTarget: pendingPayment.planTarget,
         } : null}

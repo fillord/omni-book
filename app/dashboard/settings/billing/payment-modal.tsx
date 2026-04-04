@@ -16,7 +16,7 @@ import { ShieldCheck } from 'lucide-react'
 type PendingPayment = {
   id: string
   amount: number
-  paylinkUrl: string | null   // CHANGED: was mockQrCode
+  paylinkUrl: string | null
   expiresAt: string  // ISO string
   planTarget: string
 }
@@ -31,7 +31,7 @@ type Props = {
 
 type PaymentData = {
   id: string
-  paylinkUrl: string         // CHANGED: was mockQrCode
+  paylinkUrl: string
   amount: number
   expiresAt: string
 }

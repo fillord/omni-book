@@ -54,7 +54,7 @@ export async function requestProActivation() {
 export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
   success: boolean
   paymentId?: string
-  paylinkUrl?: string   // CHANGED: was mockQrCode
+  paylinkUrl?: string
   amount?: number
   expiresAt?: string
   error?: string
@@ -81,7 +81,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
       return {
         success: true,
         paymentId: existingPending.id,
-        paylinkUrl: existingPending.paylinkUrl ?? undefined,  // CHANGED: was mockQrCode
+        paylinkUrl: existingPending.paylinkUrl ?? undefined,
         amount: existingPending.amount,
         expiresAt: existingPending.expiresAt.toISOString(),
       }
@@ -100,7 +100,7 @@ export async function initiateSubscriptionPayment(plan: Plan = 'PRO'): Promise<{
     return {
       success: true,
       paymentId: result.paymentId,
-      paylinkUrl: result.paylinkUrl,  // CHANGED: was mockQrCode
+      paylinkUrl: result.paylinkUrl,
       amount: planRecord.priceMonthly,
       expiresAt: result.expiresAt.toISOString(),
     }

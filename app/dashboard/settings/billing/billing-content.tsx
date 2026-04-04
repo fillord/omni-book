@@ -32,7 +32,7 @@ type SubscriptionPlanInfo = {
 type PendingPaymentInfo = {
   id: string
   amount: number
-  paylinkUrl: string | null   // CHANGED: was mockQrCode
+  paylinkUrl: string | null
   expiresAt: string
   planTarget: string
 }
@@ -194,7 +194,7 @@ export function BillingContent({ tenant, subscriptionPlans = [], pendingPayment 
               onOpenChange={setIsOpen}
               pendingPayment={pendingPayment ? {
                 ...pendingPayment,
-                paylinkUrl: pendingPayment.paylinkUrl,  // CHANGED: was mockQrCode
+                paylinkUrl: pendingPayment.paylinkUrl,
               } : null}
               planLabel={isFree ? 'PRO' : tenant.plan}
               planPrice={proPlan?.priceMonthly ?? 10000}
