@@ -19,7 +19,7 @@ export default async function StaffPage() {
   })
 
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-4">
+    <div className="p-4 sm:p-6 max-w-[1400px] mx-auto space-y-4">
       <StaffManager planStatus={tenant?.planStatus ?? undefined} />
     </div>
   )

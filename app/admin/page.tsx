@@ -1,6 +1,7 @@
 import { basePrisma } from '@/lib/db'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Building2, CalendarCheck, Activity, Users } from 'lucide-react'
+import { RunCronButton } from './run-cron-button'
 
 export default async function AdminIndexPage() {
   const now = new Date()
@@ -52,13 +53,16 @@ export default async function AdminIndexPage() {
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
       {/* Header */}
-      <header className="space-y-1">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-          Обзор платформы
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Высокоуровневая статистика по всем компаниям и бронированиям в системе.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+            Обзор платформы
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Высокоуровневая статистика по всем компаниям и бронированиям в системе.
+          </p>
+        </div>
+        <RunCronButton />
       </header>
 
       {/* KPI cards */}

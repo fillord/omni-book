@@ -141,11 +141,9 @@ export function StaffManager({ planStatus }: { planStatus?: string }) {
         </div>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5" disabled={isExpired}>
-              <UserPlus className="h-4 w-4" />
-              Добавить
-            </Button>
+          <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={isExpired} />}>
+            <UserPlus className="h-4 w-4" />
+            Добавить
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

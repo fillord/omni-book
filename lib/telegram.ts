@@ -24,6 +24,25 @@ export async function sendTelegramMessage(chatId: string, text: string): Promise
   }
 }
 
+/**
+ * Deletes a message from a Telegram chat.
+ * Works reliably in group chats where the bot is an admin.
+ * In private DMs, Telegram only allows bots to delete their own messages —
+ * user messages cannot be deleted, so this call may silently fail (no throw).
+ */
+export async function deleteTelegramMessage(chatId: string, messageId: number): Promise<void> {
+  if (!BOT_TOKEN || !chatId) return
+
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/deleteMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
+  }).catch(() => {
+    // Deletion is best-effort — Telegram returns 400 for DM user messages;
+    // we swallow the error rather than crashing the webhook handler.
+  })
+}
+
 export interface InlineButton {
   text: string
   url: string

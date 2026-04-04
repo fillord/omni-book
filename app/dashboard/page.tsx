@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { BookingStatusBadge } from '@/components/booking-status-badge'
 import { ActivityTimeline, type ActivityItem } from '@/components/dashboard/activity-timeline'
 import { AnalyticsOverview } from '@/components/dashboard/analytics-overview'
-import { SupportButtons } from '@/components/dashboard/support-buttons'
 import { CalendarCheck, Clock, Sparkles, TrendingUp } from 'lucide-react'
 import { getServerT } from '@/lib/i18n/server'
 
@@ -213,10 +212,6 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* Support buttons */}
-      <div className="flex justify-end">
-        <SupportButtons />
-      </div>
 
     </div>
   )

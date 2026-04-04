@@ -11,6 +11,7 @@ import { Briefcase, Scissors, CalendarCheck, Users, TrendingUp } from 'lucide-re
 import { CountUp } from '@/components/dashboard/count-up'
 import { ActivityTimeline, type ActivityItem } from '@/components/dashboard/activity-timeline'
 import { useI18n } from '@/lib/i18n/context'
+import { SupportButtons } from '@/components/dashboard/support-buttons'
 
 const STAT_ICONS: Record<'resources' | 'services' | 'bookings' | 'users', React.ElementType> = {
   resources: Briefcase,
@@ -78,6 +79,11 @@ export function DashboardClient({ stats, activities, children }: Props) {
         <div className="animate-slide-up stagger-5">
           {children}
         </div>
+      </div>
+
+      {/* Support contact — bottom right */}
+      <div className="flex justify-end">
+        <SupportButtons />
       </div>
     </>
   )

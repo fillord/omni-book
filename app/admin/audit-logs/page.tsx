@@ -12,15 +12,57 @@ const EVENT_LABELS: Record<string, string> = {
   staff_deleted: 'Удаление сотрудника',
 }
 
-function formatDetails(details: unknown): string {
-  if (!details || typeof details !== 'object') return '—'
-  const d = details as Record<string, unknown>
-  if (d.oldPlan && d.newPlan) return `${d.oldPlan} → ${d.newPlan}`
-  if (d.serviceName) return `${d.serviceName}`
-  if (d.resourceName) return `${d.resourceName}`
-  if (d.staffEmail) return `${d.staffEmail}`
-  if (d.email) return `${d.email}`
-  return JSON.stringify(details)
+const REASON_LABELS: Record<string, string> = {
+  subscription_expired: 'Истечение подписки',
+  manual_downgrade: 'Ручной перевод',
+  plan_change: 'Смена тарифа',
+}
+
+const PLAN_LABELS: Record<string, string> = {
+  FREE: 'Бесплатный',
+  PRO: 'PRO',
+  ENTERPRISE: 'Enterprise',
+}
+
+const ACTIVATED_BY_LABELS: Record<string, string> = {
+  superadmin: 'Администратор',
+}
+
+function formatDate(value: unknown): string {
+  if (typeof value !== 'string') return String(value)
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return value
+  return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+type DetailParts = { label: string; value: string }[]
+
+function parseDetailParts(d: Record<string, unknown>): DetailParts | null {
+  const parts: DetailParts = []
+
+  if (d.oldPlan && d.newPlan) {
+    const from = PLAN_LABELS[d.oldPlan as string] ?? d.oldPlan as string
+    const to = PLAN_LABELS[d.newPlan as string] ?? d.newPlan as string
+    parts.push({ label: 'Изменение', value: `${from} → ${to}` })
+  }
+  if (d.reason) {
+    parts.push({ label: 'Причина', value: REASON_LABELS[d.reason as string] ?? d.reason as string })
+  }
+  if (d.previousPlan) {
+    parts.push({ label: 'Предыдущий план', value: PLAN_LABELS[d.previousPlan as string] ?? d.previousPlan as string })
+  }
+  if (d.activatedBy) {
+    parts.push({ label: 'Активировал', value: ACTIVATED_BY_LABELS[d.activatedBy as string] ?? d.activatedBy as string })
+  }
+  if (d.newExpiry) {
+    parts.push({ label: 'Истекает', value: formatDate(d.newExpiry) })
+  }
+  if (d.serviceName) parts.push({ label: 'Услуга', value: d.serviceName as string })
+  if (d.resourceName) parts.push({ label: 'Ресурс', value: d.resourceName as string })
+  if (d.staffEmail) parts.push({ label: 'Сотрудник', value: d.staffEmail as string })
+  if (d.email) parts.push({ label: 'Email', value: d.email as string })
+
+  return parts.length > 0 ? parts : null
 }
 
 export default async function AuditLogsPage({
@@ -130,7 +172,24 @@ export default async function AuditLogsPage({
                     </span>
                   </td>
                   <td className="p-4 text-sm text-muted-foreground">
-                    {formatDetails(log.details)}
+                    {(() => {
+                      if (!log.details || typeof log.details !== 'object') return '—'
+                      const parts = parseDetailParts(log.details as Record<string, unknown>)
+                      if (!parts) return '—'
+                      return (
+                        <div className="flex flex-wrap gap-1.5">
+                          {parts.map(({ label, value }) => (
+                            <span
+                              key={label}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs neu-inset bg-[var(--neu-bg)]"
+                            >
+                              <span className="text-muted-foreground/70">{label}:</span>
+                              <span className="text-foreground font-medium">{value}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </td>
                 </tr>
               ))}

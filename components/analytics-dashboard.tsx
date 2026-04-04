@@ -5,7 +5,7 @@
 import { useState, useTransition } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell, Legend,
+  ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell,
 } from 'recharts'
 import { TrendingUp, Calendar, DollarSign, XCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -212,6 +212,9 @@ export function AnalyticsDashboard({ initial, color }: Props) {
         />
       </div>
 
+      {/* Charts — dimmed while period is loading */}
+      <div className={`space-y-6 transition-opacity duration-200 ${pending ? 'opacity-40 pointer-events-none' : ''}`}>
+
       {/* Bookings by day */}
       <Card>
         <CardHeader className="pb-2">
@@ -278,12 +281,16 @@ export function AnalyticsDashboard({ initial, color }: Props) {
                       tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }}
                       tickLine={false}
                       axisLine={false}
-                      tickFormatter={(v: number) => v === 0 ? '0' : `${Math.round(v / 100)}₸`}
-                      width={44}
+                      tickFormatter={(v: number) => {
+                        if (v === 0) return '0'
+                        const kzt = Math.round(v / 100)
+                        return kzt >= 1000 ? `${Math.round(kzt / 1000)}к₸` : `${kzt}₸`
+                      }}
+                      width={48}
                     />
                     <Tooltip content={<RevenueTooltip />} cursor={{ stroke: 'var(--color-border)', strokeWidth: 1 }} />
                     <Area
-                      type="monotone"
+                      type="linear"
                       dataKey="revenue"
                       stroke={nicheColor}
                       strokeWidth={2}
@@ -345,59 +352,72 @@ export function AnalyticsDashboard({ initial, color }: Props) {
           </CardContent>
         </Card>
 
-        {/* Top services — pie + list */}
-        <Card>
+        {/* Top services — donut + custom list */}
+        <Card className="neu-raised bg-[var(--neu-bg)]">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">{t('analytics', 'popularServices')}</CardTitle>
           </CardHeader>
           <CardContent>
             {!hasServices ? <EmptyState label={t('analytics', 'noDataPeriod')} /> : (
-              <div className="flex flex-col gap-4">
-                <ResponsiveContainer width="100%" height={200}>
+              <div className="flex flex-col gap-3">
+                {/* Donut — fixed 250px so the list below never gets squashed */}
+                <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
                     <Pie
-                      data={servicesChart}
+                      data={servicesChart.filter(s => s.bookings > 0)}
                       cx="50%"
                       cy="50%"
-                      innerRadius={55}
-                      outerRadius={85}
+                      innerRadius={65}
+                      outerRadius={100}
                       paddingAngle={3}
                       dataKey="bookings"
                       nameKey="name"
                     >
-                      {servicesChart.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
+                      {servicesChart
+                        .filter(s => s.bookings > 0)
+                        .map((_, i) => (
+                          <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        ))}
                     </Pie>
                     <Tooltip
                       formatter={(v, name) => [v, name]}
-                      contentStyle={{ borderRadius: 12, border: '1px solid var(--color-border)', fontSize: 13 }}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: '1px solid var(--color-border)',
+                        fontSize: 13,
+                        background: 'var(--neu-bg)',
+                      }}
                     />
-                    <Legend
-                      iconType="circle"
-                      iconSize={8}
-                      formatter={(value: string) =>
-                        <span style={{ fontSize: 12, color: 'var(--color-muted-foreground)' }}>{value}</span>
-                      }
-                    />
+                    {/* No <Legend /> — the custom list below is the legend */}
                   </PieChart>
                 </ResponsiveContainer>
 
-                {/* Table */}
-                <div className="divide-y divide-border text-sm">
+                {/* Custom legend list — color dot, name left / count + revenue right */}
+                <div className="rounded-xl neu-inset bg-[var(--neu-bg)] divide-y divide-border text-sm px-1">
                   {servicesChart.slice(0, 5).map((s, i) => (
-                    <div key={s.name} className="flex items-center gap-3 py-2">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                      />
-                      <span className="flex-1 text-foreground truncate">{s.name}</span>
-                      <span className="font-semibold text-card-foreground tabular-nums">{s.bookings}</span>
-                      {s.revenue > 0 && (
-                        <span className="text-xs text-muted-foreground tabular-nums w-24 text-right">
-                          {fmtRevenue(s.revenue)}
+                    <div
+                      key={s.name}
+                      className={`flex justify-between items-center gap-3 py-2.5 px-2 ${s.bookings === 0 ? 'opacity-40' : ''}`}
+                    >
+                      {/* Left: dot + name */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                        />
+                        <span className="truncate text-foreground">{s.name}</span>
+                      </div>
+                      {/* Right: count + optional revenue */}
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="font-semibold tabular-nums text-card-foreground">
+                          {s.bookings}
                         </span>
-                      )}
+                        {s.revenue > 0 && (
+                          <span className="text-xs text-muted-foreground tabular-nums w-20 text-right">
+                            {fmtRevenue(s.revenue)}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -407,6 +427,8 @@ export function AnalyticsDashboard({ initial, color }: Props) {
         </Card>
 
       </div>
+
+      </div>{/* end charts loading wrapper */}
     </div>
   )
 }

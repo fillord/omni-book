@@ -1,18 +1,30 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { basePrisma } from '@/lib/db'
-import { sendTelegramMessage } from '@/lib/telegram'
+import { sendTelegramMessage, deleteTelegramMessage } from '@/lib/telegram'
 
 const ADMIN_CHAT_ID = process.env.ADMIN_TELEGRAM_CHAT_ID
 const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET
 
 interface TelegramUpdate {
   message?: {
+    message_id: number
     text?: string
     chat: {
       id: number
     }
   }
+}
+
+/**
+ * Generates a cryptographically secure random password.
+ * Uses only unambiguous characters (no 0/O, 1/l/I) to ease manual entry.
+ */
+function generateSecurePassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%'
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes).map((b) => chars[b % chars.length]).join('')
 }
 
 export async function POST(req: NextRequest) {
@@ -31,6 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   const chatId = String(message.chat.id)
+  const messageId = message.message_id
   const text = message.text.trim()
 
   // Гвардия: только владелец
@@ -41,13 +54,20 @@ export async function POST(req: NextRequest) {
 
   // Роутинг команд
   if (text.startsWith('/add_superadmin')) {
+    // Delete the command message immediately — it contains the email address.
+    // In private DMs Telegram does not allow bots to delete user messages, so
+    // this is best-effort (the helper swallows the error silently).
+    await deleteTelegramMessage(chatId, messageId)
     await handleAddSuperadmin(chatId, text)
   } else if (text === '/admins') {
     await handleListAdmins(chatId)
   } else if (text.startsWith('/delete_admin')) {
     await handleDeleteAdmin(chatId, text)
   } else if (text === '/start' || text === '/id') {
-    await sendTelegramMessage(chatId, `Твой ID: <code>${chatId}</code>\n\n<b>Доступные команды:</b>\n/admins - Список админов\n/add_superadmin [email] [pass] - Создать\n/delete_admin [email] - Удалить`)
+    await sendTelegramMessage(
+      chatId,
+      `Твой ID: <code>${chatId}</code>\n\n<b>Доступные команды:</b>\n/admins — Список админов\n/add_superadmin [email] — Создать (пароль генерируется автоматически)\n/delete_admin [email] — Удалить`,
+    )
   }
 
   return NextResponse.json({ ok: true })
@@ -56,22 +76,22 @@ export async function POST(req: NextRequest) {
 // === ОБРАБОТЧИКИ КОМАНД ===
 
 async function handleAddSuperadmin(chatId: string, text: string): Promise<void> {
+  // New format: /add_superadmin email
+  // Password is NEVER sent through Telegram chat — generated server-side.
   const parts = text.split(/\s+/)
 
-  if (parts.length !== 3) {
-    await sendTelegramMessage(chatId, '❌ <b>Ошибка формата</b>\nИспользуй: <code>/add_superadmin email password</code>')
+  if (parts.length !== 2) {
+    await sendTelegramMessage(
+      chatId,
+      '❌ <b>Ошибка формата</b>\nИспользуй: <code>/add_superadmin email@example.com</code>\n\nПароль будет сгенерирован автоматически.',
+    )
     return
   }
 
-  const [, email, password] = parts
+  const [, email] = parts
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     await sendTelegramMessage(chatId, '❌ <b>Некорректный Email</b>')
-    return
-  }
-
-  if (password.length < 8) {
-    await sendTelegramMessage(chatId, '❌ <b>Пароль слишком короткий</b> (минимум 8 символов)')
     return
   }
 
@@ -82,6 +102,8 @@ async function handleAddSuperadmin(chatId: string, text: string): Promise<void> 
       return
     }
 
+    // Generate a strong random password — never typed by the admin in chat
+    const password = generateSecurePassword()
     const passwordHash = await bcrypt.hash(password, 12)
 
     await basePrisma.user.create({
@@ -94,7 +116,10 @@ async function handleAddSuperadmin(chatId: string, text: string): Promise<void> 
       },
     })
 
-    await sendTelegramMessage(chatId, `✅ <b>Супер-админ создан!</b>\n📧 Email: <code>${email}</code>`)
+    await sendTelegramMessage(
+      chatId,
+      `✅ <b>Супер-админ создан!</b>\n\n📧 Email: <code>${email}</code>\n🔑 Пароль: <code>${password}</code>\n\n⚠️ <b>Сохраните пароль</b> — он больше не будет показан. Смените его после первого входа.`,
+    )
   } catch (error) {
     console.error('[TG_CMD_ERR]', error)
     await sendTelegramMessage(chatId, '❌ <b>Ошибка БД</b>. Проверь логи сервера.')

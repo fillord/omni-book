@@ -3,9 +3,27 @@ import bcrypt from 'bcryptjs'
 import { basePrisma } from '@/lib/db'
 import { Prisma, Plan, PlanStatus } from '@prisma/client'
 import { getServerT } from '@/lib/i18n/server'
+import { rateLimit, getClientIp } from '@/lib/rate-limit'
+
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 registration attempts per IP per 10 minutes
+  const ip = getClientIp(req)
+  const rl = rateLimit(`register:${ip}`, 5, 10 * 60_000)
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: 'Слишком много попыток регистрации. Пожалуйста, подождите.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+          'X-RateLimit-Remaining': '0',
+        },
+      },
+    )
+  }
+
   let body: unknown
   try {
     body = await req.json()

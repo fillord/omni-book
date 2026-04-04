@@ -16,9 +16,10 @@ export default async function ClientsPage() {
     getServerT(),
   ])
 
-  // Serialize dates for client component (Next.js App Router constraint — Date objects cannot be passed as props)
+  // Serialize dates and convert prices from minor units (tiyn × 100) to major units for display
   const serializedClients = clients.map(c => ({
     ...c,
+    totalRevenue: Math.round(c.totalRevenue / 100),
     lastVisitAt: c.lastVisitAt ? c.lastVisitAt.toISOString() : null,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),

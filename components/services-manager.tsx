@@ -229,6 +229,11 @@ export function ServicesManager({ services, resources, canEdit }: Props) {
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {s.durationMin} {t('booking', 'minutes')} · {s.price === null || s.price === 0 ? t('booking', 'free') : formatPrice(s.price, s.currency)}
+                  {(s as unknown as { requireDeposit: boolean }).requireDeposit && (
+                    <span className="ml-1.5 inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700">
+                      💳 {formatPrice((s as unknown as { depositAmount: number }).depositAmount, s.currency)}
+                    </span>
+                  )}
                 </p>
                 {s.resources.length > 0 && (
                   <div className="flex flex-wrap gap-2 leading-relaxed">

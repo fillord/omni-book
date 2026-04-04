@@ -3,6 +3,7 @@ import { basePrisma } from "@/lib/db"
 import {
   getAvailableSlots,
   DayOffError,
+  FrozenError,
   ResourceNotFoundError,
   ServiceNotFoundError,
 } from "@/lib/booking/engine"
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
     // ---- verify resource belongs to this tenant ---------------------------
     const resource = await basePrisma.resource.findFirst({
       where: { id: resourceId, tenantId: tenant.id },
-      select: { id: true, name: true },
+      select: { id: true, name: true, isFrozen: true },
     })
     console.log("[SLOTS API] resource:", resource ? `${resource.id} (${resource.name})` : "NULL")
 
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
     // ---- verify service belongs to this tenant ----------------------------
     const service = await basePrisma.service.findFirst({
       where: { id: serviceId, tenantId: tenant.id },
-      select: { id: true, name: true },
+      select: { id: true, name: true, isFrozen: true },
     })
     console.log("[SLOTS API] service:", service ? `${service.id} (${service.name})` : "NULL")
 
@@ -85,6 +86,10 @@ export async function GET(request: NextRequest) {
         { error: `Service "${serviceId}" not found for tenant "${tenantSlug}"` },
         { status: 404 },
       )
+    }
+
+    if (resource.isFrozen || service.isFrozen) {
+      return NextResponse.json({ slots: [], frozen: true }, { status: 200 })
     }
 
     // ---- get slots --------------------------------------------------------
@@ -102,6 +107,9 @@ export async function GET(request: NextRequest) {
     if (err instanceof DayOffError) {
       console.log("[SLOTS API] day off")
       return NextResponse.json({ slots: [], dayOff: true, message: "Выходной день" })
+    }
+    if (err instanceof FrozenError) {
+      return NextResponse.json({ slots: [], frozen: true })
     }
     if (err instanceof ResourceNotFoundError || err instanceof ServiceNotFoundError) {
       console.log("[SLOTS API] engine error:", (err as Error).message)

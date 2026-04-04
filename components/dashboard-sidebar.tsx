@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react'
 import {
   Menu, LogOut, ExternalLink,
   LayoutDashboard, CalendarDays, Wrench, Scissors, Settings, BarChart3,
-  Zap, Clock, Users, CreditCard
+  Zap, Clock, Users, CreditCard, LifeBuoy
 } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -86,6 +86,7 @@ function SidebarContent({ nicheConfig, tenantName, tenantSlug, tenantPlan, tenan
     { href: '/dashboard/analytics',          section: 'dashboard', tKey: 'analytics', icon: BarChart3,        exact: false },
     { href: '/dashboard/settings',           section: 'dashboard', tKey: 'settings',  icon: Settings,        exact: true  },
     { href: '/dashboard/settings/billing',  section: 'dashboard', tKey: 'billing',   icon: CreditCard,      exact: false },
+    { href: '/dashboard/support',           section: 'dashboard', tKey: 'support',   icon: LifeBuoy,        exact: false },
   ]
 
   return (

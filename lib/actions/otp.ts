@@ -99,16 +99,17 @@ export async function checkLoginIp(email: string, password: string) {
     return { requiresOtp: true, requiresForceLogin: false }
   }
 
-  // 2. IP matched (or no IP history). Now check concurrent sessions.
+  // 2. IP matched (or no IP history). Check for an active session on another
+  //    device. null means the user logged out cleanly — skip the warning.
   if (user.activeSessionId) {
     return {
       requiresOtp: false,
       requiresForceLogin: true,
-      message: 'В этот аккаунт уже выполнен вход с другого устройства.'
+      message: 'В этот аккаунт уже выполнен вход с другого устройства.',
     }
   }
 
-  // 3. No active sessions, proceed. Opportunistically save IP for legacy users
+  // 3. Opportunistically save IP for legacy users
   if (!user.lastIpAddress) {
     await basePrisma.user.update({
       where: { id: user.id },
@@ -149,11 +150,12 @@ export async function verifyLoginOtp(email: string, code: string) {
     basePrisma.otpCode.delete({ where: { id: record.id } })
   ])
 
-  // Identity is now verified. Check if there's an active session on another device.
-  if (user?.activeSessionId) {
-    return { 
-      requiresForceLogin: true, 
-      message: 'В этот аккаунт уже выполнен вход с другого устройства.' 
+  // Re-fetch user after IP update to get latest activeSessionId
+  const freshUser = await basePrisma.user.findUnique({ where: { email: cleanEmail } })
+  if (freshUser?.activeSessionId) {
+    return {
+      requiresForceLogin: true,
+      message: 'В этот аккаунт уже выполнен вход с другого устройства.',
     }
   }
 

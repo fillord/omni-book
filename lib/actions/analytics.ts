@@ -24,12 +24,20 @@ export interface AnalyticsResult {
     bookings: number
     revenue:  number
   }[]
+  statusDistribution: {
+    status: string
+    count:  number
+  }[]
   summary: {
     totalBookings:  number
     totalRevenue:   number
     completionRate: number
     cancelRate:     number
   }
+}
+
+function toLocalDateKey(date: Date, tz: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(date)
 }
 
 export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsResult> {
@@ -41,17 +49,25 @@ export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsRe
   const from = new Date()
   from.setDate(from.getDate() - days)
 
-  // ---- 1. Бронирования (flat) -----------------------------------------------
-  const bookings = await basePrisma.booking.findMany({
-    where:  { tenantId, createdAt: { gte: from } },
-    select: {
-      createdAt: true,
-      status:    true,
-      service:   { select: { price: true } },
-    },
-  })
+  // ---- 0. Tenant timezone + bookings in parallel ----------------------------
+  const [tenant, bookings] = await Promise.all([
+    basePrisma.tenant.findUnique({
+      where:  { id: tenantId },
+      select: { timezone: true },
+    }),
+    basePrisma.booking.findMany({
+      where:  { tenantId, createdAt: { gte: from } },
+      select: {
+        createdAt: true,
+        status:    true,
+        service:   { select: { price: true } },
+      },
+    }),
+  ])
 
-  // Инициализируем все дни в диапазоне
+  const TZ = tenant?.timezone ?? 'Asia/Almaty'
+
+  // Инициализируем все дни в диапазоне (в локальном времени Казахстана)
   const bookingsByDay: Record<string, {
     total:     number
     confirmed: number
@@ -62,12 +78,12 @@ export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsRe
   for (let i = 0; i < days; i++) {
     const d = new Date()
     d.setDate(d.getDate() - (days - 1 - i))
-    const key = d.toISOString().split('T')[0]
+    const key = toLocalDateKey(d, TZ)
     bookingsByDay[key] = { total: 0, confirmed: 0, cancelled: 0, revenue: 0 }
   }
 
   for (const b of bookings) {
-    const key = b.createdAt.toISOString().split('T')[0]
+    const key = toLocalDateKey(b.createdAt, TZ)
     if (!bookingsByDay[key]) continue
     bookingsByDay[key].total++
     if (b.status === 'CONFIRMED' || b.status === 'COMPLETED') {
@@ -79,10 +95,11 @@ export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsRe
 
   const bookingsChart = Object.entries(bookingsByDay).map(([date, data]) => ({
     date,
-    label: new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', {
-      day:   'numeric',
-      month: 'short',
-    }),
+    label: new Intl.DateTimeFormat('ru-RU', {
+      timeZone: TZ,
+      day:      'numeric',
+      month:    'short',
+    }).format(new Date(date + 'T12:00:00Z')),
     ...data,
   }))
 
@@ -138,7 +155,18 @@ export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsRe
     .sort((a, b) => b.bookings - a.bookings)
     .slice(0, 8)
 
-  // ---- 4. Summary ------------------------------------------------------------
+  // ---- 4. Status distribution (computed from already-fetched bookings) ------
+  const statusMap = new Map<string, number>()
+  for (const b of bookings) {
+    statusMap.set(b.status, (statusMap.get(b.status) ?? 0) + 1)
+  }
+  // Canonical order: best outcome first
+  const STATUS_ORDER = ['COMPLETED', 'CONFIRMED', 'PENDING', 'CANCELLED', 'NO_SHOW']
+  const statusDistribution = STATUS_ORDER
+    .filter((s) => statusMap.has(s))
+    .map((s) => ({ status: s, count: statusMap.get(s)! }))
+
+  // ---- 5. Summary ------------------------------------------------------------
   const totalBookings = bookings.length
   const totalRevenue  = bookings
     .filter((b) => b.status === 'CONFIRMED' || b.status === 'COMPLETED')
@@ -154,6 +182,7 @@ export async function getAnalytics(period: AnalyticsPeriod): Promise<AnalyticsRe
     bookingsChart,
     resourceChart,
     servicesChart,
+    statusDistribution,
     summary: { totalBookings, totalRevenue, completionRate, cancelRate },
   }
 }

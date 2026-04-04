@@ -10,6 +10,8 @@ export const createServiceSchema = z.object({
   currency: z.string().default('KZT'),
   resourceIds: z.array(z.string()).min(1, 'Выберите хотя бы один ресурс'),
   translations: z.record(z.string(), z.record(z.string(), z.string())).optional(),
+  requireDeposit: z.boolean().default(false),
+  depositAmount: z.number().int().min(0).optional(),
 })
 
 export const updateServiceSchema = createServiceSchema.partial()

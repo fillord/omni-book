@@ -6,15 +6,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ease-in-out outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "neu-btn bg-[var(--neu-bg)] text-foreground",
+        default: "neu-btn bg-[var(--neu-bg)] text-foreground hover:text-neu-accent",
         outline:
-          "neu-raised bg-[var(--neu-bg)] text-foreground hover:text-neu-accent",
+          "neu-raised bg-[var(--neu-bg)] text-foreground hover:text-neu-accent active:neu-inset",
         secondary:
-          "neu-raised bg-[var(--neu-bg)] text-secondary-foreground hover:text-neu-accent",
+          "neu-raised bg-[var(--neu-bg)] text-secondary-foreground hover:text-neu-accent active:neu-inset",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground",
         destructive:

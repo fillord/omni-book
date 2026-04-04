@@ -23,8 +23,12 @@ interface TenantPlanInfo {
 export type LimitError = { success: false; error: 'LIMIT_REACHED'; plan: string }
 
 const RESOURCE_INCLUDE = {
-  schedules: true,
+  schedules: {
+    // Only the fields rendered in the UI — skips createdAt / updatedAt
+    select: { id: true, dayOfWeek: true, startTime: true, endTime: true, isActive: true },
+  },
   services: {
+    // Only id + name needed to render the chip list
     include: { service: { select: { id: true, name: true } } },
   },
 } as const

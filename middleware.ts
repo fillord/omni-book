@@ -82,7 +82,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // ------------------------------------------------------------------
   if (ADMIN_PREFIXES.some((p) => pathname.startsWith(p))) {
     if (!token) return loginRedirect(request)
-    const isSuperAdmin = role === 'SUPERADMIN' || token.email === 'admin@omnibook.com'
+    const isSuperAdmin = role === 'SUPERADMIN'
     if (!isSuperAdmin) {
       const dashboard = request.nextUrl.clone()
       dashboard.pathname = '/dashboard'

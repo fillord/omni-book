@@ -7,7 +7,9 @@ out/
 
 # Build
 dist/
-
+.claude/
+.planning/
+__tests__/
 # Environment
 .env
 .env.local

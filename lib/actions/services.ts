@@ -111,13 +111,15 @@ export async function createService(
 
   const svc = await db.service.create({
     data: {
-      tenantId:    tenantId,
-      name:        parsed.name,
-      description: parsed.description,
-      durationMin: parsed.durationMin,
-      price:       toMinorUnits(parsed.price),
-      currency:    parsed.currency ?? 'KZT',
-      translations: (parsed.translations ?? {}) as Prisma.InputJsonValue,
+      tenantId:       tenantId,
+      name:           parsed.name,
+      description:    parsed.description,
+      durationMin:    parsed.durationMin,
+      price:          toMinorUnits(parsed.price),
+      currency:       parsed.currency ?? 'KZT',
+      translations:   (parsed.translations ?? {}) as Prisma.InputJsonValue,
+      requireDeposit: parsed.requireDeposit ?? false,
+      depositAmount:  parsed.depositAmount ?? null,
     },
   })
 
@@ -153,11 +155,13 @@ export async function updateService(
   await findOwned(id, tenantId)
 
   const updateData: Prisma.ServiceUpdateInput = {}
-  if (parsed.name !== undefined)        updateData.name        = parsed.name
-  if ('description' in parsed)          updateData.description = parsed.description ?? null
-  if (parsed.durationMin !== undefined) updateData.durationMin = parsed.durationMin
-  if ('price' in parsed)                updateData.price       = toMinorUnits(parsed.price)
-  if (parsed.currency !== undefined)    updateData.currency    = parsed.currency
+  if (parsed.name !== undefined)            updateData.name           = parsed.name
+  if ('description' in parsed)              updateData.description    = parsed.description ?? null
+  if (parsed.durationMin !== undefined)     updateData.durationMin    = parsed.durationMin
+  if ('price' in parsed)                    updateData.price          = toMinorUnits(parsed.price)
+  if (parsed.currency !== undefined)        updateData.currency       = parsed.currency
+  if (parsed.requireDeposit !== undefined)  updateData.requireDeposit = parsed.requireDeposit
+  if ('depositAmount' in parsed)            updateData.depositAmount  = parsed.depositAmount ?? null
 
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)

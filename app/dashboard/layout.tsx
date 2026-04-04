@@ -83,13 +83,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 >
                   Продлить подписку / PRO
                 </Link>
-                <a
-                  href="mailto:qz.nursultan@gmail.com"
+                <Link
+                  href="/dashboard/support"
                   className="inline-flex items-center justify-center gap-1.5 rounded-md border border-orange-300 dark:border-orange-700 px-4 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-colors"
                 >
                   <Mail className="h-4 w-4" />
                   Написать в поддержку
-                </a>
+                </Link>
               </div>
             </div>
           </div>

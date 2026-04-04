@@ -51,7 +51,7 @@ function LoginForm() {
   const [requiresOtp, setRequiresOtp] = useState(false)
   const [otpCode, setOtpCode] = useState("")
 
-  // States for Concurrent Sessions (Force Login)
+  // State for concurrent-session warning
   const [requiresForceLogin, setRequiresForceLogin] = useState(false)
   const isKicked = searchParams.get("kicked") === "true"
 
@@ -81,7 +81,7 @@ function LoginForm() {
         return
       }
 
-      // 2. Check if another session is active
+      // 2. Check for an active session on another device
       if (res.requiresForceLogin) {
         setRequiresForceLogin(true)
         setServerError(res.message || "Аккаунт используется на другом устройстве.")
@@ -89,45 +89,11 @@ function LoginForm() {
         return
       }
 
-      // No OTP required, no active sessions, proceed to normal signIn
+      // No OTP, no active session — proceed
       await performSignIn(values.email, values.password)
     } catch {
       setServerError("Произошла ошибка при входе")
       setLoading(false)
-    }
-  }
-
-  // 1b. Force Login confirmation
-  async function handleForceLogin() {
-    setLoading(true)
-    setServerError(null)
-    
-    // They approved kicking out the other session, but we still need to check IP
-    const email = form.getValues('email')
-    const password = form.getValues('password')
-
-    try {
-      const res = await checkLoginIp(email, password)
-      
-      if (res.error) {
-         setServerError(res.error)
-         setLoading(false)
-         return
-      }
-
-      // If IP has changed, we still need OTP, even after force login approval
-      if (res.requiresOtp) {
-        setRequiresForceLogin(false)
-        setRequiresOtp(true)
-        setLoading(false)
-        return
-      }
-
-      // Otherwise, just sign in (backend config.ts will regenerate session ID and invalidate the other device)
-      await performSignIn(email, password)
-    } catch {
-       setServerError("Ошибка при принудительном входе")
-       setLoading(false)
     }
   }
 
@@ -153,7 +119,7 @@ function LoginForm() {
         return
       }
 
-      // After verifying OTP, check if there's an active session
+      // OTP valid, IP updated. Check for active session on another device.
       if (res.requiresForceLogin) {
         setRequiresOtp(false)
         setRequiresForceLogin(true)
@@ -162,7 +128,6 @@ function LoginForm() {
         return
       }
 
-      // OTP valid, IP updated, no concurrent sessions, proceed to normal signIn
       await performSignIn(email, password)
     } catch {
       setServerError("Ошибка проверки кода")
@@ -191,6 +156,14 @@ function LoginForm() {
 
   async function handleGoogle() {
     await signIn("google", { callbackUrl })
+  }
+
+  // Force-login: user confirmed — overwrite the existing session and sign in
+  async function handleForceLogin() {
+    setLoading(true)
+    setServerError(null)
+    setRequiresForceLogin(false)
+    await performSignIn(form.getValues('email'), form.getValues('password'))
   }
 
   // OTP Fallback Cancel
@@ -230,28 +203,40 @@ function LoginForm() {
 
         <CardContent className="space-y-4">
           {serverError && !requiresForceLogin && (
-            <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div className="rounded-md neu-inset px-4 py-3 text-sm text-destructive">
               {serverError}
             </div>
           )}
 
           {isKicked && (
-            <div className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive font-medium">
+            <div className="rounded-md neu-inset px-4 py-3 text-sm text-destructive font-medium">
               Кто-то другой зашел в ваш аккаунт. Вы были отключены для безопасности.
             </div>
           )}
 
           {requiresForceLogin ? (
-            <div className="space-y-4">
-              <div className="rounded-md border border-orange-500/40 bg-orange-500/5 px-4 py-3 text-sm text-orange-600 font-medium">
-                {serverError || "В этот аккаунт уже выполнен вход с другого устройства."}
+            <div className="space-y-3">
+              <div className="rounded-xl neu-raised px-4 py-4 text-sm">
+                <p className="font-semibold text-foreground mb-1">Активная сессия обнаружена</p>
+                <p className="text-muted-foreground">
+                  {serverError || "В этот аккаунт уже выполнен вход с другого устройства."}
+                </p>
               </div>
-              <Button type="button" onClick={handleForceLogin} className="w-full bg-orange-600 hover:bg-orange-700 text-white" disabled={loading}>
-                {loading ? "Загрузка..." : "Завершить другие сеансы и войти"}
-              </Button>
-              <Button type="button" variant="ghost" className="w-full text-muted-foreground" onClick={() => window.location.reload()}>
+              <button
+                type="button"
+                onClick={handleForceLogin}
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-lg neu-btn text-neu-accent font-semibold text-sm transition-all duration-300 ease-in-out active:neu-inset disabled:opacity-50"
+              >
+                {loading ? "Загрузка..." : "Завершить другой сеанс и войти"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setRequiresForceLogin(false); setServerError(null) }}
+                className="w-full px-4 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+              >
                 Отмена
-              </Button>
+              </button>
             </div>
           ) : !requiresOtp ? (
             // Form 1: Credentials
@@ -348,7 +333,7 @@ function LoginForm() {
           )}
 
           {/* Google OAuth */}
-          {!requiresOtp && process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true" && (
+          {!requiresOtp && !requiresForceLogin && process.env.NEXT_PUBLIC_GOOGLE_ENABLED === "true" && (
             <>
               <div className="relative">
                 <Separator />
@@ -374,7 +359,7 @@ function LoginForm() {
             </>
           )}
 
-          {!requiresOtp && (
+          {!requiresOtp && !requiresForceLogin && (
             <p className="text-center text-sm text-muted-foreground">
               {t('auth', 'noAccount')}{" "}
               <Link href="/register" className="font-medium underline underline-offset-4 hover:text-foreground">

@@ -22,7 +22,7 @@ export function Footer() {
               <li><a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'features')}</a></li>
               <li><a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'pricing')}</a></li>
               <li><a href="#demo" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'demo')}</a></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerDocs')}</a></li>
+              <li><Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerDocs')}</Link></li>
             </ul>
           </div>
           {/* Legal column (per D-03) */}
@@ -44,7 +44,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li><Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerAbout')}</Link></li>
               <li><Link href="/about#contacts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerContacts')}</Link></li>
-              <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerSupport')}</a></li>
+              <li><Link href="/support" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t('landing', 'footerSupport')}</Link></li>
             </ul>
           </div>
         </div>

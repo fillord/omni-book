@@ -15,7 +15,7 @@ export interface BookingEmailData {
   manageToken?: string | null  // Token for public booking management page
 }
 
-function fmtDateTime(d: Date | string, tz = 'Europe/Moscow'): string {
+function fmtDateTime(d: Date | string, tz = 'UTC'): string {
   return new Intl.DateTimeFormat('ru-RU', {
     timeZone: tz,
     weekday: 'long',

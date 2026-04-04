@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { useI18n } from "@/lib/i18n/context"
+import { Navbar } from "@/components/landing/Navbar"
+import { Footer } from "@/components/landing/Footer"
 
 export default function RefundPage() {
   const { t } = useI18n()
@@ -16,6 +18,8 @@ export default function RefundPage() {
   ]
 
   return (
+    <>
+    <Navbar />
     <main className="bg-[var(--neu-bg)] min-h-screen py-16">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-4">
@@ -41,5 +45,7 @@ export default function RefundPage() {
         </div>
       </div>
     </main>
+    <Footer />
+    </>
   )
 }

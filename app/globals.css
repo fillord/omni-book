@@ -60,6 +60,7 @@ body {
 .dark {
   /* Neumorphism palette */
   --neu-bg: #1e1e24;
+  --calendar-icon-filter: invert(1);
   --neu-text: #d1d5db;
   --neu-shadow-light: #2c2c35;
   --neu-shadow-dark: #101013;
@@ -156,6 +157,39 @@ body {
   }
 }
 
+/* iOS Safari / WebKit: force date input internals to be visible.
+   Without these rules, input[type="date"] can collapse or render
+   transparent text on physical iOS devices when appearance is reset. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-height: 50px;
+  width: 100%;
+  color: var(--foreground);
+  opacity: 1;
+}
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  color: var(--foreground);
+  opacity: 1;
+  min-height: 1.5em;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+  filter: var(--calendar-icon-filter, none);
+}
+
+/* Hide scrollbar while keeping scroll functional */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Neumorphism utility classes — defined in @layer utilities so they share precedence with
    Tailwind utilities and are NOT overridden by them. background-color is set here directly
    so elements using neu-* classes automatically get the exact background needed for the shadow. */
@@ -173,6 +207,7 @@ body {
   .neu-btn {
     background-color: var(--neu-bg);
     box-shadow: 10px 10px 20px var(--neu-shadow-dark), -10px -10px 20px var(--neu-shadow-light);
+    transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
   }
 
   .neu-btn:hover {
@@ -180,6 +215,19 @@ body {
   }
 
   .neu-btn:active {
+    box-shadow: inset 5px 5px 10px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
+  }
+
+  /* Hover + active states for neu-raised used directly on interactive elements
+     (links, buttons, admin custom buttons) — mirrors neu-btn behaviour */
+  a.neu-raised:hover,
+  button.neu-raised:hover {
+    color: var(--neu-accent);
+    transition: box-shadow 300ms ease-in-out, color 300ms ease-in-out;
+  }
+
+  a.neu-raised:active,
+  button.neu-raised:active {
     box-shadow: inset 5px 5px 10px var(--neu-shadow-dark), inset -5px -5px 10px var(--neu-shadow-light);
   }
 }

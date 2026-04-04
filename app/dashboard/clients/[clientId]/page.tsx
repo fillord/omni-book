@@ -5,14 +5,15 @@ import { basePrisma } from '@/lib/db'
 import { ClientDetail } from '@/components/client-detail'
 import { getServerT } from '@/lib/i18n/server'
 
-export default async function ClientDetailPage({ params }: { params: { clientId: string } }) {
+export default async function ClientDetailPage({ params }: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = await params
   const session = await getServerSession(authConfig)
   if (!session?.user.tenantId) redirect('/login')
 
   const tenantId = session.user.tenantId
 
   const client = await basePrisma.client.findUnique({
-    where: { id: params.clientId },
+    where: { id: clientId },
   })
   if (!client || client.tenantId !== tenantId) notFound()
 
@@ -29,8 +30,10 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
   const t = await getServerT()
 
   // Serialize dates for client component
+  // Prices stored in minor units (tiyn × 100); divide by 100 for display
   const serializedClient = {
     ...client,
+    totalRevenue: Math.round(client.totalRevenue / 100),
     lastVisitAt: client.lastVisitAt ? client.lastVisitAt.toISOString() : null,
     createdAt: client.createdAt.toISOString(),
     updatedAt: client.updatedAt.toISOString(),
@@ -41,7 +44,7 @@ export default async function ClientDetailPage({ params }: { params: { clientId:
     startsAt: b.startsAt.toISOString(),
     status: b.status,
     serviceName: b.service?.name ?? '—',
-    servicePrice: b.service?.price ?? 0,
+    servicePrice: b.service?.price != null ? Math.round(b.service.price / 100) : 0,
     resourceName: b.resource?.name ?? '—',
   }))
 

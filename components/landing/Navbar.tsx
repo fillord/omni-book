@@ -60,7 +60,7 @@ export function Navbar() {
           <ClientOnly fallback={<div className="w-16 h-8 bg-muted rounded animate-pulse" />}>
             <Link
               href="/login"
-              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-foreground transition-all active:neu-inset"
+              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-foreground transition-all duration-300 ease-in-out hover:text-neu-accent active:neu-inset"
             >
               {t('common', 'login')}
             </Link>
@@ -68,7 +68,7 @@ export function Navbar() {
           <ClientOnly fallback={<div className="w-24 h-8 bg-muted rounded animate-pulse" />}>
             <Link
               href="/register"
-              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-neu-accent font-medium transition-all active:neu-inset"
+              className="text-sm px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-neu-accent font-medium transition-all duration-300 ease-in-out active:neu-inset"
             >
               {t('common', 'register')}
             </Link>
@@ -115,7 +115,7 @@ export function Navbar() {
           <ClientOnly fallback={<div className="h-9 bg-muted rounded" />}>
             <Link
               href="/register"
-              className="text-sm text-center px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium"
+              className="text-sm text-center px-4 py-2 rounded-lg neu-raised bg-[var(--neu-bg)] text-neu-accent font-medium transition-all duration-300 ease-in-out active:neu-inset"
               onClick={() => setOpen(false)}
             >
               {t('common', 'register')}
