@@ -7,7 +7,7 @@ import { createBooking, BookingConflictError, BookingLimitError, BookingWindowEr
 import { sendBookingConfirmation } from '@/lib/email/resend'
 import { sendTelegramMessage } from '@/lib/telegram'
 import { normalizePhone } from '@/lib/utils/phone'
-import { format } from 'date-fns'
+import { formatInTimeZone } from 'date-fns-tz'
 import { ru } from 'date-fns/locale'
 import { rateLimit, getClientIp } from '@/lib/rate-limit'
 
@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         serviceName:  service?.name ?? '',
         resourceName: resource?.name ?? '',
         startsAt:     booking.startsAt,
+        timezone:     tenant.timezone ?? 'Asia/Almaty',
         manageToken:  booking.manageToken,
       }).catch(console.error)
     }
@@ -189,8 +190,9 @@ export async function POST(req: NextRequest) {
     const chatId = (tenant as unknown as { telegramChatId?: string | null }).telegramChatId ?? null
     if (chatId) {
       const startsAt = new Date(booking.startsAt)
-      const dateStr = format(startsAt, 'd MMMM yyyy', { locale: ru })
-      const timeStr = format(startsAt, 'HH:mm')
+      const tz = tenant.timezone ?? 'Asia/Almaty'
+      const dateStr = formatInTimeZone(startsAt, tz, 'd MMMM yyyy', { locale: ru })
+      const timeStr = formatInTimeZone(startsAt, tz, 'HH:mm')
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
       const msg = [
         '🔔 <b>Новая запись!</b>',

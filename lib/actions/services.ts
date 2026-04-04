@@ -118,8 +118,6 @@ export async function createService(
       price:          toMinorUnits(parsed.price),
       currency:       parsed.currency ?? 'KZT',
       translations:   (parsed.translations ?? {}) as Prisma.InputJsonValue,
-      requireDeposit: parsed.requireDeposit ?? false,
-      depositAmount:  parsed.depositAmount ?? null,
     },
   })
 
@@ -160,8 +158,6 @@ export async function updateService(
   if (parsed.durationMin !== undefined)     updateData.durationMin    = parsed.durationMin
   if ('price' in parsed)                    updateData.price          = toMinorUnits(parsed.price)
   if (parsed.currency !== undefined)        updateData.currency       = parsed.currency
-  if (parsed.requireDeposit !== undefined)  updateData.requireDeposit = parsed.requireDeposit
-  if ('depositAmount' in parsed)            updateData.depositAmount  = parsed.depositAmount ?? null
 
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)
