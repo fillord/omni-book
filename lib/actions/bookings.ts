@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { format } from 'date-fns'
+import { formatInTimeZone } from 'date-fns-tz'
 import { ru } from 'date-fns/locale'
 import { basePrisma } from '@/lib/db'
 import { requireAuth, requireRole } from '@/lib/auth/guards'
@@ -62,7 +62,7 @@ export async function createManualBooking(data: ManualBookingInput) {
     const [tenant, service, resource] = await Promise.all([
       basePrisma.tenant.findUnique({
         where: { id: tenantId },
-        select: { name: true, telegramChatId: true },
+        select: { name: true, telegramChatId: true, timezone: true },
       }),
       basePrisma.service.findFirst({
         where: { id: parsed.serviceId, tenantId },
@@ -83,6 +83,7 @@ export async function createManualBooking(data: ManualBookingInput) {
         serviceName:  service?.name ?? '',
         resourceName: resource?.name ?? '',
         startsAt:     result.startsAt,
+        timezone:     tenant?.timezone ?? 'Asia/Almaty',
         manageToken:  result.manageToken,
       }).catch(console.error)
     }
@@ -91,8 +92,9 @@ export async function createManualBooking(data: ManualBookingInput) {
     const chatId = tenant?.telegramChatId ?? null
     if (chatId) {
       const startsAtDate = new Date(result.startsAt)
-      const dateStr = format(startsAtDate, 'd MMMM yyyy', { locale: ru })
-      const timeStr = format(startsAtDate, 'HH:mm')
+      const tz = tenant?.timezone ?? 'Asia/Almaty'
+      const dateStr = formatInTimeZone(startsAtDate, tz, 'd MMMM yyyy', { locale: ru })
+      const timeStr = formatInTimeZone(startsAtDate, tz, 'HH:mm')
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
       const msg = [
         '🔔 <b>Новая запись (от администратора)!</b>',
