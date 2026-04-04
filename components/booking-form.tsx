@@ -40,6 +40,7 @@ type Props = {
   nicheColor?:   string
   /** Rolling booking window: max days ahead for booking */
   bookingWindowDays?: number
+  tenantPhone?:  string | null  // used for WhatsApp prepayment deep link
 }
 
 type Step = 'service' | 'resource' | 'datetime' | 'confirm'
@@ -59,44 +60,44 @@ type NicheColorClasses = {
 
 const BOOKING_COLORS: Record<string, NicheColorClasses> = {
   blue: {
-    stepActive:       'border-blue-600 text-blue-600',
+    stepActive:       'text-blue-600',
     stepDone:         'bg-blue-600 border-blue-600 text-white',
     stepLine:         'bg-blue-600',
     slotSelected:     'bg-blue-600 text-white border-blue-600',
-    slotHover:        'hover:border-blue-500 hover:text-blue-600',
+    slotHover:        'hover:text-blue-600',
     submitBtn:        'bg-blue-600 hover:bg-blue-700 text-white',
-    serviceSelected:  'border-blue-600 bg-card dark:bg-blue-950/40',
-    resourceSelected: 'border-blue-600 bg-card dark:bg-blue-950/40',
+    serviceSelected:  'neu-inset bg-[var(--neu-bg)] text-blue-600',
+    resourceSelected: 'neu-inset bg-[var(--neu-bg)] text-blue-600',
   },
   pink: {
-    stepActive:       'border-pink-600 text-pink-600',
+    stepActive:       'text-pink-600',
     stepDone:         'bg-pink-600 border-pink-600 text-white',
     stepLine:         'bg-pink-600',
     slotSelected:     'bg-pink-600 text-white border-pink-600',
-    slotHover:        'hover:border-pink-500 hover:text-pink-600',
+    slotHover:        'hover:text-pink-600',
     submitBtn:        'bg-pink-600 hover:bg-pink-700 text-white',
-    serviceSelected:  'border-pink-600 bg-card dark:bg-pink-950/40',
-    resourceSelected: 'border-pink-600 bg-card dark:bg-pink-950/40',
+    serviceSelected:  'neu-inset bg-[var(--neu-bg)] text-pink-600',
+    resourceSelected: 'neu-inset bg-[var(--neu-bg)] text-pink-600',
   },
   orange: {
-    stepActive:       'border-orange-600 text-orange-600',
+    stepActive:       'text-orange-600',
     stepDone:         'bg-orange-600 border-orange-600 text-white',
     stepLine:         'bg-orange-600',
     slotSelected:     'bg-orange-600 text-white border-orange-600',
-    slotHover:        'hover:border-orange-500 hover:text-orange-600',
+    slotHover:        'hover:text-orange-600',
     submitBtn:        'bg-orange-600 hover:bg-orange-700 text-white',
-    serviceSelected:  'border-orange-600 bg-card dark:bg-orange-950/40',
-    resourceSelected: 'border-orange-600 bg-card dark:bg-orange-950/40',
+    serviceSelected:  'neu-inset bg-[var(--neu-bg)] text-orange-600',
+    resourceSelected: 'neu-inset bg-[var(--neu-bg)] text-orange-600',
   },
   green: {
-    stepActive:       'border-green-600 text-green-600',
+    stepActive:       'text-green-600',
     stepDone:         'bg-green-600 border-green-600 text-white',
     stepLine:         'bg-green-600',
     slotSelected:     'bg-green-600 text-white border-green-600',
-    slotHover:        'hover:border-green-500 hover:text-green-600',
+    slotHover:        'hover:text-green-600',
     submitBtn:        'bg-green-600 hover:bg-green-700 text-white',
-    serviceSelected:  'border-green-600 bg-card dark:bg-green-950/40',
-    resourceSelected: 'border-green-600 bg-card dark:bg-green-950/40',
+    serviceSelected:  'neu-inset bg-[var(--neu-bg)] text-green-600',
+    resourceSelected: 'neu-inset bg-[var(--neu-bg)] text-green-600',
   },
 }
 
@@ -152,10 +153,10 @@ function StepIndicator({
           <li key={step.id} className="flex items-center flex-1 last:flex-none">
             <div className="flex flex-col items-center gap-1 min-w-[2.5rem]">
               <span className={[
-                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all',
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all',
                 done     ? colors.stepDone
-                : isActive ? colors.stepActive
-                : 'border-border text-muted-foreground',
+                : isActive ? `neu-inset bg-[var(--neu-bg)] ${colors.stepActive}`
+                : 'neu-raised bg-[var(--neu-bg)] text-muted-foreground',
               ].join(' ')}>
                 {done ? '✓' : idx + 1}
               </span>
@@ -188,6 +189,7 @@ function SuccessScreen({
   resource,
   date,
   time,
+  tenantPhone,
   onReset,
 }: {
   bookingId:   string
@@ -196,6 +198,7 @@ function SuccessScreen({
   resource:    ResourceOption
   date:        string
   time:        string
+  tenantPhone?: string | null
   onReset:     () => void
 }) {
   const { t, locale } = useI18n()
@@ -229,7 +232,7 @@ function SuccessScreen({
     <div className="flex flex-col items-center gap-6 py-8 text-center relative">
       <div
         className={[
-          'w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center transition-all duration-500',
+          'w-20 h-20 rounded-full neu-raised bg-[var(--neu-bg)] flex items-center justify-center transition-all duration-500',
           visible ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
         ].join(' ')}
       >
@@ -264,7 +267,7 @@ function SuccessScreen({
         <p className="text-muted-foreground text-sm">{guestName}, {t('booking', 'successSub')}</p>
       </div>
 
-      <div className="w-full rounded-xl border border-border bg-card p-5 text-sm space-y-3 text-left max-w-sm">
+      <div className="w-full rounded-xl neu-raised bg-[var(--neu-bg)] p-5 text-sm space-y-3 text-left max-w-sm">
         <SummaryRow label={t('booking', 'service')}    value={service.name} />
         <SummaryRow label={t('booking', 'specialist')} value={resource.name} />
         <Separator />
@@ -278,6 +281,30 @@ function SuccessScreen({
           {t('booking', 'bookingNumber')}: <span className="font-mono font-medium text-foreground">{bookingId}</span>
         </p>
       </div>
+
+      {tenantPhone && (
+        <div className="mt-4 pt-4 border-t border-[var(--neu-bg)] w-full max-w-sm">
+          <a
+            href={buildWhatsAppPrepaymentUrl({
+              tenantPhone,
+              guestName,
+              serviceName: service.name,
+              date: new Date(date).toLocaleDateString('ru-RU', { dateStyle: 'long' }),
+              time,
+              price: service.price ?? null,
+              currency: service.currency,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-[var(--neu-bg)] neu-raised text-sm font-medium text-green-600 hover:opacity-80 transition-opacity"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+            {t('payment', 'whatsappPrepayment')}
+          </a>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 w-full max-w-sm">
         {/* Telegram deep-link — only shown when bot username is configured */}
@@ -314,6 +341,34 @@ function SuccessScreen({
   )
 }
 
+// ---- WhatsApp prepayment ---------------------------------------------------
+
+function buildWhatsAppPrepaymentUrl(params: {
+  tenantPhone: string
+  guestName: string
+  serviceName: string
+  date: string
+  time: string
+  price: number | null
+  currency: string
+}): string {
+  const priceText = params.price
+    ? `${new Intl.NumberFormat('ru-RU').format(params.price)} ${params.currency}`
+    : ''
+
+  const template = [
+    `Здравствуйте! Я хочу подтвердить бронирование.`,
+    `📋 Услуга: ${params.serviceName}`,
+    `📅 Дата и время: ${params.date}, ${params.time}`,
+    priceText ? `💰 Стоимость: ${priceText}` : '',
+    ``,
+    `Мне необходимо внести предоплату. Подскажите, как это сделать?`,
+  ].filter(Boolean).join('\n')
+
+  const phone = params.tenantPhone.replace(/[^0-9]/g, '')
+  return `https://wa.me/${phone}?text=${encodeURIComponent(template)}`
+}
+
 // ---- BookingForm -----------------------------------------------------------
 
 export function BookingForm({
@@ -324,6 +379,7 @@ export function BookingForm({
   resourceLabel,
   nicheColor,
   bookingWindowDays = 14,
+  tenantPhone,
 }: Props) {
   const { t, locale } = useI18n()
   const colors = BOOKING_COLORS[nicheColor ?? 'blue'] ?? FALLBACK_COLORS
@@ -470,6 +526,7 @@ export function BookingForm({
         resource={selectedResource}
         date={selectedDate}
         time={selectedTime}
+        tenantPhone={tenantPhone}
         onReset={handleReset}
       />
     )
@@ -493,10 +550,10 @@ export function BookingForm({
                 key={service.id}
                 htmlFor={`service-${service.id}`}
                 className={[
-                  'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                  'flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all',
                   selectedServiceId === service.id
                     ? colors.serviceSelected
-                    : 'border-border hover:border-border/80',
+                    : 'neu-raised bg-[var(--neu-bg)]',
                 ].join(' ')}
               >
                 <RadioGroupItem value={service.id} id={`service-${service.id}`} className="mt-0.5 shrink-0" />
@@ -521,7 +578,7 @@ export function BookingForm({
             <button
               disabled={!selectedServiceId}
               onClick={() => goForward('resource')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
+              className={`px-5 py-2.5 rounded-xl neu-raised text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -550,10 +607,10 @@ export function BookingForm({
                 key={resource.id}
                 htmlFor={`resource-${resource.id}`}
                 className={[
-                  'flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                  'flex items-start gap-3 p-4 rounded-xl cursor-pointer transition-all',
                   selectedResourceId === resource.id
                     ? colors.resourceSelected
-                    : 'border-border hover:border-border/80',
+                    : 'neu-raised bg-[var(--neu-bg)]',
                 ].join(' ')}
               >
                 <RadioGroupItem value={resource.id} id={`resource-${resource.id}`} className="mt-0.5 shrink-0" />
@@ -598,13 +655,13 @@ export function BookingForm({
             ))}
           </RadioGroup>
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+            <button onClick={() => goBack('service')} className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground hover:text-neu-accent transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedResourceId}
               onClick={() => goForward('datetime')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
+              className={`px-5 py-2.5 rounded-xl neu-raised text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -638,7 +695,7 @@ export function BookingForm({
                 setSelectedDate(val)
                 setSelectedTime('')
               }}
-              className="block w-full sm:max-w-xs rounded-xl border-2 border-input px-3 py-2.5 text-sm focus:outline-none focus:border-ring transition-colors bg-background text-foreground"
+              className="block w-full sm:max-w-xs rounded-xl neu-inset bg-[var(--neu-bg)] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-colors text-foreground"
             />
           </div>
 
@@ -677,12 +734,12 @@ export function BookingForm({
                         disabled={!slot.available}
                         onClick={() => slot.available && setSelectedTime(slot.time)}
                         className={[
-                          'py-2.5 rounded-xl text-sm font-medium border-2 transition-all',
+                          'py-2.5 rounded-xl text-sm font-medium transition-all',
                           !slot.available
-                            ? 'border-border/50 bg-muted/50 text-muted-foreground/40 cursor-not-allowed'
+                            ? 'neu-inset bg-muted/50 text-muted-foreground/40 cursor-not-allowed'
                             : selectedTime === slot.time
                             ? colors.slotSelected
-                            : `border-border text-foreground ${colors.slotHover}`,
+                            : `neu-raised bg-[var(--neu-bg)] text-foreground ${colors.slotHover}`,
                         ].join(' ')}
                       >
                         {slot.time}
@@ -696,13 +753,13 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+            <button onClick={() => goBack('resource')} className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground hover:text-neu-accent transition-colors">
               ← {t('common', 'back')}
             </button>
             <button
               disabled={!selectedDate || !selectedTime}
               onClick={() => goForward('confirm')}
-              className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
+              className={`px-5 py-2.5 rounded-xl neu-raised text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {t('common', 'next')} →
             </button>
@@ -715,7 +772,7 @@ export function BookingForm({
         <div className={`space-y-5 animate-slide-${slideDir}`}>
           <h3 className="font-semibold text-foreground">{t('booking', 'confirmBooking')}</h3>
 
-          <div className="rounded-xl border border-border bg-card p-4 space-y-3 text-sm">
+          <div className="rounded-xl neu-raised bg-[var(--neu-bg)] p-4 space-y-3 text-sm">
             <SummaryRow label={t('booking', 'service')}  value={selectedService?.name ?? '—'} />
             <SummaryRow label={t('booking', 'price')}    value={formatPrice(selectedService?.price ?? null, selectedService?.currency ?? 'KZT')} />
             <SummaryRow label={t('booking', 'duration')} value={`${selectedService?.durationMin} ${t('booking', 'minutes')}`} />
@@ -769,13 +826,13 @@ export function BookingForm({
           )}
 
           <div className="flex justify-between pt-2">
-            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl border-2 border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-40">
+            <button onClick={() => goBack('datetime')} disabled={loading} className="px-5 py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-sm font-semibold text-foreground hover:text-neu-accent transition-colors disabled:opacity-40">
               ← {t('common', 'back')}
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className={`min-w-40 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
+              className={`min-w-40 px-5 py-2.5 rounded-xl neu-raised text-sm font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${colors.submitBtn}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">

@@ -29,7 +29,7 @@ Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — COMPLE
 Plan: 4 of 4 (all complete)
 Current Plan: 4
 Status: Phase 12 complete
-Last activity: 2026-04-04 -- Phase 12 complete (all 4 plans executed)
+Last activity: 2026-04-04 - Completed quick task 260404-m66: Restore neumorphic UI on public booking form
 
 Progress: [██████████] 100% (43/43 plans complete)
 
@@ -165,4 +165,6 @@ None.
 | 260323-1el | Add 18 niche resource types to RESOURCE_TYPES (horeca/sports/medicine/beauty) | 2026-03-23 | af3e28c | [260323-1el-bulk-resource-types-update](./quick/260323-1el-bulk-resource-types-update/) |
 | 260401-bx1 | Fix 3 UI bugs: invisible toggle in service form, obsolete deposit fields in billing, sidebar double-highlight | 2026-04-01 | 548bf47 | [260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic](./quick/260401-bx1-fix-3-ui-bugs-invisible-toggle-in-servic/) |
 | 260401-c61 | Fix invisible toggle OFF state in service-form.tsx with visible bg-gray-300 dark:bg-gray-600 and thumb border | 2026-04-01 | e05eff5 | [260401-c61-fix-invisible-toggle-off-state-in-servic](./quick/260401-c61-fix-invisible-toggle-off-state-in-servic/) |
+| 260404-f6n | Type safety cleanup: remove stale Prisma field refs (requireDeposit, depositAmount, mockQrCode, kaspiApiKey) — restore clean build | 2026-04-04 | d329de3 | [260404-f6n-type-safety-cleanup-remove-stale-prisma-](./quick/260404-f6n-type-safety-cleanup-remove-stale-prisma-/) |
 | 260404-g9o | Fix timezone bug: all email and Telegram notifications now show Asia/Almaty time (not UTC) | 2026-04-04 | 68ccbcf | [260404-g9o-fix-timezone-bug-in-email-notifications-](./quick/260404-g9o-fix-timezone-bug-in-email-notifications-/) |
+| 260404-m66 | Restore neumorphic UI on public booking form — steps, cards, slots, buttons, success screen | 2026-04-04 | 9496b0f | [260404-m66-restore-neumorphic-ui-on-public-booking-](./quick/260404-m66-restore-neumorphic-ui-on-public-booking-/) |
