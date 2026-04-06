@@ -24,7 +24,7 @@ export async function updatePaymentSettings(_data: Record<string, never> = {}) {
       return { error: 'Требуется план PRO' }
     }
 
-    // Kaspi payment settings removed — payments handled via Paylink.kz
+    // Paylink.kz settings — no tenant-facing config form yet
     revalidatePath('/dashboard/settings/billing')
     return { success: true }
   } catch (error: unknown) {
