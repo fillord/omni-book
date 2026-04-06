@@ -4,8 +4,8 @@ milestone: v1.5
 milestone_name: Payments Pivot
 current_plan: 4
 status: complete
-last_updated: "2026-04-04T05:00:00.000Z"
-last_activity: 2026-04-04 -- Phase 12 complete (all 4 plans executed)
+last_updated: "2026-04-06T18:29:50Z"
+last_activity: 2026-04-06 -- quick task 260406-w0a complete (login 500 fix, Kaspi ghost code removed, Paylink.kz i18n)
 progress:
   total_phases: 12
   completed_phases: 12
@@ -169,3 +169,4 @@ None.
 | 260404-g9o | Fix timezone bug: all email and Telegram notifications now show Asia/Almaty time (not UTC) | 2026-04-04 | 68ccbcf | [260404-g9o-fix-timezone-bug-in-email-notifications-](./quick/260404-g9o-fix-timezone-bug-in-email-notifications-/) |
 | 260404-m66 | Restore neumorphic UI on public booking form — steps, cards, slots, buttons, success screen | 2026-04-04 | 9496b0f | [260404-m66-restore-neumorphic-ui-on-public-booking-](./quick/260404-m66-restore-neumorphic-ui-on-public-booking-/) |
 | 260406-vjz | Comprehensive technical audit — generate FULL_PROJECT_REPORT.md | 2026-04-06 | e617573 | [260406-vjz-comprehensive-technical-audit-generate-f](./quick/260406-vjz-comprehensive-technical-audit-generate-f/) |
+| 260406-w0a | High-priority cleanup: fix login 500 error, remove Kaspi ghost code, update i18n to Paylink.kz, complete .env.example | 2026-04-06 | db9a7c0 | [260406-w0a-high-priority-cleanup-fix-login-500-erro](./quick/260406-w0a-high-priority-cleanup-fix-login-500-erro/) |
