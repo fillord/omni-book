@@ -229,7 +229,7 @@ function SuccessScreen({
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'kz' ? 'kk-KZ' : 'ru-RU'
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8 text-center relative">
+    <div className="flex flex-col items-center gap-6 py-8 text-center relative rounded-2xl neu-raised bg-[var(--neu-bg)]">
       <div
         className={[
           'w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center transition-all duration-500',
