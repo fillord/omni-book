@@ -158,7 +158,6 @@ export async function updateService(
   if (parsed.durationMin !== undefined)     updateData.durationMin    = parsed.durationMin
   if ('price' in parsed)                    updateData.price          = toMinorUnits(parsed.price)
   if (parsed.currency !== undefined)        updateData.currency       = parsed.currency
-
   if (parsed.translations !== undefined) {
     const existing = await findOwned(id, tenantId)
     const existingTranslations = (existing.translations as Record<string, Record<string, string>>) || {}

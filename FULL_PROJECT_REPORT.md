@@ -404,7 +404,7 @@ All files in `lib/actions/` use `'use server'` directive. Auth guards (`requireA
 - `verifyLoginOtp(email, code)` — final login OTP verification
 
 ### payment-settings.ts (OWNER, PRO+)
-- `updatePaymentSettings()` — **stub** (no-op since Kaspi removal). Returns `{ success: true }` after auth check.
+- `updatePaymentSettings()` — **stub** (no-op, Paylink.kz settings not yet surfaced in UI). Returns `{ success: true }` after auth check.
 
 ### resources.ts (OWNER+)
 - `getResources()` / `createResource(data)` / `updateResource(data)` / `deleteResource(id)` / `toggleResourceActive(id, isActive)`
@@ -637,16 +637,7 @@ Key counts are nearly identical across all three locales — no missing translat
 
 ### Ghost Code — Kaspi Remnants
 
-Phase 12 removed the Kaspi deposit payment flow. Most removal is complete. Remaining references:
-
-| File | Type | Description |
-|------|------|-------------|
-| `lib/payment-lifecycle.ts` | Intentional no-op | `cancelExpiredPendingBookings()` returns `{ cancelled: 0 }` — kept for API compatibility but effectively dead code. No cron calls this (vercel.json has no `/payment-lifecycle` endpoint). |
-| `lib/actions/payment-settings.ts` | Intentional stub | `updatePaymentSettings()` is a no-op returning success — Kaspi settings form removed, Paylink settings not yet surfaced in UI |
-| `lib/actions/bookings.ts:13` | Comment | `// TODO(12-02): cancelExpiredBooking removed — Kaspi deposit flow removed in Phase 12` |
-| `lib/i18n/translations.ts` | Stale content | `payWithKaspi`, `waitingInstructions` (Kaspi instructions), legal page sections mentioning Kaspi Pay — translations exist but are unused in current UI flows |
-| `app/dashboard/layout.tsx:79` | Stale comment | `{/* TODO: Replace with your actual payment link, e.g., Kaspi Pay */}` — the link now correctly goes to `/dashboard/settings/billing`, the comment is misleading |
-| `app/(marketing)/docs/page.tsx` | Stale content | Docs billing section mentions "Kaspi Pay" and "Basic" plan (which doesn't exist — plans are FREE/PRO/ENTERPRISE) |
+All Kaspi remnants cleaned (quick task 260406-w0a). `lib/payment-lifecycle.ts` deleted. Zero ghost code locations remain.
 
 ### TODO / FIXME / HACK Survey
 
@@ -672,8 +663,7 @@ Phase 12 removed the Kaspi deposit payment flow. Most removal is complete. Remai
 
 | Stub | File | Impact |
 |------|------|--------|
-| `updatePaymentSettings()` returns success without doing anything | `lib/actions/payment-settings.ts` | Low — no UI exposes Paylink settings yet; future plan will add Paylink configuration form |
-| `cancelExpiredPendingBookings()` returns `{ cancelled: 0 }` | `lib/payment-lifecycle.ts` | Low — function not called by any cron; retained for API shape compatibility |
+| `updatePaymentSettings()` returns success without doing anything | `lib/actions/payment-settings.ts` | Low — no UI exposes Paylink.kz settings yet; future plan will add Paylink configuration form |
 | `/book` page | `app/book/page.tsx` | Low — actual booking is via `/{slug}` tenant pages |
 | `/api/tenants` GET/POST | `app/api/tenants/route.ts` | Low — tenant creation via `/api/auth/register`, management via Server Actions |
 | `/api/resources` GET/POST | `app/api/resources/route.ts` | Low — resource management via Server Actions |
@@ -721,12 +711,8 @@ Phase 12 removed the Kaspi deposit payment flow. Most removal is complete. Remai
 | `NEXT_PUBLIC_GOOGLE_ENABLED` | `lib/auth/config.ts` | No | Feature flag for Google OAuth provider |
 | `ROOT_DOMAIN` | `middleware.ts` | No | Defaults to `omnibook.com` — used for subdomain extraction |
 
-**Not in .env.example but used in code:**
-- `NEXTAUTH_SECRET` — not in example (standard NextAuth var)
-- `NEXTAUTH_URL` — in example as `NEXTAUTH_URL=http://localhost:3000`
-- `CRON_SECRET` — not in .env.example; required for production cron
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `NEXT_PUBLIC_GOOGLE_ENABLED` — not in .env.example
-- `META_WEBHOOK_VERIFY_TOKEN` — not in .env.example
+**All variables now documented in .env.example** (updated 2026-04-06):
+- `CRON_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_ENABLED`, `META_WEBHOOK_VERIFY_TOKEN`, `RESEND_API_KEY` added in quick task 260406-w0a.
 
 ### Hardcoded Secrets Scan
 **Result:** No hardcoded API keys, passwords, or secrets found in source files.
@@ -757,7 +743,7 @@ The following Server Action files use `requireAuth()` and/or `requireRole()`:
 
 ### Security Notes
 
-1. **CRON_SECRET not in .env.example** — developers may miss this. Add it.
+1. **CRON_SECRET now in .env.example** — added in quick task 260406-w0a along with all other missing vars.
 2. **In-memory rate limiter** — acceptable for MVP scale; Redis required for strict enforcement at scale.
 3. **No CSRF on Server Actions** — Next.js App Router Server Actions have built-in CSRF protection (Origin header check). Not a gap.
 4. **Paylink webhook HMAC verification** — implemented in `lib/payments/paylink.ts::verifyPaylinkWebhook()`. Dynamic `require()` used for crypto (eslint suppressed).
@@ -778,13 +764,14 @@ Omni-book is a multi-tenant SaaS online booking platform targeting Kazakhstan bu
 
 ### Technical Debt — Prioritized
 
+*Completed in quick task 260406-w0a (2026-04-06):*
+- ~~Update legal page translations to replace "Kaspi Pay" with "Paylink.kz"~~ — DONE
+- ~~Add missing variables to `.env.example`~~ — DONE
+- ~~Remove stale Kaspi comments from `docs/page.tsx` and `layout.tsx`~~ — DONE
+- ~~Delete `lib/payment-lifecycle.ts`~~ — DONE
+
 | Priority | Item | Effort |
 |----------|------|--------|
-| High | Update legal page translations to replace "Kaspi Pay" with "Paylink.kz" in `oferta`, `privacy`, `refund` namespaces (all 3 locales) | Low |
-| High | Add `CRON_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXT_PUBLIC_GOOGLE_ENABLED`, `META_WEBHOOK_VERIFY_TOKEN` to `.env.example` | Trivial |
-| Medium | Update `docs/page.tsx` to remove Kaspi Pay references and correct plan names (Basic plan mentioned does not exist) | Low |
-| Medium | Remove stale comment from `app/dashboard/layout.tsx:79` | Trivial |
-| Medium | Decide fate of `lib/payment-lifecycle.ts` — either delete or add a cron endpoint if there is a use case | Low |
 | Medium | Build `/docs/getting-started`, `/docs/branch-setup`, `/docs/billing` sub-pages (currently linked but 404) | High |
 | Low | Replace in-memory rate limiter with Redis-backed solution before horizontal scale | High |
 | Low | Either implement or remove `/api/tenants` and `/api/resources` stub routes (confusion risk) | Low |

@@ -48,7 +48,10 @@ export const authConfig: NextAuthOptions = {
         const currentIp = getIpAddress(reqHeaders)
 
         if (user.lastIpAddress && user.lastIpAddress !== currentIp) {
-          throw new Error('Упс, ваш IP изменился. Требуется OTP подтверждение.')
+          // Return null (not throw) — throwing inside authorize causes a 500.
+          // The pre-flight checkLoginIp server action handles IP-changed flow;
+          // this path should only be reached in edge cases (race conditions).
+          return null
         }
 
         // SUPERADMIN (tenantId = null) is always allowed through

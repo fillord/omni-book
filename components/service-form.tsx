@@ -81,7 +81,6 @@ export function ServiceForm({ service, availableResources, onSubmit, disabled = 
   const [selectedResourceIds, setSelectedResourceIds] = useState<string[]>(initialResourceIds)
   const [resourceError, setResourceError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-
   const form = useForm<FormValues>({
     defaultValues: {
       name: service?.name ?? '',

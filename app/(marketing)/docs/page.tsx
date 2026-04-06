@@ -30,12 +30,12 @@ const sections = [
   {
     icon: CreditCard,
     title: "Управление тарифами",
-    description: "Тарифные планы, онлайн-оплата депозита и продление подписки.",
+    description: "Тарифные планы, онлайн-оплата через Paylink.kz и продление подписки.",
     href: "/docs/billing",
     items: [
-      "Тарифы Free, Basic, Pro, Enterprise",
-      "Подключение Kaspi Pay для приёма депозитов",
-      "Продление подписки через Kaspi",
+      "Тарифы Free, PRO, Enterprise",
+      "Онлайн-оплата через Paylink.kz",
+      "Управление подпиской",
       "Enterprise — индивидуальные условия",
     ],
   },
