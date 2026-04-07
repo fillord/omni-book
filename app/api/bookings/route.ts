@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         serviceName:  service?.name ?? '',
         resourceName: resource?.name ?? '',
         startsAt:     booking.startsAt,
+        timezone:     (tenant as unknown as { timezone?: string }).timezone ?? 'Asia/Almaty',
         manageToken:  booking.manageToken,
       }).catch(console.error)
     }

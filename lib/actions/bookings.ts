@@ -62,7 +62,7 @@ export async function createManualBooking(data: ManualBookingInput) {
     const [tenant, service, resource] = await Promise.all([
       basePrisma.tenant.findUnique({
         where: { id: tenantId },
-        select: { name: true, telegramChatId: true },
+        select: { name: true, telegramChatId: true, timezone: true },
       }),
       basePrisma.service.findFirst({
         where: { id: parsed.serviceId, tenantId },
@@ -83,6 +83,7 @@ export async function createManualBooking(data: ManualBookingInput) {
         serviceName:  service?.name ?? '',
         resourceName: resource?.name ?? '',
         startsAt:     result.startsAt,
+        timezone:     tenant.timezone ?? 'Asia/Almaty',
         manageToken:  result.manageToken,
       }).catch(console.error)
     }
