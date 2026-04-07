@@ -11,7 +11,7 @@ export interface BookingEmailData {
   serviceName: string
   resourceName: string
   startsAt: Date | string
-  timezone?: string
+  timezone: string
   manageToken?: string | null  // Token for public booking management page
 }
 
@@ -212,7 +212,7 @@ export interface RescheduleEmailData {
   tenantName: string
   serviceName: string
   newStartsAt: Date | string
-  timezone?: string
+  timezone: string
   manageToken?: string | null
 }
 

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { BookOpen, Settings, CreditCard, ChevronRight } from "lucide-react"
+import { BookOpen, Settings, CreditCard, MessageCircle, ChevronRight } from "lucide-react"
 import { Navbar } from "@/components/landing/Navbar"
 import { Footer } from "@/components/landing/Footer"
 
@@ -33,10 +33,21 @@ const sections = [
     description: "Тарифные планы, онлайн-оплата через Paylink.kz и продление подписки.",
     href: "/docs/billing",
     items: [
-      "Тарифы Free, PRO, Enterprise",
-      "Онлайн-оплата через Paylink.kz",
-      "Управление подпиской",
+      "Тарифы Free, PRO и Enterprise",
+      "Подключение Paylink.kz для оплаты",
+      "Продление подписки через Paylink.kz",
       "Enterprise — индивидуальные условия",
+    ],
+  },
+  {
+    icon: MessageCircle,
+    title: "WhatsApp-оплата",
+    description: "Как менеджеру принимать предоплату через WhatsApp и Paylink.kz.",
+    href: "/docs/whatsapp-flow",
+    items: [
+      "Кнопка «Написать в WhatsApp» после записи",
+      "Предзаполненное сообщение с деталями",
+      "Отправка ссылки на оплату через Paylink.kz",
     ],
   },
 ]

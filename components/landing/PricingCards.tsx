@@ -48,7 +48,7 @@ const PLANS = [
       "entFeature5",
     ],
     cta: "contactUs",
-    href: "mailto:qz.nursultan@gmail.com",
+    href: "/support",
     highlight: false,
     priceKey: "onDemand",
   },
@@ -108,23 +108,14 @@ export function PricingCards() {
                 ))}
               </ul>
 
-              {(name === "Free" || name === "Pro") ? (
-                <Link
-                  href={href}
-                  className={`mt-auto text-center text-sm font-semibold py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] transition-all active:neu-inset ${
-                    highlight ? "text-neu-accent" : "text-foreground hover:text-neu-accent"
-                  }`}
-                >
-                  {t('landing', cta)}
-                </Link>
-              ) : (
-                <a
-                  href={href}
-                  className="mt-auto text-center text-sm font-semibold py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] text-foreground hover:text-neu-accent transition-all active:neu-inset"
-                >
-                  {t('landing', cta)}
-                </a>
-              )}
+              <Link
+                href={href}
+                className={`mt-auto text-center text-sm font-semibold py-2.5 rounded-xl neu-raised bg-[var(--neu-bg)] transition-all active:neu-inset ${
+                  highlight ? "text-neu-accent" : "text-foreground hover:text-neu-accent"
+                }`}
+              >
+                {t('landing', cta)}
+              </Link>
             </div>
           ))}
         </div>
