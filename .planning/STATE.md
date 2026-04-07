@@ -5,7 +5,7 @@ milestone_name: Payments Pivot
 current_plan: 4
 status: complete
 last_updated: "2026-04-06T18:29:50Z"
-last_activity: 2026-04-06 -- quick task 260406-w0a complete (login 500 fix, Kaspi ghost code removed, Paylink.kz i18n)
+last_activity: 2026-04-07 -- quick task 260407-uec complete (legal translations, enterprise button, docs sub-pages, timezone type-safety)
 progress:
   total_phases: 12
   completed_phases: 12
@@ -29,7 +29,7 @@ Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — COMPLE
 Plan: 4 of 4 (all complete)
 Current Plan: 4
 Status: Phase 12 complete
-Last activity: 2026-04-06 - Completed quick task 260406-vjz: Comprehensive technical audit — generate FULL_PROJECT_REPORT.md
+Last activity: 2026-04-06 - Completed quick task 260406-w0a: High priority cleanup — fix login 500, remove Kaspi ghost code, update i18n to Paylink.kz, add env vars, verify neumorphic UI
 
 Progress: [██████████] 100% (43/43 plans complete)
 
@@ -170,3 +170,4 @@ None.
 | 260404-m66 | Restore neumorphic UI on public booking form — steps, cards, slots, buttons, success screen | 2026-04-04 | 9496b0f | [260404-m66-restore-neumorphic-ui-on-public-booking-](./quick/260404-m66-restore-neumorphic-ui-on-public-booking-/) |
 | 260406-vjz | Comprehensive technical audit — generate FULL_PROJECT_REPORT.md | 2026-04-06 | e617573 | [260406-vjz-comprehensive-technical-audit-generate-f](./quick/260406-vjz-comprehensive-technical-audit-generate-f/) |
 | 260406-w0a | High-priority cleanup: fix login 500 error, remove Kaspi ghost code, update i18n to Paylink.kz, complete .env.example | 2026-04-06 | db9a7c0 | [260406-w0a-high-priority-cleanup-fix-login-500-erro](./quick/260406-w0a-high-priority-cleanup-fix-login-500-erro/) |
+| 260407-uec | Fix legal translations (real company data), remove legal address, add dashboard.support, fix Enterprise button to /support, create 4 docs sub-pages, make timezone required in email | 2026-04-07 | 265dc1d | [260407-uec-fix-legal-translations-enterprise-button](./quick/260407-uec-fix-legal-translations-enterprise-button/) |
