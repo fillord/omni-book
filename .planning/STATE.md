@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Payments Pivot
+milestone: v1.4
+milestone_name: Client Base
 current_plan: 4
-status: complete
-last_updated: "2026-04-06T18:29:50Z"
-last_activity: 2026-04-07 -- quick task 260407-uec complete (legal translations, enterprise button, docs sub-pages, timezone type-safety)
+status: completed
+last_updated: "2026-04-08T14:32:17.809Z"
+last_activity: 2026-04-08
 progress:
-  total_phases: 12
-  completed_phases: 12
-  total_plans: 43
-  completed_plans: 43
+  total_phases: 11
+  completed_phases: 11
+  total_plans: 40
+  completed_plans: 40
   percent: 100
 ---
 
@@ -18,10 +18,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-25 after v1.3 milestone close)
+See: .planning/PROJECT.md (updated 2026-04-08 after v1.4 milestone close)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 12 complete — Remove Kaspi Pay, integrate Paylink.kz + WhatsApp prepayment
+**Current focus:** v1.4 archived — planning next milestone (v1.5)
 
 ## Current Position
 
@@ -29,7 +29,7 @@ Phase: 12 (remove-kaspi-pay-integrate-paylink-kz-whatsapp-prepayment) — COMPLE
 Plan: 4 of 4 (all complete)
 Current Plan: 4
 Status: Phase 12 complete
-Last activity: 2026-04-06 - Completed quick task 260406-w0a: High priority cleanup — fix login 500, remove Kaspi ghost code, update i18n to Paylink.kz, add env vars, verify neumorphic UI
+Last activity: 2026-04-08
 
 Progress: [██████████] 100% (43/43 plans complete)
 

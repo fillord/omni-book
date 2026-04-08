@@ -137,6 +137,57 @@
 
 ---
 
+## Milestone: v1.4 — Client Base
+
+**Shipped:** 2026-04-08
+**Phases:** 8 (4–12) | **Plans:** 28 | **Timeline:** 14 days | **Commits:** 189
+
+### What Was Built
+
+- `Client` Prisma model with aggregated metrics + Neumorphic clients table/detail page + Telegram outreach (Mini-CRM)
+- `/manage/[token]` public booking self-service: cancel/reschedule with 4-hour cutoff, no login required
+- Bookings Dashboard overhaul: day-grouped Neumorphic cards + manual booking creation Sheet
+- Kaspi Pay deposit mock → built → then fully ripped out in favor of WhatsApp prepayment deep-link
+- `SubscriptionPlan` DB model, Enterprise pricing calculator, real Paylink.kz API integration with HMAC-SHA256
+- 4 legal compliance pages (/oferta, /privacy, /refund, /about) for Kaspi Pay merchant approval
+
+### What Worked
+
+- **Wave-based parallelization:** The GSD executor correctly parallelized independent plan waves, reducing context windows per phase significantly.
+- **Test-first RED/GREEN pattern:** Writing failing static assertion tests before any production files (Phase 7 especially) gave clear scope and instant feedback on completion.
+- **Quick task pattern for hotfixes:** Multiple urgent bugs (login 500, Kaspi ghost code, i18n regressions) were handled via `/gsd:quick` without interrupting the phase pipeline — kept main phases clean.
+- **Gap-fix decimal phases (12.1):** Inserting a decimal phase for verification gaps was clean and didn't disrupt the roadmap numbering.
+
+### What Was Inefficient
+
+- **Built then removed Kaspi Pay deposit (Phase 9 → Phase 12):** Phases 9's full deposit infrastructure was built and then completely removed in Phase 12. This represents ~4 plans of rework. Earlier pivot decision would have saved ~1 week.
+- **MILESTONES.md milestone header said "Phases 4-5"** but actual v1.4 scope grew to Phases 4-12 — the milestone definition drifted without being updated, causing confusion at archive time.
+- **REQUIREMENTS.md only covered CRM-01–12** but the milestone expanded well beyond CRM. Requirements document was effectively stale by Phase 6 onward.
+- **Quick tasks accumulated:** 11 quick tasks across the milestone indicates some scope that should have been planned phases — especially multi-file fixes like timezone bug and neumorphic UI restore.
+
+### Patterns Established
+
+- **Serializable transaction with SELECT FOR UPDATE** for booking collision detection — prevents race conditions on concurrent reschedule/create
+- **`basePrisma` for cross-tenant public routes** (no tenant scoping) vs `prisma` for authenticated dashboard routes
+- **Decimal phase insertion (X.1) for gap fixes** — clean semantics, doesn't renumber subsequent phases
+- **WhatsApp deep-link pattern:** `buildWhatsAppPrepaymentUrl(phone, params)` generates `wa.me` deep-link with pre-filled template — zero server infrastructure for payment initiation
+- **DB-driven pricing via `SubscriptionPlan`:** All plan limit checks use `subscriptionPlan.findUnique({ where: { plan } })` — no hardcoded constants in business logic
+
+### Key Lessons
+
+1. **Validate payment provider availability before building the integration.** Kaspi Pay required merchant approval that blocked production use — building the full mock then pivoting to Paylink.kz cost 4+ plans of rework. Validate integrations with a spike/proof-of-concept before full implementation.
+2. **Update milestone scope in REQUIREMENTS.md when roadmap expands.** By Phase 7, the requirements document was outdated. Keep REQUIREMENTS.md in sync or accept that it becomes archival-only once scope drifts.
+3. **Quick tasks are useful but should trigger a phase review.** Multiple quick tasks in the same area (neumorphic UI, timezone, Kaspi cleanup) signals that a cleanup phase would have been cleaner than ad-hoc hotfixes.
+4. **The gap-fix decimal phase pattern works well** — 12.1 closed 3 real verification gaps found after Phase 12 completed, without disrupting the roadmap or requiring a full new phase.
+
+### Cost Observations
+
+- Model mix: balanced profile (Sonnet primary, Opus for planning)
+- Sessions: ~30+ sessions across 14 days
+- Notable: The Kaspi → Paylink pivot (Phase 12) was the most impactful single phase — removed an entire architectural layer and replaced it with a simpler redirect-based approach. Decision to pivot was correct but came late.
+
+---
+
 ## Cross-Milestone Trends
 
 | Milestone | Duration | Phases | Plans | Rework | Standout Pattern |
@@ -144,3 +195,5 @@
 | v1.0 Dark Mode | 2 days | 5 | 15 | Low | Infrastructure-first test validation |
 | v1.1 Critical Bug Fixes | 1 day | 2 | 2 | None | TDD static assertions + minimal diff discipline |
 | v1.2 Adv. Customization | 2 days | 2 | 2 | None | Config-driven architecture + no-opt_ key discipline |
+| v1.3 Neumorphism + God Mode | 5 days | 3 | 12 | Low | Wave parallelization for UI components |
+| v1.4 Client Base | 14 days | 8 | 28 | Medium (Kaspi rework) | Quick tasks for hotfixes; DB-driven pricing; WhatsApp deep-link |

@@ -4,22 +4,22 @@
 
 omni-book is a multi-tenant SaaS booking platform where tenants (businesses) configure their services and resources, and customers book appointments via a public-facing page. It supports multiple business niches (healthcare, legal, fitness, etc.) with configurable options per niche.
 
-**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added). **v1.2 shipped 2026-03-20** — Advanced Customization & Niche Expansion: custom duration input + 19 new resource types with trilingual translations (12 requirements).
+**v1.0 shipped 2026-03-19** — Full dark mode audit across all surfaces (66 files, 26 requirements). **v1.1 shipped 2026-03-19** — Critical bug fixes: opt_* ID display, mobile card overflow, mobile theme toggle visibility (6 requirements, 20 regression tests added). **v1.2 shipped 2026-03-20** — Advanced Customization & Niche Expansion: custom duration input + 19 new resource types with trilingual translations (12 requirements). **v1.3 shipped 2026-03-24** — Neumorphism Soft UI visual system, Super-Admin God Mode panel, 30-day subscription lifecycle with automated resource freezing. **v1.4 shipped 2026-04-08** — Mini-CRM (Client model + aggregated metrics + clients table + Telegram outreach), tokenized self-service booking management, bookings dashboard CRM overhaul, enterprise SaaS pricing, full Kaspi Pay → Paylink.kz payment pivot, and legal compliance pages — 366 files, 8 phases, 28 plans, 189 commits.
 
 ## Core Value
 
 A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
 
-## Current Milestone: v1.4 Client Base (Mini-CRM)
+## Current State: v1.4 Shipped
 
-**Goal:** Build a client aggregation layer so business owners can view their actual customer base — who visited, how often, how much they spent, and whether they're reachable via Telegram.
+**v1.4 delivered (2026-04-08):**
+- Mini-CRM: `Client` Prisma model with aggregated metrics, searchable Neumorphic clients table, detail page, Telegram outreach
+- Tokenized booking self-service: `/manage/[token]` public page with cancel/reschedule, 4-hour cutoff rule
+- Bookings Dashboard CRM: day-grouped cards, CANCELLED exclusion filter, manual booking creation Sheet
+- Full payment infrastructure: Kaspi Pay mock → `SubscriptionPlan` DB pricing → Enterprise calculator → real Paylink.kz redirect API + WhatsApp prepayment
+- Legal compliance: 4 public legal pages (/oferta, /privacy, /refund, /about) in RU/EN/KZ
 
-**Target features:**
-- Dedicated `Client` Prisma model linked to `Tenant`, synced from existing bookings
-- Aggregated metrics per client: total visits, total revenue, last visit date, Telegram status
-- Neumorphic clients table page at `app/(dashboard)/[tenantId]/clients/page.tsx` with search
-- Client detail page showing full booking history per client
-- Telegram message action for clients with active chat connection
+**Next milestone:** To be defined via `/gsd:new-milestone`
 
 ## Requirements
 
@@ -63,13 +63,17 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 - ✓ Super-Admin "God Mode" panel: Financial Analytics, Tenant Drill-Down, Announcement Banners, Notification Bell, Audit Log — v1.3 (GOD-01–06)
 - ✓ Subscription lifecycle: `isFrozen` on Resource/Service, daily cron with 3-day warnings, frozen UI badges, billing EXPIRED alert, super-admin activation with bulk unfreeze — v1.3 (SUB-01–06)
 
+- ✓ `Client` Prisma model with (tenantId, phone) composite key, `syncClients` idempotent upsert, aggregated metrics (visits, revenue, last visit, Telegram) — v1.4 (CRM-01–05)
+- ✓ Neumorphic clients table page with real-time search, client detail page with booking history, Telegram outreach action — v1.4 (CRM-06–12)
+- ✓ Tokenized booking self-service: `/manage/[token]` public page, cancel/reschedule, 4-hour cutoff rule, owner Telegram notification — v1.4 (TOK-01–07)
+- ✓ Bookings Dashboard CRM overhaul: day-grouped Neumorphic cards, CANCELLED exclusion filter, manual booking creation Sheet — v1.4 (CRM-B01–12)
+- ✓ `SubscriptionPlan` DB model replacing all hardcoded pricing, Enterprise tier with dynamic calculator, `PlatformPayment` model, Super Admin plan editor — v1.4 (MON-01–09)
+- ✓ 4 public legal pages (/oferta, /privacy, /refund, /about) with multi-column footer in RU/EN/KZ — v1.4 (LEGAL-01–07)
+- ✓ Full Kaspi Pay removal + real Paylink.kz integration (HMAC-SHA256 webhook) + WhatsApp prepayment deep-link replacing deposit flow — v1.4 (PIV-01–10)
+
 ### Active
 
-- [ ] **CRM-01**: Client model linked to Tenant, synced from existing bookings
-- [ ] **CRM-02**: Aggregated metrics per client (visits, revenue, last visit, Telegram status)
-- [ ] **CRM-03**: Clients table page with Neumorphic design and search
-- [ ] **CRM-04**: Client detail page with full booking history
-- [ ] **CRM-05**: Send Telegram message action from client detail
+*(To be defined for v1.5 — run `/gsd:new-milestone`)*
 
 ### Out of Scope
 
@@ -83,7 +87,12 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 
 The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built with shadcn/ui components on top of Tailwind CSS 4.2.1. The color system is OKLch-based, defined in `app/globals.css` as CSS custom properties (`:root` for light, `.dark` for dark). The `next-themes` library manages the `dark` class on the `<html>` element.
 
-**v1.2 state:** ~20,000 LOC TypeScript (app code). 12 requirements delivered across 2 phases. Duration stepper widget added to `service-form.tsx` with 12 new static-file assertion tests. `NICHE_CONFIG` expanded with 19 new resource type entries and 60 new i18n translation keys. Pre-existing `cleanup-surface.test.ts` failures (6 tests, dark mode selection state) documented as tech debt — root cause is commit f7da11b from v1.0 completion.
+**v1.4 state:** ~184,700 LOC TypeScript. 8 phases (4–12), 28 plans, 189 commits, 366 files changed. Payment provider is now Paylink.kz (real API, redirect-based). Booking deposits replaced by WhatsApp prepayment deep-link. Subscription pricing is DB-driven via `SubscriptionPlan` model. Legal pages live at /oferta, /privacy, /refund, /about. Mini-CRM is live with `Client` model and aggregated metrics.
+
+**Known tech debt from v1.4:**
+- `cleanup-surface.test.ts` has 6 pre-existing failures (dark mode selection state from v1.0, commit f7da11b) — documented but not fixed
+- Paylink.kz mock fallback remains in `platform-payment.ts` when `PAYLINK_API_KEY` not set — works in dev but needs real key in production
+- Vercel free tier supports 2 cron entries — currently using 2 (subscriptions + any future); pending-payments cron was removed in v1.4
 
 **Known patterns established:**
 - Static file assertion tests using `fs.readFileSync` + regex for Tailwind class audits (no DOM/build required) — extended in v1.1 to cover opt_* display correctness and mobile class audits
@@ -120,5 +129,14 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | New resource type keys use `resource_type_<value>` pattern (no `opt_xxx`) | Breaking away from opaque opt_ pattern for all new additions — readable keys preferred | ✓ Good — eliminates future opt_ leakage risk at source |
 | Beauty specialization → free-text (not select) | Removes 6 opaque `opt_xxx` options; staff records with type:'staff' still match forTypes filter | ✓ Good — simpler UX, backward compatible for stored records |
 
+| Client identity uses (tenantId, phone) composite key | phone always present on bookings; email is optional — composite key avoids nullability | ✓ Good — no migration issues, deduplication is clear |
+| `Client` is materialized aggregate (no direct Booking[] relation) | Adding clientId to Booking would be a breaking schema change; pre-computed metrics avoid runtime joins | ✓ Good — page load is instant, no N+1 queries |
+| `manageToken` is nullable (String?) on Booking | Existing bookings lack tokens — migration would fail on non-empty DB without nullable | ✓ Good — backwards compatible |
+| manageToken: null for admin (manual) bookings | Admin bookings bypass MAX_ACTIVE_BOOKINGS limit and shouldn't generate self-manage links | ✓ Good — explicit null prevents inadvertent token exposure |
+| Paylink.kz redirect-based (not push invoice) for SaaS payments | Kaspi Pay push-to-app was market-specific and required merchant approval; Paylink.kz redirect is simpler and already live | ✓ Good — unblocked monetization without waiting for Kaspi approval |
+| WhatsApp deep-link replaces booking deposit flow | Kaspi Pay deposit required merchant API keys per tenant; WhatsApp deep-link has zero infrastructure and works for any tenant | ✓ Good — simpler UX, zero server infrastructure for deposits |
+| SubscriptionPlan pricing from DB (not hardcoded) | Allows price changes without code deploy; Super Admin can adjust pricing from UI | ✓ Good — business-configurable pricing |
+| Paylink.kz mock fallback when PAYLINK_API_KEY unset | Allows dev/test without production credentials; mock returns a localhost redirect URL | ✓ Good — developer ergonomics, flag is clear |
+
 ---
-*Last updated: 2026-04-02 — Phase 10 complete: SaaS monetization, Enterprise tier & platform payments*
+*Last updated: 2026-04-08 — v1.4 milestone complete: Client Base (Mini-CRM + payments + legal)*
