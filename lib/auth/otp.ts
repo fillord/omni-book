@@ -1,9 +1,11 @@
+import { randomInt } from 'crypto'
+
 /**
  * Generates a 6-digit secure random numeric OTP string.
  */
 export function generateOtp(): string {
   // Generates exactly 6 digits, e.g. "049382"
-  const val = Math.floor(Math.random() * 1000000)
+  const val = randomInt(0, 1000000)
   return val.toString().padStart(6, '0')
 }
 

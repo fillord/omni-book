@@ -8,6 +8,15 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://omni-book.site'
 
 // POST /api/webhooks/telegram — Receive Telegram Bot updates
 export async function POST(request: NextRequest) {
+  // Validate webhook secret
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET
+  if (secret) {
+    const headerToken = request.headers.get('X-Telegram-Bot-Api-Secret-Token')
+    if (headerToken !== secret) {
+      return new NextResponse(null, { status: 401 })
+    }
+  }
+
   const update = await request.json()
 
   const message = update.message
