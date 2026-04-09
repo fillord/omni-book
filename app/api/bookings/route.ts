@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   // Rate limit: 10 booking attempts per IP per minute
   const ip = getClientIp(req)
-  const rl = rateLimit(`booking:${ip}`, 10, 60_000)
+  const rl = await rateLimit(`booking:${ip}`, 10, 60_000)
   if (!rl.success) {
     return NextResponse.json(
       { error: 'Слишком много запросов. Пожалуйста, подождите минуту.' },

@@ -10,7 +10,7 @@ const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/
 export async function POST(req: NextRequest) {
   // Rate limit: 5 registration attempts per IP per 10 minutes
   const ip = getClientIp(req)
-  const rl = rateLimit(`register:${ip}`, 5, 10 * 60_000)
+  const rl = await rateLimit(`register:${ip}`, 5, 10 * 60_000)
   if (!rl.success) {
     return NextResponse.json(
       { error: 'Слишком много попыток регистрации. Пожалуйста, подождите.' },
