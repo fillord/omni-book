@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Optimization & Launch Readiness
-status: executing
-stopped_at: Completed 14-01-PLAN.md
-last_updated: "2026-04-09T16:38:49.763Z"
+status: verifying
+stopped_at: Completed 14-03-PLAN.md
+last_updated: "2026-04-09T16:46:53.129Z"
 last_activity: 2026-04-09
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 3
-  percent: 0
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-09 after v1.5 milestone start)
 ## Current Position
 
 Phase: 14 (code-i18n-cleanup) — EXECUTING
-Plan: 2 of 3
-Status: Ready to execute
+Plan: 3 of 3
+Status: Phase complete — ready for verification
 Last activity: 2026-04-09
 
-Progress: [░░░░░░░░░░] 0% (0/TBD plans complete)
+Progress: [██████████] 100% (39/39 plans complete)
 
 ## Performance Metrics
 
@@ -55,6 +55,8 @@ Progress: [░░░░░░░░░░] 0% (0/TBD plans complete)
 | Phase 13 P01 | 10m | 3 tasks | 3 files |
 | Phase 13 P02 | 76s | 3 tasks | 4 files |
 | Phase 14 P01 | 8min | 2 tasks | 2 files |
+| Phase 14 P02 | 5min | 2 tasks | 3 files |
+| Phase 14 P03 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -72,6 +74,11 @@ Key decisions carrying forward to v1.5:
 - [Phase 13]: Client and PlatformPayment added to TENANT_SCOPED middleware set for defense-in-depth tenant isolation
 - [Phase 13]: rateLimit in lib/rate-limit.ts is synchronous — plan interface docs incorrectly showed async; callers use it without await
 - [Phase 14]: CLN-05/06: explicit remotePatterns (i.imgur.com, i.ibb.com, omni-book.site) replacing wildcard hostname '**' — http protocol entry removed entirely
+- [Phase 14-code-i18n-cleanup]: unoptimized prop on UrlPreview Image required — arbitrary user URLs cannot be in remotePatterns
+- [Phase 14-code-i18n-cleanup]: Parameters<typeof prisma.X.create>[0] for Prisma typed create args without manual type duplication
+- [Phase 14]: Generic payment wording without Paylink.kz brand in waitingInstructions (RU/KZ/EN) — brand name only in legal namespace
+- [Phase 14]: Session maxAge set to 7 days (604800s) in lib/auth/config.ts — replaces implicit NextAuth 30-day default
+- [Phase 14]: STUB comment pattern over TODO in stub routes — makes intent explicit and searchable
 
 ### Pending Todos
 
@@ -84,6 +91,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-09T16:38:49.759Z
-Stopped at: Completed 14-01-PLAN.md
+Last session: 2026-04-09T16:46:53.125Z
+Stopped at: Completed 14-03-PLAN.md
 Resume file: None

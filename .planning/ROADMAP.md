@@ -76,7 +76,7 @@ Mini-CRM with client aggregation, tokenized booking self-service, bookings CRM o
 **Milestone Goal:** Harden the production deployment — fix database performance gaps, clear accumulated code debt, and complete the /docs onboarding surface before growth-phase marketing.
 
 - [x] **Phase 13: Database Optimization** - Indexes, batched upserts, OTP cleanup cron, tenant scoping, rate limiting, and transaction isolation (completed 2026-04-09)
-- [ ] **Phase 14: Code & i18n Cleanup** - ESLint suppressions, type safety, stale Kaspi i18n, security headers, and session hardening
+- [x] **Phase 14: Code & i18n Cleanup** - ESLint suppressions, type safety, stale Kaspi i18n, security headers, and session hardening (completed 2026-04-09)
 - [ ] **Phase 15: Documentation & Onboarding** - /docs sub-pages and tenant page SEO metadata
 
 ## Phase Details
@@ -109,8 +109,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 14-01-PLAN.md — Test scaffold (CLN-01..08) + next.config.ts security headers and scoped remotePatterns
-- [ ] 14-02-PLAN.md — Replace img with next/image in tenant-public-page.tsx and settings-form.tsx; remove any from guard.ts
-- [ ] 14-03-PLAN.md — Generic payment translation strings, 7-day session maxAge, STUB comments on stub routes
+- [x] 14-02-PLAN.md — Replace img with next/image in tenant-public-page.tsx and settings-form.tsx; remove any from guard.ts
+- [x] 14-03-PLAN.md — Generic payment translation strings, 7-day session maxAge, STUB comments on stub routes
 **UI hint**: yes
 
 ### Phase 15: Documentation & Onboarding
@@ -129,5 +129,5 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Database Optimization | v1.5 | 2/2 | Complete    | 2026-04-09 |
-| 14. Code & i18n Cleanup | v1.5 | 1/3 | In Progress|  |
+| 14. Code & i18n Cleanup | v1.5 | 3/3 | Complete   | 2026-04-09 |
 | 15. Documentation & Onboarding | v1.5 | 0/TBD | Not started | - |
