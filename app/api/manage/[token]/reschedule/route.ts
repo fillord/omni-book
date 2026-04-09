@@ -24,7 +24,7 @@ export async function POST(
   const { token } = await params
 
   // Rate limit: 20 requests per IP per minute (DB-07)
-  const rl = rateLimit(`manage-reschedule:${getClientIp(req)}`, 20, 60_000)
+  const rl = await rateLimit(`manage-reschedule:${getClientIp(req)}`, 20, 60_000)
   if (!rl.success) {
     return new Response('Too Many Requests', { status: 429 })
   }
