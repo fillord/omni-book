@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Optimization & Launch Readiness
-status: verifying
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-04-09T10:56:24.391Z"
+status: executing
+stopped_at: Completed 14-01-PLAN.md
+last_updated: "2026-04-09T16:38:49.763Z"
 last_activity: 2026-04-09
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 5
+  completed_plans: 3
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 after v1.5 milestone start)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** Phase 13 — database-optimization
+**Current focus:** Phase 14 — code-i18n-cleanup
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 14 (code-i18n-cleanup) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-09
 
 Progress: [░░░░░░░░░░] 0% (0/TBD plans complete)
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0% (0/TBD plans complete)
 *Updated after each plan completion*
 | Phase 13 P01 | 10m | 3 tasks | 3 files |
 | Phase 13 P02 | 76s | 3 tasks | 4 files |
+| Phase 14 P01 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Key decisions carrying forward to v1.5:
 - [Phase 13]: ReadCommitted + FOR UPDATE replaces Serializable isolation in createBooking — row lock is sufficient, Serializable caused unnecessary predicate lock contention
 - [Phase 13]: Client and PlatformPayment added to TENANT_SCOPED middleware set for defense-in-depth tenant isolation
 - [Phase 13]: rateLimit in lib/rate-limit.ts is synchronous — plan interface docs incorrectly showed async; callers use it without await
+- [Phase 14]: CLN-05/06: explicit remotePatterns (i.imgur.com, i.ibb.com, omni-book.site) replacing wildcard hostname '**' — http protocol entry removed entirely
 
 ### Pending Todos
 
@@ -82,6 +84,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-09T10:48:18.977Z
-Stopped at: Completed 13-02-PLAN.md
+Last session: 2026-04-09T16:38:49.759Z
+Stopped at: Completed 14-01-PLAN.md
 Resume file: None
