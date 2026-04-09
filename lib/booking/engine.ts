@@ -355,6 +355,6 @@ export async function createBooking(params: CreateBookingParams) {
         },
       })
     },
-    { isolationLevel: "Serializable" }
+    { isolationLevel: "ReadCommitted" }
   )
 }
