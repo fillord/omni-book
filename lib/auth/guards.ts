@@ -82,8 +82,8 @@ export async function requireAuthWithRole(roles: Role[]): Promise<Session> {
  */
 export async function ensureSuperAdmin(): Promise<void> {
   const session = await getServerSession(authConfig)
-  if (!session?.user?.email) throw new UnauthorizedError()
-  if (session.user.role !== 'SUPERADMIN' && session.user.email !== 'admin@omnibook.com') {
+  if (!session?.user) throw new UnauthorizedError()
+  if (session.user.role !== 'SUPERADMIN') {
     throw new ForbiddenError('Superadmin only')
   }
 }
