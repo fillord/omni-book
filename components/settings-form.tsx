@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { tenantSettingsSchema } from "@/lib/validations/tenant-settings"
@@ -148,13 +149,16 @@ function Textarea({
 function UrlPreview({ url, alt }: { url: string; alt: string }) {
   if (!url) return null
   return (
-    <div className="mt-2 overflow-hidden rounded-md border bg-muted">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+    <div className="mt-2 overflow-hidden rounded-md border bg-muted relative h-24">
+      <Image
         src={url}
         alt={alt}
-        className="h-24 w-full object-cover"
-        onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+        fill
+        className="object-cover"
+        unoptimized
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = "none";
+        }}
       />
     </div>
   )
