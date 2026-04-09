@@ -75,7 +75,7 @@ Mini-CRM with client aggregation, tokenized booking self-service, bookings CRM o
 
 **Milestone Goal:** Harden the production deployment — fix database performance gaps, clear accumulated code debt, and complete the /docs onboarding surface before growth-phase marketing.
 
-- [ ] **Phase 13: Database Optimization** - Indexes, batched upserts, OTP cleanup cron, tenant scoping, rate limiting, and transaction isolation
+- [x] **Phase 13: Database Optimization** - Indexes, batched upserts, OTP cleanup cron, tenant scoping, rate limiting, and transaction isolation (completed 2026-04-09)
 - [ ] **Phase 14: Code & i18n Cleanup** - ESLint suppressions, type safety, stale Kaspi i18n, security headers, and session hardening
 - [ ] **Phase 15: Documentation & Onboarding** - /docs sub-pages and tenant page SEO metadata
 
@@ -93,8 +93,8 @@ Mini-CRM with client aggregation, tokenized booking self-service, bookings CRM o
   5. `/api/manage/[token]/cancel` and `/api/manage/[token]/reschedule` return 429 after 20 requests per IP per minute — cannot be abused to loop cancel/reschedule operations
 **Plans**: 2 plans
 Plans:
-- [ ] 13-01-PLAN.md — Schema indexes (Booking + OtpCode), tenant scoping (Client + PlatformPayment), transaction isolation fix
-- [ ] 13-02-PLAN.md — Batch syncClients upserts, OTP cleanup cron, rate limiting on manage routes
+- [x] 13-01-PLAN.md — Schema indexes (Booking + OtpCode), tenant scoping (Client + PlatformPayment), transaction isolation fix
+- [x] 13-02-PLAN.md — Batch syncClients upserts, OTP cleanup cron, rate limiting on manage routes
 
 ### Phase 14: Code & i18n Cleanup
 **Goal**: The codebase has zero ESLint suppressions for `<img>` and `any` types, all Kaspi Pay translation strings are removed, and the app ships with security headers, scoped image hostnames, and a 7-day session expiry
@@ -124,6 +124,6 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Database Optimization | v1.5 | 0/2 | Not started | - |
+| 13. Database Optimization | v1.5 | 2/2 | Complete   | 2026-04-09 |
 | 14. Code & i18n Cleanup | v1.5 | 0/TBD | Not started | - |
 | 15. Documentation & Onboarding | v1.5 | 0/TBD | Not started | - |
