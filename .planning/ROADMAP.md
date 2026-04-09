@@ -106,7 +106,11 @@ Plans:
   3. Browser DevTools shows `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin` response headers on all pages
   4. `next.config.ts` `images.remotePatterns` lists only explicit trusted hostnames — wildcard `**` is absent
   5. A new session expires after 7 days (not 30) — confirmed via NextAuth session token `exp` claim
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 14-01-PLAN.md — Test scaffold (CLN-01..08) + next.config.ts security headers and scoped remotePatterns
+- [ ] 14-02-PLAN.md — Replace img with next/image in tenant-public-page.tsx and settings-form.tsx; remove any from guard.ts
+- [ ] 14-03-PLAN.md — Generic payment translation strings, 7-day session maxAge, STUB comments on stub routes
 **UI hint**: yes
 
 ### Phase 15: Documentation & Onboarding
@@ -125,5 +129,5 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Database Optimization | v1.5 | 2/2 | Complete    | 2026-04-09 |
-| 14. Code & i18n Cleanup | v1.5 | 0/TBD | Not started | - |
+| 14. Code & i18n Cleanup | v1.5 | 0/3 | Not started | - |
 | 15. Documentation & Onboarding | v1.5 | 0/TBD | Not started | - |

@@ -262,3 +262,117 @@ describe("Regression: tenant-public-page.tsx badge and avatarBg have dark mode o
     expect(containerLine).toMatch(/dark:/);
   });
 });
+
+// ---- CLN-01 ----
+describe("CLN-01: tenant-public-page.tsx replaces img with next/image", () => {
+  it("has no @next/next/no-img-element eslint suppression", () => {
+    const source = readComponent("tenant-public-page.tsx");
+    expect(source).not.toMatch(/@next\/next\/no-img-element/);
+  });
+  it("imports Image from next/image", () => {
+    const source = readComponent("tenant-public-page.tsx");
+    expect(source).toMatch(/import\s+Image\s+from\s+['"]next\/image['"]/);
+  });
+});
+
+// ---- CLN-02 ----
+describe("CLN-02: settings-form.tsx replaces img with next/image", () => {
+  it("has no @next/next/no-img-element eslint suppression", () => {
+    const source = readComponent("settings-form.tsx");
+    expect(source).not.toMatch(/@next\/next\/no-img-element/);
+  });
+  it("imports Image from next/image", () => {
+    const source = readComponent("settings-form.tsx");
+    expect(source).toMatch(/import\s+Image\s+from\s+['"]next\/image['"]/);
+  });
+});
+
+// ---- CLN-03 ----
+describe("CLN-03: guard.ts has no explicit-any suppressions", () => {
+  it("has no @typescript-eslint/no-explicit-any eslint suppression", () => {
+    const source = readApp("lib/tenant/guard.ts");
+    expect(source).not.toMatch(/@typescript-eslint\/no-explicit-any/);
+  });
+  it("does not use 'as any'", () => {
+    const source = readApp("lib/tenant/guard.ts");
+    expect(source).not.toMatch(/as any/);
+  });
+});
+
+// ---- CLN-04 ----
+describe("CLN-04: no Kaspi Pay or stale Paylink deposit strings in payment namespace", () => {
+  it("translations.ts has no Kaspi references", () => {
+    const source = readApp("lib/i18n/translations.ts");
+    expect(source.toLowerCase()).not.toMatch(/kaspi/);
+  });
+  it("waitingInstructions does not contain Paylink.kz", () => {
+    const source = readApp("lib/i18n/translations.ts");
+    const lines = source.split("\n").filter(l => l.includes("waitingInstructions"));
+    lines.forEach(line => {
+      expect(line).not.toMatch(/Paylink\.kz/i);
+    });
+  });
+});
+
+// ---- CLN-05 ----
+describe("CLN-05: next.config.ts has security headers", () => {
+  it("contains X-Frame-Options DENY header", () => {
+    const source = readApp("next.config.ts");
+    expect(source).toContain("X-Frame-Options");
+    expect(source).toContain("DENY");
+  });
+  it("contains X-Content-Type-Options nosniff header", () => {
+    const source = readApp("next.config.ts");
+    expect(source).toContain("X-Content-Type-Options");
+    expect(source).toContain("nosniff");
+  });
+  it("contains Referrer-Policy strict-origin-when-cross-origin header", () => {
+    const source = readApp("next.config.ts");
+    expect(source).toContain("Referrer-Policy");
+    expect(source).toContain("strict-origin-when-cross-origin");
+  });
+});
+
+// ---- CLN-06 ----
+describe("CLN-06: next.config.ts has no wildcard image hostname", () => {
+  it("does not contain hostname '**' wildcard", () => {
+    const source = readApp("next.config.ts");
+    expect(source).not.toMatch(/hostname:\s*['"]\*\*['"]/);
+  });
+  it("contains explicit i.imgur.com hostname", () => {
+    const source = readApp("next.config.ts");
+    expect(source).toContain("i.imgur.com");
+  });
+  it("contains explicit i.ibb.com hostname", () => {
+    const source = readApp("next.config.ts");
+    expect(source).toContain("i.ibb.com");
+  });
+});
+
+// ---- CLN-07 ----
+describe("CLN-07: session maxAge is 7 days", () => {
+  it("lib/auth/config.ts contains maxAge: 7 * 24 * 60 * 60 or 604800", () => {
+    const source = readApp("lib/auth/config.ts");
+    expect(source).toMatch(/maxAge:\s*(7\s*\*\s*24\s*\*\s*60\s*\*\s*60|604800)/);
+  });
+});
+
+// ---- CLN-08 ----
+describe("CLN-08: stub routes have STUB comments", () => {
+  it("app/api/tenants/route.ts contains '// STUB: not implemented'", () => {
+    const source = readApp("app/api/tenants/route.ts");
+    expect(source).toContain("// STUB: not implemented");
+  });
+  it("app/api/resources/route.ts contains '// STUB: not implemented'", () => {
+    const source = readApp("app/api/resources/route.ts");
+    expect(source).toContain("// STUB: not implemented");
+  });
+  it("app/api/webhooks/route.ts contains '// STUB: not implemented'", () => {
+    const source = readApp("app/api/webhooks/route.ts");
+    expect(source).toContain("// STUB: not implemented");
+  });
+  it("app/book/page.tsx contains '// STUB: not implemented'", () => {
+    const source = readApp("app/book/page.tsx");
+    expect(source).toContain("// STUB: not implemented");
+  });
+});
