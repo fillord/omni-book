@@ -10,7 +10,9 @@ omni-book is a multi-tenant SaaS booking platform where tenants (businesses) con
 
 A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
 
-## Current State: v1.4 Shipped
+## Current State: v1.5 In Progress — Phase 13 Complete
+
+**Phase 13 complete (2026-04-09):** DB indexes on Booking/OtpCode, tenant isolation for Client/PlatformPayment, ReadCommitted transaction fix, syncClients N+1 batching (chunks of 100), expired OTP cleanup in subscriptions cron, rate limiting on cancel/reschedule manage routes.
 
 **v1.4 delivered (2026-04-08):**
 - Mini-CRM: `Client` Prisma model with aggregated metrics, searchable Neumorphic clients table, detail page, Telegram outreach
@@ -184,4 +186,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 — v1.5 milestone started: Optimization & Launch Readiness*
+*Last updated: 2026-04-09 — Phase 13 (database-optimization) complete*
