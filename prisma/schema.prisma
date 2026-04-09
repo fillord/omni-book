@@ -107,6 +107,7 @@ model OtpCode {
   createdAt DateTime @default(now())
 
   @@unique([email, code])
+  @@index([email])
 }
 
 model Resource {
@@ -207,6 +208,8 @@ model Booking {
   @@index([startsAt, reminder24hSentAt])
   @@index([startsAt, reminder2hSentAt])
   @@index([startsAt, reminder1hSentAt])
+  @@index([tenantId, guestPhone])
+  @@index([telegramChatId])
 }
 
 model Client {

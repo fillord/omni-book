@@ -1,27 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Client Base
-current_plan: 4
-status: completed
-last_updated: "2026-04-08T14:32:17.809Z"
-last_activity: 2026-04-08
+milestone: v1.5
+milestone_name: Optimization & Launch Readiness
+current_plan: 0
+status: defining_requirements
+last_updated: "2026-04-09T00:00:00.000Z"
+last_activity: 2026-04-09
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 40
-  completed_plans: 40
-  percent: 100
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-08 after v1.4 milestone close)
+See: .planning/PROJECT.md (updated 2026-04-09 after v1.5 milestone start)
 
 **Core value:** A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
-**Current focus:** v1.4 archived — planning next milestone (v1.5)
+**Current focus:** v1.5 — Optimization & Launch Readiness
+
+## Current Position
+
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-09 — Milestone v1.5 started
 
 ## Current Position
 

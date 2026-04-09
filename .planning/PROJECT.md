@@ -71,9 +71,37 @@ A reliable, correctly-rendered booking experience for tenants and customers — 
 - ✓ 4 public legal pages (/oferta, /privacy, /refund, /about) with multi-column footer in RU/EN/KZ — v1.4 (LEGAL-01–07)
 - ✓ Full Kaspi Pay removal + real Paylink.kz integration (HMAC-SHA256 webhook) + WhatsApp prepayment deep-link replacing deposit flow — v1.4 (PIV-01–10)
 
+## Current Milestone: v1.5 Optimization & Launch Readiness
+
+**Goal:** Harden the production deployment — fix database performance gaps, clear accumulated code debt, and complete the /docs onboarding surface before growth-phase marketing.
+
+**Target features:**
+- Database indexes for CRM queries + batch syncClients + OTP cleanup cron
+- ESLint suppression fixes, stale Kaspi i18n cleanup, security hardening (headers, session maxAge, remotePatterns)
+- /docs sub-pages (getting-started, branch-setup, billing) + tenant page SEO metadata
+
 ### Active
 
-*(To be defined for v1.5 — run `/gsd:new-milestone`)*
+- [ ] **DB-01**: Booking model has `@@index([tenantId, guestPhone])` composite index in Prisma schema — prevents full table scan in CRM sync and booking limit check
+- [ ] **DB-02**: Booking model has `@@index([telegramChatId])` index in Prisma schema
+- [ ] **DB-03**: OtpCode model has standalone `@@index([email])` in Prisma schema — supports range deletes
+- [ ] **DB-04**: `syncClients` upserts are batched (N+1 → chunked `$transaction`) — max 100 per batch
+- [ ] **DB-05**: Expired OtpCode records are cleaned up by cron — `deleteMany({ where: { expiresAt: { lt: new Date() } } })` runs in existing subscriptions cron
+- [ ] **DB-06**: `Client` and `PlatformPayment` models added to `TENANT_SCOPED` set in `lib/tenant/prisma-tenant.ts`
+- [ ] **DB-07**: `/api/manage/[token]/cancel` and `/api/manage/[token]/reschedule` routes have `rateLimit(ip, 20, 60_000)` guard
+- [ ] **DB-08**: `createBooking` uses `ReadCommitted` isolation (not `Serializable`) — `FOR UPDATE` provides locking, Serializable is redundant
+- [ ] **CLN-01**: 3 `<img>` ESLint suppressions replaced with Next.js `<Image>` (`tenant-public-page.tsx` ×2, `settings-form.tsx`)
+- [ ] **CLN-02**: `any` types in `lib/tenant/guard.ts` replaced with `unknown` + type narrowing (2 suppressions removed)
+- [ ] **CLN-03**: Stale Kaspi Pay references purged from translations (`payment`, `oferta`, `privacy`, `refund` namespaces — all 3 locales)
+- [ ] **CLN-04**: Security headers added to `next.config.ts` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`)
+- [ ] **CLN-05**: Wildcard `remotePatterns` (`hostname: '**'`) replaced with explicit hostnames in `next.config.ts`
+- [ ] **CLN-06**: JWT session `maxAge` set to `7 * 24 * 60 * 60` (7 days) in `lib/auth/config.ts`
+- [ ] **CLN-07**: Stub routes (`/api/tenants`, `/api/resources`, `/api/webhooks`, `/book`) return `405 Method Not Allowed` or have intent comments
+- [ ] **DOC-01**: `/docs/getting-started` page exists and renders (no longer 404)
+- [ ] **DOC-02**: `/docs/branch-setup` page exists and renders (no longer 404)
+- [ ] **DOC-03**: `/docs/billing` page exists and renders (no longer 404)
+- [ ] **DOC-04**: `app/(tenant)/[slug]/page.tsx` exports `generateMetadata` returning tenant `name`, `description`, `openGraph`
+- [ ] **DOC-05**: Tenant slug page includes JSON-LD `LocalBusiness` schema with `name`, `address`, `telephone`
 
 ### Out of Scope
 
@@ -138,5 +166,22 @@ The app uses Next.js 15 App Router with a multi-tenant architecture. UI is built
 | SubscriptionPlan pricing from DB (not hardcoded) | Allows price changes without code deploy; Super Admin can adjust pricing from UI | ✓ Good — business-configurable pricing |
 | Paylink.kz mock fallback when PAYLINK_API_KEY unset | Allows dev/test without production credentials; mock returns a localhost redirect URL | ✓ Good — developer ergonomics, flag is clear |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-08 — v1.4 milestone complete: Client Base (Mini-CRM + payments + legal)*
+*Last updated: 2026-04-09 — v1.5 milestone started: Optimization & Launch Readiness*
