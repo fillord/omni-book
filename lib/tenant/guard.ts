@@ -1,6 +1,9 @@
 import { basePrisma } from '@/lib/db'
 import { getTenantId } from './context'
 
+type BookingCreateArgs = Parameters<typeof basePrisma.booking.create>[0]
+type ResourceCreateArgs = Parameters<typeof basePrisma.resource.create>[0]
+
 /**
  * Returns a Prisma-like helper that automatically scopes queries to the
  * tenant currently set in AsyncLocalStorage.
@@ -18,15 +21,13 @@ export async function tenantDb() {
       findMany: (args?: object) =>
         basePrisma.booking.findMany({ ...args, where: { ...(args as { where?: object } | undefined)?.where, tenantId } }),
       create: (args: { data: object }) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        basePrisma.booking.create({ ...args, data: { ...(args.data as any), tenantId } } as any),
+        basePrisma.booking.create({ ...args, data: { ...(args.data as Record<string, unknown>), tenantId } } as BookingCreateArgs),
     },
     resource: {
       findMany: (args?: object) =>
         basePrisma.resource.findMany({ ...args, where: { ...(args as { where?: object } | undefined)?.where, tenantId } }),
       create: (args: { data: object }) =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        basePrisma.resource.create({ ...args, data: { ...(args.data as any), tenantId } } as any),
+        basePrisma.resource.create({ ...args, data: { ...(args.data as Record<string, unknown>), tenantId } } as ResourceCreateArgs),
     },
   }
 }
