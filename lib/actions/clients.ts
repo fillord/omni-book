@@ -27,22 +27,30 @@ export async function syncClients() {
     byPhone.set(b.guestPhone, existing)
   }
 
-  // 3. Upsert each client with aggregated metrics
-  let synced = 0
-  for (const [phone, clientBookings] of byPhone) {
+  // 3. Prepare client data for batched upsert
+  const clientsToUpsert = Array.from(byPhone.entries()).map(([phone, clientBookings]) => {
     const totalVisits = clientBookings.length
     const totalRevenue = clientBookings.reduce((sum, b) => sum + (b.service?.price ?? 0), 0)
     const lastVisitAt = clientBookings[0]?.startsAt ?? null  // already ordered desc
     const hasTelegram = clientBookings.some(b => b.telegramChatId != null)
     const name = clientBookings[0]?.guestName ?? phone
     const email = clientBookings.find(b => b.guestEmail != null)?.guestEmail ?? null
+    return { phone, name, email, totalVisits, totalRevenue, lastVisitAt, hasTelegram }
+  })
 
-    await basePrisma.client.upsert({
-      where: { tenantId_phone: { tenantId, phone } },
-      create: { tenantId, phone, name, email, totalVisits, totalRevenue, lastVisitAt, hasTelegram },
-      update: { name, email, totalVisits, totalRevenue, lastVisitAt, hasTelegram },
-    })
-    synced++
+  // 4. Batch upserts in chunks of 100 to eliminate N+1 pattern (DB-04)
+  const CHUNK_SIZE = 100
+  let synced = 0
+  for (let i = 0; i < clientsToUpsert.length; i += CHUNK_SIZE) {
+    const chunk = clientsToUpsert.slice(i, i + CHUNK_SIZE)
+    await basePrisma.$transaction(
+      chunk.map(c => basePrisma.client.upsert({
+        where: { tenantId_phone: { tenantId, phone: c.phone } },
+        create: { tenantId, phone: c.phone, name: c.name, email: c.email, totalVisits: c.totalVisits, totalRevenue: c.totalRevenue, lastVisitAt: c.lastVisitAt, hasTelegram: c.hasTelegram },
+        update: { name: c.name, email: c.email, totalVisits: c.totalVisits, totalRevenue: c.totalRevenue, lastVisitAt: c.lastVisitAt, hasTelegram: c.hasTelegram },
+      }))
+    )
+    synced += chunk.length
   }
 
   revalidatePath('/dashboard/clients')
