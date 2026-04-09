@@ -12,6 +12,7 @@ import { getServerT } from '@/lib/i18n/server'
 import { cookies } from 'next/headers'
 import { getDbTranslation } from '@/lib/i18n/db-translations'
 import { PublicThemeToggle } from '@/components/public-theme-toggle'
+import Image from 'next/image'
 import {
   PublicSectionsTabs,
   type PublicTabSection,
@@ -310,12 +311,13 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
       <header className="sticky top-0 z-50 bg-[var(--neu-bg)] backdrop-blur neu-raised transition-colors duration-300">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             {tenant.logoUrl && (
-              <img
+              <Image
                 src={tenant.logoUrl}
                 alt={tenant.name}
-                className="w-7 h-7 rounded-lg object-cover shrink-0"
+                width={28}
+                height={28}
+                className="rounded-lg object-cover shrink-0"
               />
             )}
             <span className="font-bold text-foreground truncate">{tenantName}</span>
@@ -369,11 +371,12 @@ export async function TenantPublicPage({ slug }: { slug: string }) {
         <div className="max-w-5xl mx-auto px-4 text-center md:text-left">
           {/* Logo */}
           {tenant.logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={tenant.logoUrl}
               alt={tenantName}
-              className="w-16 h-16 rounded-2xl mb-4 object-cover neu-raised"
+              width={64}
+              height={64}
+              className="rounded-2xl mb-4 object-cover neu-raised"
             />
           )}
 
