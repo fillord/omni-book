@@ -10,7 +10,7 @@ import { createAuditLog } from '@/lib/actions/audit-log'
 import '@/lib/auth/types'
 
 export const authConfig: NextAuthOptions = {
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt', maxAge: 7 * 24 * 60 * 60 },
 
   pages: {
     signIn: '/login',
