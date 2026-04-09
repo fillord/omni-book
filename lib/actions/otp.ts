@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs'
 import { basePrisma } from '@/lib/db'
 import { generateOtp, getIpAddress } from '@/lib/auth/otp'
 import { sendOtpEmail } from '@/lib/email/resend'
+import { rateLimit } from '@/lib/rate-limit'
 
 // ----------------------------------------------------------------------------
 // Registration verification
@@ -13,6 +14,11 @@ import { sendOtpEmail } from '@/lib/email/resend'
 export async function verifyRegistrationOtp(email: string, code: string) {
   const cleanEmail = email.toLowerCase().trim()
   const cleanCode = code.trim()
+
+  const verifyLimit = rateLimit(`otp-verify:${cleanEmail}`, 5, 10 * 60_000) // 5 per 10 min
+  if (!verifyLimit.success) {
+    return { error: 'Слишком много попыток. Попробуйте позже.' }
+  }
 
   const record = await basePrisma.otpCode.findUnique({
     where: { email_code: { email: cleanEmail, code: cleanCode } },
@@ -46,6 +52,11 @@ export async function verifyRegistrationOtp(email: string, code: string) {
 
 export async function resendRegistrationOtp(email: string) {
   const cleanEmail = email.toLowerCase().trim()
+
+  const genLimit = rateLimit(`otp-gen:${cleanEmail}`, 3, 10 * 60_000) // 3 per 10 min
+  if (!genLimit.success) {
+    return { error: 'Слишком много запросов. Попробуйте позже.' }
+  }
 
   const user = await basePrisma.user.findUnique({ where: { email: cleanEmail } })
   if (!user) return { error: 'Пользователь не найден' }
@@ -81,6 +92,11 @@ export async function checkLoginIp(email: string, password: string) {
 
   const reqHeaders = await headers()
   const currentIp = getIpAddress(reqHeaders)
+
+  const genLimit = rateLimit(`otp-gen:${cleanEmail}`, 3, 10 * 60_000)
+  if (!genLimit.success) {
+    return { error: 'Слишком много запросов. Попробуйте позже.' }
+  }
 
   // 1. IP check first: if IP changed, we must verify identity before worrying about concurrent sessions
   if (user.lastIpAddress && user.lastIpAddress !== currentIp) {
@@ -123,6 +139,11 @@ export async function checkLoginIp(email: string, password: string) {
 export async function verifyLoginOtp(email: string, code: string) {
   const cleanEmail = email.toLowerCase().trim()
   const cleanCode = code.trim()
+
+  const verifyLimit = rateLimit(`otp-verify:${cleanEmail}`, 5, 10 * 60_000)
+  if (!verifyLimit.success) {
+    return { error: 'Слишком много попыток. Попробуйте позже.' }
+  }
 
   const record = await basePrisma.otpCode.findUnique({
     where: { email_code: { email: cleanEmail, code: cleanCode } },
