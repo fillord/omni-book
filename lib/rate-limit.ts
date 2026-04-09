@@ -1,32 +1,28 @@
 /**
- * In-memory sliding-window rate limiter.
+ * Upstash Redis-backed fixed-window rate limiter.
  *
- * Intentionally simple — no Redis required.
- * In a multi-instance / serverless deployment each instance maintains its own
- * counter, so the effective limit is `max * instanceCount`.  That is acceptable
- * for abuse prevention before a Redis-backed solution is introduced.
+ * Uses the Upstash REST API so it works in serverless and edge environments
+ * (no persistent TCP connection required). Rate limit counters are shared
+ * across all function instances — effective in Vercel's serverless deployment.
  *
  * Usage:
- *   const result = rateLimit(getClientIp(req), 10, 60_000)   // 10 req / min
+ *   const result = await rateLimit(getClientIp(req), 10, 60_000)   // 10 req / min
  *   if (!result.success) return rateLimitResponse(result)
  */
 
-interface Entry {
-  count: number
-  resetAt: number // Unix ms
-}
+import { Redis } from '@upstash/redis'
 
-const store = new Map<string, Entry>()
-let lastCleanup = Date.now()
+/** Lazy-initialized Redis client — avoids errors during build when env vars are absent. */
+let redis: Redis | null = null
 
-/** Remove expired entries every 5 minutes to prevent unbounded memory growth. */
-function maybeCleanup(): void {
-  const now = Date.now()
-  if (now - lastCleanup < 5 * 60_000) return
-  lastCleanup = now
-  for (const [key, entry] of store) {
-    if (now > entry.resetAt) store.delete(key)
+function getRedis(): Redis {
+  if (!redis) {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
   }
+  return redis
 }
 
 export interface RateLimitResult {
@@ -36,27 +32,24 @@ export interface RateLimitResult {
 }
 
 /**
- * Check and increment the counter for `key`.
- * @param key      Unique identifier — typically `"prefix:ip"`
+ * Check and increment the counter for `key` using a fixed-window algorithm.
+ * @param key      Unique identifier — typically `"prefix:email"`
  * @param max      Maximum requests allowed in the window
  * @param windowMs Window duration in milliseconds
  */
-export function rateLimit(key: string, max: number, windowMs: number): RateLimitResult {
-  maybeCleanup()
-  const now = Date.now()
-  const entry = store.get(key)
-
-  if (!entry || now > entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs })
-    return { success: true, remaining: max - 1, resetAt: now + windowMs }
+export async function rateLimit(key: string, max: number, windowMs: number): Promise<RateLimitResult> {
+  const r = getRedis()
+  const windowSec = Math.ceil(windowMs / 1000)
+  const count = await r.incr(key)
+  if (count === 1) {
+    await r.expire(key, windowSec)
   }
-
-  if (entry.count >= max) {
-    return { success: false, remaining: 0, resetAt: entry.resetAt }
+  const ttl = await r.ttl(key)
+  const resetAt = Date.now() + ttl * 1000
+  if (count > max) {
+    return { success: false, remaining: 0, resetAt }
   }
-
-  entry.count++
-  return { success: true, remaining: max - entry.count, resetAt: entry.resetAt }
+  return { success: true, remaining: max - count, resetAt }
 }
 
 /**
