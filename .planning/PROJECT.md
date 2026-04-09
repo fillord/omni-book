@@ -10,7 +10,9 @@ omni-book is a multi-tenant SaaS booking platform where tenants (businesses) con
 
 A reliable, correctly-rendered booking experience for tenants and customers — accurate data display, accessible UI across all screen sizes and both themes.
 
-## Current State: v1.5 In Progress — Phase 13 Complete
+## Current State: v1.5 In Progress — Phase 14 Complete
+
+**Phase 14 complete (2026-04-09):** Removed all ESLint suppressions (3× no-img-element → next/image, 2× no-explicit-any → typed aliases), cleaned stale Paylink.kz payment strings, hardened next.config.ts with security headers + scoped remotePatterns, set 7-day session maxAge, marked stub routes with intent comments.
 
 **Phase 13 complete (2026-04-09):** DB indexes on Booking/OtpCode, tenant isolation for Client/PlatformPayment, ReadCommitted transaction fix, syncClients N+1 batching (chunks of 100), expired OTP cleanup in subscriptions cron, rate limiting on cancel/reschedule manage routes.
 
@@ -186,4 +188,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 — Phase 13 (database-optimization) complete*
+*Last updated: 2026-04-09 — Phase 14 (code-i18n-cleanup) complete*
