@@ -5,6 +5,7 @@ import { sendTelegramMessage } from "@/lib/telegram"
 import { notifyClientReschedule } from "@/lib/notifications/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 // Explicit GET guard — prevents link previewers from triggering side effects
 export async function GET() {
@@ -21,6 +22,12 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
+
+  // Rate limit: 20 requests per IP per minute (DB-07)
+  const rl = rateLimit(`manage-reschedule:${getClientIp(req)}`, 20, 60_000)
+  if (!rl.success) {
+    return new Response('Too Many Requests', { status: 429 })
+  }
 
   // 1. Parse and validate request body
   const rawBody = await req.json().catch(() => null)

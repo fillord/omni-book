@@ -4,6 +4,7 @@ import { sendTelegramMessage } from "@/lib/telegram"
 import { notifyClientCancellation } from "@/lib/notifications/client"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { rateLimit, getClientIp } from "@/lib/rate-limit"
 
 // Explicit GET handler — some crawlers / email clients / Telegram link previews
 // send GET requests to URLs found in messages. Return 405 so they never trigger
@@ -17,6 +18,12 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
+
+  // Rate limit: 20 requests per IP per minute (DB-07)
+  const rl = rateLimit(`manage-cancel:${getClientIp(req)}`, 20, 60_000)
+  if (!rl.success) {
+    return new Response('Too Many Requests', { status: 429 })
+  }
 
   // Hard-lockdown diagnostics — log EVERY incoming request immediately, before any DB work
   const ip = req.headers.get("x-forwarded-for") ?? req.headers.get("x-real-ip") ?? "unknown"
