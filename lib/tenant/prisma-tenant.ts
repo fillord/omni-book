@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 
 // Models that carry a tenantId column and must be scoped.
-const TENANT_SCOPED = new Set(['User', 'Resource', 'Service', 'Booking'])
+const TENANT_SCOPED = new Set(['User', 'Resource', 'Service', 'Booking', 'Client', 'PlatformPayment'])
 
 // Operations where we inject tenantId into WHERE.
 const WHERE_OPS = new Set([
